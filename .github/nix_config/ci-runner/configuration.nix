@@ -29,7 +29,7 @@
 
   services = {
     openssh.enable = true;
-    github-runner = {
+    github-runners.gh-runner = {
       enable = true;
       url = "https://github.com/cherusk/godon";
       tokenFile = "/srv/gh_runner.token";
