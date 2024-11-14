@@ -80,7 +80,7 @@ jobs:
                    awk -F= '{ print $2 }' > ./instance_address
             - name: infect with nixos
               run: >
-                   sleep 60;
+                   sleep 120;
                    ansible "$(cat ./instance_address)"
                    -i "$(cat ./instance_address),"
                    --private-key ./access_key_file
