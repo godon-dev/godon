@@ -23,7 +23,7 @@ on:
     types: [ labeled ]
 
 env:
-  RUNNER_BASE_IMAGE: "Fedora 30"
+  RUNNER_BASE_IMAGE: "Fedora 40"
   INSTANCE_NAME: "ci_runner"
   OS_AUTH_URL: "https://openstack.osuosl.org:5000/v3"
   OS_PROJECT_NAME: "godon"
