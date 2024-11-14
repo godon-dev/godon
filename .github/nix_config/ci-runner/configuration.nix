@@ -156,5 +156,5 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  system.nixos.version = "23.05";
+  system.nixos.version = "24.05";
 }

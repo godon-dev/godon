@@ -89,7 +89,7 @@ jobs:
                    --become
                    -T 120
                    -m raw -a "hostnamectl set-hostname ci_runner;
-                              curl ${NIXOS_INFECT_SCRIPT_URL} | NO_REBOOT=true NO_SWAP=true NIX_CHANNEL=nixos-21.11 bash -x;"
+                              curl ${NIXOS_INFECT_SCRIPT_URL} | NO_REBOOT=true NO_SWAP=true NIX_CHANNEL=nixos-24.05 bash -x;"
                    ssh-keygen -R "$(cat ./instance_address)";
               env:
                 NIXOS_INFECT_SCRIPT_URL: "https://raw.githubusercontent.com/elitak/nixos-infect/master/nixos-infect"
