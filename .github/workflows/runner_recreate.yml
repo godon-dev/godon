@@ -60,7 +60,7 @@ jobs:
                    openstack server create --wait
                    --key-name "ci_runner"
                    --image "${RUNNER_BASE_IMAGE}"
-                   --flavor "m1.xlarge"
+                   --flavor "m1.xxlarge"
                    --network "general_servers1"
                    --security-group "godon"
                    "${INSTANCE_NAME}"
