@@ -38,7 +38,9 @@ env:
 
 jobs:
     ci_runner_recreate:
-        if: ${{ github.pull_request.label.name == 'ci_runner' && github.pull_request.label.name == 'recreate' }}
+        if: |
+          contains(github.event.pull_request.labels.*.name, 'ci_runner') &&
+          contains(github.event.pull_request.labels.*.name, 'recreate')
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v2
