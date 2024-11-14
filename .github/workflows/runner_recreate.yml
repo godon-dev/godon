@@ -23,7 +23,7 @@ on:
     types: [ labeled ]
 
 env:
-  RUNNER_BASE_IMAGE: "Fedora 36"
+  RUNNER_BASE_IMAGE: "Debian 12"
   INSTANCE_NAME: "ci_runner"
   OS_AUTH_URL: "https://openstack.osuosl.org:5000/v3"
   OS_PROJECT_NAME: "godon"
@@ -85,8 +85,8 @@ jobs:
                    -i "$(cat ./instance_address),"
                    --private-key ./access_key_file
                    --ssh-extra-args="-o StrictHostKeyChecking=accept-new"
-                   -u fedora
                    --become
+                   -u debian
                    -T 120
                    -m raw -a "hostnamectl set-hostname ci_runner;
                               curl ${NIXOS_INFECT_SCRIPT_URL} | NO_REBOOT=true NO_SWAP=true NIX_CHANNEL=nixos-24.05 bash -x;"
