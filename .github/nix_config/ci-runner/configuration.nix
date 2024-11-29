@@ -31,7 +31,7 @@
     openssh.enable = true;
     github-runners.gh-runner = {
       enable = true;
-      url = "https://github.com/cherusk/godon";
+      url = "https://github.com/godon-dev/godon";
       tokenFile = "/srv/gh_runner.token";
       extraLabels = [ "nixos" "osuosl" ];
       extraPackages = let
