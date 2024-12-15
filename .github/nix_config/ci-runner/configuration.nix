@@ -31,7 +31,7 @@
     openssh.enable = true;
     github-runners.gh-runner = {
       enable = true;
-      url = "https://github.com/godon-dev/godon";
+      url = "https://github.com/godon-dev";
       tokenFile = "/srv/gh_runner.token";
       extraLabels = [ "nixos" "osuosl" ];
       extraPackages = let
@@ -46,6 +46,8 @@
       in with pkgs; [
         nixos-generators
         mask
+        k3s
+        kubernetes-helm
         docker_old
         docker_compose_old
         iproute2
@@ -62,12 +64,6 @@
         CapabilityBoundingSet = [ "CAP_NET_ADMIN" ];
       };
     };
-    # lightweight kubernetes
-    k3s.enable = true;
-    k3s.role = "server";
-    k3s.extraFlags = toString [
-      "--bind-address=localhost" "--kubelet-arg='address=127.0.0.1'"
-    ];
   };
 
   # create github-runner work dir
