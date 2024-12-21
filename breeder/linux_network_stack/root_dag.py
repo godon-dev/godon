@@ -27,23 +27,13 @@ import copy
 import hashlib
 import os
 
-import urllib3
 
-from sqlalchemy import create_engine
-from sqlalchemy import text
 
-from prometheus_api_client import PrometheusConnect, MetricsList, Metric
-from prometheus_api_client.utils import parse_datetime
 
 task_logger = logging.getLogger("airflow.task")
 task_logger.setLevel(logging.DEBUG)
 
-
-PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL")
-
 ###
-
-{% include 'effectuation.py' %}
 
 config = {{ breeder }}
 
