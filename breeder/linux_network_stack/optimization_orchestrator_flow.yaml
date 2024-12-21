@@ -1,0 +1,49 @@
+summary: "BreederOptimizationOrchestrator"
+description: "Orchestrates Per Breeder Optimization Steps"
+value:
+  modules:
+    - id: a
+      value:
+        type: forloopflow
+        modules:
+          - id: b
+            value:
+              path: f/breeder/optuna_optimization_step.py
+              type: script
+              is_trigger: false
+              input_transforms:
+                iteration:
+                  expr: flow_input.iter.value
+                  type: javascript
+            summary: RunOptunaOptimization
+            continue_on_error: false
+        iterator:
+          expr: flow_input.iterations
+          type: javascript
+        parallel: false
+        skip_failures: true
+      summary: OptimizationIterations
+  preprocessor_module:
+    id: preprocessor
+    value:
+      path: f/breeder/optimization_preprocessor
+      type: script
+      is_trigger: false
+      input_transforms:
+        wm_trigger:
+          type: static
+    summary: ExtractConfig
+schema:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  properties:
+    iterations:
+      default:
+        - []
+      items:
+        type: string
+      type: array
+      description: "Iterations"
+  required: []
+  type: object
+  order:
+    - iterations
