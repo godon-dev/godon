@@ -1,0 +1,41 @@
+summary: "EffectuationFlow"
+description: "Effectuation Sequence Coordinating Flow"
+value:
+  modules:
+   - id: b
+      value:
+        path: f/breeder/effectuation_recon_step.py
+        type: script
+        is_trigger: false
+        input_transforms:
+          request_data:
+            type: static
+            value: null
+    - id: c
+      value:
+        path: f/breeder/effectuation_apply_step.py
+        type: script
+        is_trigger: false
+        input_transforms:
+          request_data:
+            type: static
+            value: null
+  preprocessor_module:
+    id: preprocessor
+    value:
+      path: f/breeder/effectuation_preprocessor
+      type: script
+      is_trigger: false
+      input_transforms:
+        wm_trigger:
+          type: static
+    summary: ExtractConfig
+schema:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  properties:
+    config:
+      type: object
+  required: []
+  type: object
+  order:
+    - config
