@@ -27,14 +27,7 @@ import copy
 import hashlib
 import os
 
-import pals
-import asyncio
 import urllib3
-
-import optuna
-from optuna.storages import InMemoryStorage
-from optuna.integration import DaskStorage
-from distributed import Client, wait
 
 from sqlalchemy import create_engine
 from sqlalchemy import text
@@ -45,54 +38,12 @@ from prometheus_api_client.utils import parse_datetime
 task_logger = logging.getLogger("airflow.task")
 task_logger.setLevel(logging.DEBUG)
 
-DEFAULTS = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': days_ago(1),
-    'retries': 0,
-    'trigger_rule': 'all_success',
-    'schedule_interval': None
-    # 'email': ['airflow@example.com'],
-    # 'email_on_failure': False,
-    # 'email_on_retry': False,
-    # 'queue': 'bash_queue',
-    # 'pool': 'backfill',
-    # 'priority_weight': 10,
-    # 'end_date': datetime(2016, 1, 1),
-    # 'wait_for_downstream': False,
-    # 'dag': dag,
-    # 'sla': timedelta(hours=2),
-    # 'execution_timeout': timedelta(seconds=300),
-    # 'on_failure_callback': some_function,
-    # 'on_success_callback': some_other_function,
-    # 'on_retry_callback': another_function,
-    # 'sla_miss_callback': yet_another_function,
-    }
-
-NATS_SERVER_URL = os.environ.get("NATS_SERVER_URL")
 
 PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL")
-
-DASK_OPTUNA_SCHEDULER_URL = os.environ.get("DASK_OPTUNA_SCHEDULER_URL")
-
-DLM_DB_USER = os.environ.get("DLM_DB_USER")
-DLM_DB_PASSWORD = os.environ.get("DLM_DB_PASSWORD")
-DLM_DB_HOST = os.environ.get("DLM_DB_HOST")
-DLM_DB_DATABASE = os.environ.get("DLM_DB_DATABASE")
-DLM_DB_CONNECTION = f"postgresql://{DLM_DB_USER}:{DLM_DB_PASSWORD}@{DLM_DB_HOST}/{DLM_DB_DATABASE}"
-
-
-ARCHIVE_DB_USER = os.environ.get("ARCHIVE_DB_USER")
-ARCHIVE_DB_PASSWORD = os.environ.get("ARCHIVE_DB_PASSWORD")
-ARCHIVE_DB_HOSTNAME = os.environ.get("ARCHIVE_DB_HOSTNAME")
-ARCHIVE_DB_PORT = os.environ.get("ARCHIVE_DB_PORT")
-ARCHIVE_DB_DATABASE = os.environ.get("ARCHIVE_DB_DATABASE")
 
 ###
 
 {% include 'effectuation.py' %}
-
-{% include 'optimization.py' %}
 
 config = {{ breeder }}
 

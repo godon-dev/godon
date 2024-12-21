@@ -7,13 +7,11 @@ def objective(trial,
               locking_db_url=None,
               breeder_id=None):
 
-###--- definition coroutines ---###
-### We have to keep to coroutines in the objective function,
-### otherwise the workers do not know about those until we preinstall those.
-    {% macro local_coroutines_include() %}{% include 'nats_coroutines.py' %}{% endmacro %}
-    {{ local_coroutines_include()|indent }} # default is indent of 4 spaces!
-###--- end coroutines ---###
+    import pals
+    import asyncio
 
+    from sqlalchemy import create_engine
+    from sqlalchemy import text
 
     logger = logging.getLogger('objective')
     logger.setLevel(logging.DEBUG)
@@ -56,6 +54,7 @@ def objective(trial,
         rtt = result_tuple[0]
         delivery_rate = result_tuple[1]
 
+    # TODO - drop synchronisation via nats and call effectuation flow on wmill
     if not is_setting_explored:
         logger.warning('doing effectuation')
         is_setting_explored = True
