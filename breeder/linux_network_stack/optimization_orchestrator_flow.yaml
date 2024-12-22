@@ -28,7 +28,7 @@ value:
         modules:
           - id: b
             value:
-              path: f/breeder/optuna_optimization_step.py
+              path: f/breeder/optuna_optimization_step
               type: script
               is_trigger: false
               input_transforms:
@@ -46,7 +46,7 @@ value:
   preprocessor_module:
     id: preprocessor
     value:
-      path: f/breeder/optimization_preprocessor.py
+      path: f/breeder/optimization_preprocessor
       type: script
       is_trigger: false
       input_transforms:

@@ -24,7 +24,7 @@ value:
   modules:
    - id: b
      value:
-       path: f/breeder/effectuation_recon_step.py
+       path: f/breeder/effectuation_recon_step
        type: script
        is_trigger: false
        input_transforms:
@@ -33,7 +33,7 @@ value:
            value: null
    - id: c
      value:
-       path: f/breeder/effectuation_apply_step.py
+       path: f/breeder/effectuation_apply_step
        type: script
        is_trigger: false
        input_transforms:
@@ -43,7 +43,7 @@ value:
   preprocessor_module:
     id: preprocessor
     value:
-      path: f/breeder/effectuation_preprocessor.py
+      path: f/breeder/effectuation_preprocessor
       type: script
       is_trigger: false
       input_transforms:
