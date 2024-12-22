@@ -46,7 +46,7 @@ value:
   preprocessor_module:
     id: preprocessor
     value:
-      path: f/breeder/optimization_preprocessor
+      path: f/breeder/optimization_preprocessor.py
       type: script
       is_trigger: false
       input_transforms:
