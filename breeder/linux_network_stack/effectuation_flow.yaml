@@ -23,23 +23,23 @@ description: "Effectuation Sequence Coordinating Flow"
 value:
   modules:
    - id: b
-      value:
-        path: f/breeder/effectuation_recon_step.py
-        type: script
-        is_trigger: false
-        input_transforms:
-          request_data:
-            type: static
-            value: null
-    - id: c
-      value:
-        path: f/breeder/effectuation_apply_step.py
-        type: script
-        is_trigger: false
-        input_transforms:
-          request_data:
-            type: static
-            value: null
+     value:
+       path: f/breeder/effectuation_recon_step.py
+       type: script
+       is_trigger: false
+       input_transforms:
+         request_data:
+           type: static
+           value: null
+   - id: c
+     value:
+       path: f/breeder/effectuation_apply_step.py
+       type: script
+       is_trigger: false
+       input_transforms:
+         request_data:
+           type: static
+           value: null
   preprocessor_module:
     id: preprocessor
     value:
