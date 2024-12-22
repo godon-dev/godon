@@ -43,7 +43,7 @@ value:
   preprocessor_module:
     id: preprocessor
     value:
-      path: f/breeder/effectuation_preprocessor
+      path: f/breeder/effectuation_preprocessor.py
       type: script
       is_trigger: false
       input_transforms:
