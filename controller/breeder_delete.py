@@ -10,7 +10,7 @@ def main(request_data):
     # extract config from request_data
     breeder_id = request_data.get("breeder_id")
 
-    ## cleanup knowledge archive db relevant state
+    ## >> cleanup knowledge archive db relevant state ##
 
     # set dbname to work with to breeder_id
     db_config = ARCHIVE_DB_CONFIG.copy()
@@ -37,7 +37,7 @@ def main(request_data):
         archive.archive_db.execute(db_info=db_config, query=__query)
 
 
-    ## cleanup breeder meta data db state
+    ## >> cleanup breeder meta data db state ##
     db_config = META_DB_CONFIG.copy()
     db_config.update(dict(dbname='meta_data'))
     db_table_name = 'breeder_meta_data'
