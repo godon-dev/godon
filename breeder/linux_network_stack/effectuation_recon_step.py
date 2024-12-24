@@ -22,15 +22,17 @@
 from prometheus_api_client import PrometheusConnect, MetricsList, Metric
 from prometheus_api_client.utils import parse_datetime
 
-PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL")
-
 import urllib3
 
-def main():
+
+def main(prometheus_url=None):
 
     task_logger.debug("Entering")
+
     prom_conn = PrometheusConnect(url=PROMETHEUS_URL,
-                                  retry=urllib3.util.retry.Retry(total=3, raise_on_status=True, backoff_factor=0.5),
+                                  retry=urllib3.util.retry.Retry(total=3,
+                                                                 raise_on_status=True,
+                                                                 backoff_factor=0.5),
                                   disable_ssl=True)
 
     metric_data = dict()
