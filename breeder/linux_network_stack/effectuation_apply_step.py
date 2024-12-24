@@ -21,6 +21,8 @@
 
 def main():
 
+## TODO - Decide on which effectuator and apply it here.
+
 #       _ssh_hook = SSHHook(
 #           remote_host=target.get('address'),
 #           username=target.get('user'),
