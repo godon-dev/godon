@@ -34,26 +34,7 @@
       url = "https://github.com/godon-dev";
       tokenFile = "/srv/gh_runner.token";
       extraLabels = [ "nixos" "osuosl" ];
-      extraPackages = let
-        old_pkgs = import (builtins.fetchTarball {
-          url =
-            "https://github.com/NixOS/nixpkgs/archive/d1c3fea7ecbed758168787fe4e4a3157e52bc808.tar.gz";
-        }) { };
-
-        docker_old = old_pkgs.docker-client;
-        docker_compose_old = old_pkgs.docker-compose;
-
-      in with pkgs; [
-        nixos-generators
-        mask
-        k3s
-        kubernetes-helm
-        docker_old
-        docker_compose_old
-        iproute2
-        jq
-        yq-go
-      ];
+      extraPackages = [ nixos-generators mask k3s kubernetes-helm docker docker-compose iproute2 jq yq-go ];
       workDir = "/github-runner/";
       serviceOverrides = {
         PrivateUsers = false;
@@ -67,19 +48,12 @@
   };
 
   # create github-runner work dir
-  systemd.tmpfiles.rules = [
-    "d /github-runner/ 0755 root root -"
-    "d /github-runner/artifacts 0755 root root -"
-  ];
+  systemd.tmpfiles.rules = [ "d /github-runner/ 0755 root root -" "d /github-runner/artifacts 0755 root root -" ];
+  # override docker limits
+  systemd.services.docker.serviceConfig = { LimitNOFILE = 4194304; };
 
   environment.systemPackages = let
     pythonModules = pythonPackages: with pythonPackages; [ pyyaml ];
-    old_pkgs = import (builtins.fetchTarball {
-      url =
-        "https://github.com/NixOS/nixpkgs/archive/d1c3fea7ecbed758168787fe4e4a3157e52bc808.tar.gz";
-    }) { };
-    docker_old = old_pkgs.docker-client;
-    docker_compose_old = old_pkgs.docker-compose;
   in with pkgs; [
     (python3.withPackages pythonModules)
     ansible
@@ -88,8 +62,8 @@
     clang
     ctags
     curl
-    docker_old
-    docker_compose_old
+    docker
+    docker-compose
     ethtool
     git
     git-crypt
@@ -148,6 +122,20 @@
   security = {
     sudo.wheelNeedsPassword = false; # for automatic use
     polkit = { enable = true; };
+    pam.loginLimits = [
+      {
+        domain = "*";
+        type = "soft";
+        item = "nofile";
+        value = "4194304";
+      }
+      {
+        domain = "*";
+        type = "hard";
+        item = "nofile";
+        value = "4194304";
+      }
+    ];
   };
 
   nixpkgs.config.allowUnfree = true;
