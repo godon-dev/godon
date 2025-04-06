@@ -24,7 +24,7 @@
 
   boot = {
     loader = { grub.enable = true; };
-    kernelPackages = pkgs.linuxPackages_5_10;
+    kernelPackages = pkgs.linuxPackages_6_12;
   };
 
   services = {
@@ -34,7 +34,7 @@
       url = "https://github.com/godon-dev";
       tokenFile = "/srv/gh_runner.token";
       extraLabels = [ "nixos" "osuosl" ];
-      extraPackages = with pkgs; [ nixos-generators mask k3s kubernetes-helm docker docker-compose iproute2 jq yq-go ];
+      extraPackages = with pkgs; [ nixos-generators mask kind kubernetes-helm docker docker-compose iproute2 jq yq-go ];
       workDir = "/github-runner/";
       serviceOverrides = {
         PrivateUsers = false;
@@ -50,9 +50,10 @@
   # create github-runner work dir
   systemd.tmpfiles.rules = [ "d /github-runner/ 0755 root root -" "d /github-runner/artifacts 0755 root root -" ];
   # override docker limits
-  systemd.services.docker.serviceConfig = { LimitNOFILE = 4194304; };
+  systemd.services.docker.serviceConfig = { LimitNOFILE=4194304; };
 
-  environment.systemPackages = let pythonModules = pythonPackages: with pythonPackages; [ pyyaml ];
+  environment.systemPackages = let
+    pythonModules = pythonPackages: with pythonPackages; [ pyyaml ];
   in with pkgs; [
     (python3.withPackages pythonModules)
     ansible
@@ -73,7 +74,8 @@
     jq
     yq-go
     killall
-    k3s
+    kind
+    kubernetes-helm
     mask
     nmap
     nixos-generators
@@ -117,6 +119,9 @@
       onShutdown = "shutdown";
     };
   };
+
+  ## Required for kind cluster to work network wise
+  networking.firewall.checkReversePath = "loose";
 
   security = {
     sudo.wheelNeedsPassword = false; # for automatic use
