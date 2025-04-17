@@ -181,6 +181,5 @@ __api_version="${api_version:-v0}"
 
 curl --request GET \
      -H 'Content-Type: application/json' \
-     --data "{ \"id\": \"${uuid}\" }" \
-    "http://${hostname}:${port}/${__api_version}/breeders/${uuid}"
+    "http://${hostname}:${port}/${__api_version}/breeders?id=${uuid}"
 ~~~
