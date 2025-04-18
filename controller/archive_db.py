@@ -4,8 +4,8 @@ import logging
 
 ARCHIVE_DB_CONFIG = dict(user="yugabyte",
                          password="yugabyte",
-                         host=os.environ.get('ARCHIVE_DB_HOSTNAME'),
-                         port=os.environ.get('ARCHIVE_DB_PORT'))
+                         host=os.environ.get('YB_TSERVER_SERVICE_SERVICE_HOST'),
+                         port=os.environ.get('YB_TSERVER_SERVICE_SERVICE_PORT'))
 
 class archive_db():
 
