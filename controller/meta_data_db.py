@@ -4,8 +4,8 @@ import json
 
 META_DB_CONFIG = dict(user="meta_data",
                       password="meta_data",
-                      host=os.environ.get('META_DB_HOSTNAME'),
-                      port=os.environ.get('META_DB_PORT'))
+                      host=os.environ.get('GODON_METADATA_DB_SERVICE_HOST'),
+                      port=os.environ.get('GODON_METADATA_DB_SERVICE_PORT'))
 
 class queries():
 
