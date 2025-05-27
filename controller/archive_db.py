@@ -1,11 +1,12 @@
 
 import psycopg2
 import logging
+import os
 
 ARCHIVE_DB_CONFIG = dict(user="yugabyte",
                          password="yugabyte",
-                         host=os.environ.get('YB_TSERVER_SERVICE_SERVICE_HOST'),
-                         port=os.environ.get('YB_TSERVER_SERVICE_SERVICE_PORT'))
+                         host="yb-tservers.godon.svc.cluster.local", # not ideal, as namespace might change on k8s side
+                         port=os.environ.get('YB_TSERVER_SERVICE_SERVICE_PORT_TCP_YSQL_PORT'))
 
 class archive_db():
 
@@ -27,6 +28,7 @@ class archive_db():
 
         except psycopg2.OperationalError as Error:
             logging.error(f"Error connecting to the database : {Error}")
+            logging.error(f"Database Info: {db_info}")
 
         finally:
             if db_connection:
@@ -135,4 +137,3 @@ class queries():
         """
 
         return query
-
