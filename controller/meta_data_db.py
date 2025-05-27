@@ -1,5 +1,6 @@
 
 import json
+import os
 
 
 META_DB_CONFIG = dict(user="meta_data",
@@ -28,7 +29,7 @@ class queries():
         json_string = json.dumps(meta_state)
 
         query = f"""
-        INSERT INTO {table_name} (creation_tsz, definition)
+        INSERT INTO {table_name} (id, creation_tsz, definition)
         VALUES('{breeder_id}', '{creation_ts}', '{json_string}');
         """
 
