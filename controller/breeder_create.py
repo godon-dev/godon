@@ -52,18 +52,12 @@ def main(breeder_config=None):
     db_config = ARCHIVE_DB_CONFIG.copy()
     db_config.update(dict(dbname="archive_db"))
 
-    import os
-
-    for name, value in os.environ.items():
-        print("{0}: {1}".format(name, value))
-
-    __query = archive_db_queries.create_breeder_table(table_name=__uuid)
-    archive_db.execute(db_info=db_config, query=__query)
-
     for target in targets:
         hash_suffix = hashlib.sha256(str.encode(target.get('address'))).hexdigest()[0:6]
         for run_id in range(0, parallel_runs):
-            breeder_id = f'{__uuid}_{run_id}_{hash_suffix}'
+            __uuid_common_name = "_" + __uuid.replace('-', '_')
+
+            breeder_id = f'{__uuid_common_name}_{run_id}_{hash_suffix}'
 
             __query = archive_db_queries.create_breeder_table(table_name=breeder_id)
             archive_db.execute(db_info=db_config, query=__query)
@@ -109,5 +103,3 @@ def main(breeder_config=None):
 
 
     return { "result": "SUCCESS", "breeder_id": __uuid }
-
-
