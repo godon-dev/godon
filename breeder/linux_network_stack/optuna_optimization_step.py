@@ -45,7 +45,7 @@ DLM_DB_CONNECTION = f"postgresql://{DLM_DB_USER}:{DLM_DB_PASSWORD}@{DLM_DB_HOST}
 ## TODO - Pass Breeer Config plus ID
 ## TODO - Pass DASK OPTUNA Entry Point
 ## TODO - Pass ARCHIVE_DB URL
-def main(iteration: str):
+def main(config=None):
 
             objective_kwargs = dict(archive_db_url=f'postgresql://{ARCHIVE_DB_USER}:{ARCHIVE_DB_PASSWORD}@{ARCHIVE_DB_HOSTNAME}:{ARCHIVE_DB_PORT}/{ARCHIVE_DB_DATABASE}',
                                     locking_db_url=DLM_DB_CONNECTION,
