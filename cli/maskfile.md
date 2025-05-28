@@ -87,7 +87,7 @@ curl --request POST \
 ### breeder purge
 
 **OPTIONS**
-* name
+* uuid
     * flags: --uuid
     * type: string
     * desc: uuid of breeder to be purged
@@ -112,7 +112,7 @@ set -eEux
 __api_version="${api_version:-v0}"
 
 curl --request DELETE \
-     "http://${hostname}:${port}/${__api_version}/breeders/${uuid}"
+     "http://${hostname}:${port}/${__api_version}/breeder?uuid=${uuid}"
 ~~~
 
 ### breeder update
@@ -155,7 +155,7 @@ curl --request PUT \
 ### breeder show
 
 **OPTIONS**
-* name
+* uuid
     * flags: --uuid
     * type: string
     * desc: uuid of breeder to get details from
@@ -182,5 +182,5 @@ __api_version="${api_version:-v0}"
 curl --request GET \
      -H 'Content-Type: application/json' \
      --data "{ \"id\": \"${uuid}\" }" \
-    "http://${hostname}:${port}/${__api_version}/breeders/${uuid}"
+    "http://${hostname}:${port}/${__api_version}/breeder?uuid=${uuid}"
 ~~~
