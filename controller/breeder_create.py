@@ -8,30 +8,40 @@ from .meta_data_db import META_DB_CONFIG
 import datetime
 import uuid
 import hashlib
+import copy
 
 def determine_config_shard(run_id=None,
                            target_id=None,
+                           targets_count=None,
                            config=None,
-                           targets_count=0,
                            parallel_runs_count=0):
 
     config_result = copy.deepcopy(config)
     settings_space = config_result.get('settings').get('sysctl')
 
     for setting in settings_space.items():
-        upper = setting.get('constraints').get('upper')
-        lower = setting.get('constraints').get('lower')
+        upper = setting[1].get('constraints').get('upper')
+        lower = setting[1].get('constraints').get('lower')
 
         delta = abs(upper - lower)
 
         shard_size = delta / targets_count * parallel_runs_count
+        offset = (run_id + target_id)
 
-        setting['constraints']['lower'] = lower + shard_size * (run_id + target_id)
+        new_lower = int(lower + shard_size * offset)
+        new_upper = int(new_lower + shard_size)
+
+        setting[1]['constraints']['lower'] = new_lower
+        setting[1]['constraints']['upper'] = new_upper
 
     config_result['settings']['sysctl'] = settings_space
 
     return config_result
 
+def start_optimization_flow(flow_id, config):
+    print("starting flow with config")
+    print(config)
+    return flow_id, config
 
 def main(breeder_config=None):
 
@@ -40,6 +50,8 @@ def main(breeder_config=None):
     breeder_name = breeder_config.get('name')
     parallel_runs = breeder_config.get('run').get('parallel')
     targets = breeder_config.get('effectuation').get('targets')
+    targets_count = len(targets)
+    is_cooperative = breeder_config.get('cooperation').get('active')
     consolidation_probability = breeder_config.get('cooperation').get('consolidation').get('probability')
 
     # generate breeder uuid and set in config
@@ -87,19 +99,21 @@ def main(breeder_config=None):
                                                   meta_state=breeder_config)
     archive_db.execute(db_info=db_config, query=__query)
 
-    # TODO - adjust breeder flows initialization to wmill way
+    target_count = 0
+    for target in targets:
+        hash_suffix = hashlib.sha256(str.encode(target.get('address'))).hexdigest()[0:6]
 
-#    for target in targets:
-#        hash_suffix = hashlib.sha256(str.encode(target.get('address'))).hexdigest()[0:6]
-#
-#        for run_id in range(0, parallel_runs):
-#            dag_id = f'{dag_name}_{run_id}'
-#            if not is_cooperative:
-#                config = determine_config_shard()
-#            globals()[f'{dag_id}_optimization_{hash_suffix}'] = create_optimization_dag(f'{dag_id}_optimization_{hash_suffix}', config, run_id, hash_suffix)
-#            globals()[f'{dag_id}_target_{hash_suffix}'] = create_target_interaction_dag(f'{dag_id}_target_interaction_{hash_suffix}', config, target, hash_suffix)
-#
-#        target_id += 1
+        for run_id in range(0, parallel_runs):
+            config = breeder_config
+            flow_id = f'{breeder_name}_{run_id}'
+            if not is_cooperative:
+                config = determine_config_shard(run_id=run_id,
+                                                target_id=target_count,
+                                                targets_count=targets_count,
+                                                config=breeder_config,
+                                                parallel_runs_count=parallel_runs)
+            start_optimization_flow(flow_id, config)
 
+        target_count += 1
 
     return { "result": "SUCCESS", "breeder_id": __uuid }
