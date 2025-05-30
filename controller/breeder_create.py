@@ -65,8 +65,12 @@ def main(breeder_config=None):
     db_config.update(dict(dbname="archive_db"))
 
 
-    __uuid_common_name = "_" + __uuid.replace('-', '_')
-    breeder_id = f'{__uuid_common_name}_{run_id}_{hash_suffix}'
+    __uuid_common_name = "breeder_" + __uuid.replace('-', '_')
+    breeder_id = f'{__uuid_common_name}'
+
+    # define per breeder database for optimization backend rdb storage
+    __query = archive_db_queries.create_database(breeder_id=breeder_id)
+    archive_db.execute(db_info=db_config, query=__query)
 
     ## create and fill breeder meta data db
     db_config = META_DB_CONFIG.copy()
