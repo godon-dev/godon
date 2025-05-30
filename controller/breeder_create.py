@@ -64,26 +64,9 @@ def main(breeder_config=None):
     db_config = ARCHIVE_DB_CONFIG.copy()
     db_config.update(dict(dbname="archive_db"))
 
-    for target in targets:
-        hash_suffix = hashlib.sha256(str.encode(target.get('address'))).hexdigest()[0:6]
-        for run_id in range(0, parallel_runs):
-            __uuid_common_name = "_" + __uuid.replace('-', '_')
 
-            breeder_id = f'{__uuid_common_name}_{run_id}_{hash_suffix}'
-
-            __query = archive_db_queries.create_breeder_table(table_name=breeder_id)
-            archive_db.execute(db_info=db_config, query=__query)
-
-            __query = archive_db_queries.create_procedure(procedure_name=f'{breeder_id}_procedure',
-                                                       probability=consolidation_probability,
-                                                       source_table_name=breeder_id,
-                                                       target_table_name=breeder_name)
-            archive_db.execute(db_info=db_config, query=__query)
-
-            __query = archive_db_queries.create_trigger(trigger_name=f'{breeder_id}_trigger',
-                                                     table_name=breeder_id,
-                                                     procedure_name=f'{breeder_id}_procedure')
-            archive_db.execute(db_info=db_config, query=__query)
+    __uuid_common_name = "_" + __uuid.replace('-', '_')
+    breeder_id = f'{__uuid_common_name}_{run_id}_{hash_suffix}'
 
     ## create and fill breeder meta data db
     db_config = META_DB_CONFIG.copy()
@@ -94,9 +77,9 @@ def main(breeder_config=None):
     archive_db.execute(db_info=db_config, query=__query)
 
     __query = meta_data_db_queries.insert_breeder_meta(table_name=db_table_name,
-                                                  breeder_id=__uuid,
-                                                  creation_ts=datetime.datetime.now(),
-                                                  meta_state=breeder_config)
+                                                       breeder_id=__uuid,
+                                                       creation_ts=datetime.datetime.now(),
+                                                       meta_state=breeder_config)
     archive_db.execute(db_info=db_config, query=__query)
 
     target_count = 0
