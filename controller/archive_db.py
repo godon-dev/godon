@@ -39,5 +39,8 @@ class queries():
 
     @staticmethod
     def create_database(breeder_id=None):
-        raise Exception("Not Implemented Yet!")
+        query = f"""
+        CREATE DATABASE {breeder_id}
+        """
+        return query
 
