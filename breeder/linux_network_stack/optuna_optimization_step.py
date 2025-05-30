@@ -17,6 +17,7 @@
 # along with this godon. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from .archive_db import ARCHIVE_DB_CONFIG
 
 # Godon Optuna Objective
 import objective
@@ -27,28 +28,27 @@ from optuna.storages import InMemoryStorage
 from optuna.integration import DaskStorage
 from distributed import Client, wait
 
-ARCHIVE_DB_USER = os.environ.get("ARCHIVE_DB_USER")
-ARCHIVE_DB_PASSWORD = os.environ.get("ARCHIVE_DB_PASSWORD")
-ARCHIVE_DB_HOSTNAME = os.environ.get("ARCHIVE_DB_HOSTNAME")
-ARCHIVE_DB_PORT = os.environ.get("ARCHIVE_DB_PORT")
-ARCHIVE_DB_DATABASE = os.environ.get("ARCHIVE_DB_DATABASE")
+DASK_OPTUNA_SCHEDULER = dict(host=os.environ.get("GODON_DASK_SCHEDULER_SERVICE_HOST"),
+                             port=os.environ.get("GODON_DASK_SCHEDULER_SERVICE_PORT"))
 
-DASK_OPTUNA_SCHEDULER_URL = os.environ.get("DASK_OPTUNA_SCHEDULER_URL")
+GODON_LOCKING_DB = dict(user=locking,
+                        password=locking,
+                        host=os.environ.get("GODON_LOCKING_DB_SERVICE_HOST"),
+                        port=os.environ.get("GODON_LOCKING_DB_SERVICE_PORT"),
+                        database=distributed_locking)
 
-DLM_DB_USER = os.environ.get("DLM_DB_USER")
-DLM_DB_PASSWORD = os.environ.get("DLM_DB_PASSWORD")
-DLM_DB_HOST = os.environ.get("DLM_DB_HOST")
-DLM_DB_DATABASE = os.environ.get("DLM_DB_DATABASE")
-DLM_DB_CONNECTION = f"postgresql://{DLM_DB_USER}:{DLM_DB_PASSWORD}@{DLM_DB_HOST}/{DLM_DB_DATABASE}"
+GODON_LOCKING_DB_CONNECTION_URL = f"postgresql://{user}:{password}@{host}:{port}/{database}".format(**GODON_LOCKING_DB)
 
 
 ## TODO - Pass Breeer Config plus ID
-## TODO - Pass DASK OPTUNA Entry Point
 ## TODO - Pass ARCHIVE_DB URL
 def main(config=None):
 
-            objective_kwargs = dict(archive_db_url=f'postgresql://{ARCHIVE_DB_USER}:{ARCHIVE_DB_PASSWORD}@{ARCHIVE_DB_HOSTNAME}:{ARCHIVE_DB_PORT}/{ARCHIVE_DB_DATABASE}',
-                                    locking_db_url=DLM_DB_CONNECTION,
+            archive_db_database = config.get('breeder_database')
+
+            ## TODO - rework objective interface - use more sys or usr attrs of study
+            objective_kwargs = dict(archive_db_url=None,
+                                    locking_db_url=GODON_LOCKING_DB_CONNECTION_URL,
                                     run=run,
                                     identifier=identifier,
                                     breeder_id=config.get('uuid'),
@@ -60,9 +60,16 @@ def main(config=None):
                 direction = __objective.get('direction')
                 __directions.append(direction)
 
-            with Client(address=DASK_OPTUNA_SCHEDULER_URL) as client:
+            with Client(address="{host}:{port}".format(**DASK_OPTUNA_SCHEDULER)) as client:
                 # Create a study using Dask-compatible storage
-                storage = DaskStorage(InMemoryStorage())
+                archive_db_url = "postgresql://{user}:{password}@{host}:{port}".format(**ARCHIVE_DB_CONFIG) + archive_db_database
+
+                rdb_storage = optuna.storages.RDBStorage(
+                        url=archive_db_url
+                        )
+
+                storage = DaskStorage(rdb_storage)
+
                 study = optuna.create_study(directions=__directions, storage=storage)
                 objective_wrapped = lambda trial: objective(trial, **objective_kwargs)
                 # Optimize in parallel on your Dask cluster
