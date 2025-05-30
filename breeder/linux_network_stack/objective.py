@@ -28,9 +28,6 @@ def objective(trial,
     import pals
     import asyncio
 
-    from sqlalchemy import create_engine
-    from sqlalchemy import text
-
     ## Compiling settings for effectuation
     def config_compile_settings(config=None):
         settings = []
@@ -51,32 +48,6 @@ def objective(trial,
 
         return (settings, settings_full)
 
-    ## Archive DB interaction functions
-    def archive_db_fetch_setting_data(archive_db_engine=None,
-                                      breeder_id=None,
-                                      run_id=None,
-                                      identifier=None,
-                                      setting_id=None):
-        logger.debug('fetching setting data')
-        breeder_table_name = f"{breeder_id}_{run_id}_{identifier}"
-        query = f"SELECT * FROM {breeder_table_name} WHERE {breeder_table_name}.setting_id = '{setting_id}';"
-
-        archive_db_data = archive_db_engine.execute(query).fetchall()
-
-        return archive_db_data
-
-    def archive_db_share_knowledge(archive_db_engine=None,
-                                   breeder_table_name=None,
-                                   setting_id=None,
-                                   setting_result=None):
-
-        query = f"INSERT INTO {breeder_table_name} VALUES ('{setting_id}', '{setting_full}', '{setting_result}');"
-        archive_db_engine.execute(query)
-
-        logger.warning('Result stored in Knowledge Archive')
-
-        return True
-
     ## Effectuation Logic
     def perform_effectuation(breeder_id=None, identifier=None, settings=None, locking_db_url=None):
         logger.warning('doing effectuation')
@@ -88,7 +59,7 @@ def objective(trial,
         dlm_lock = locker.lock(f'{breeder_id}')
 
         if not dlm_lock.acquire(acquire_timeout=1200):
-            task_logger.debug("Could not aquire lock for {breeder_id}")
+            task_logger.warning("Could not aquire lock for {breeder_id}")
 
 
         ## TODO - invoke
@@ -121,42 +92,14 @@ def objective(trial,
     # Assemble Breeder Associated Archive DB Table Name
     breeder_table_name = f"{breeder_id}_{run_id}_{identifier}"
 
-    # Create Engine to Intra Breeder knowledge archive
-    archive_db_engine = create_engine(archive_db_url)
+    setting_result = perform_effectuation(breeder_id=breeder_id,
+                                          identifier=identifier,
+                                          settings=settings,
+                                          locking_db_url=locking_db_url)
 
-    # Accrue settings state
-    is_setting_explored = False
-    settings, settings_full = config_compile_settings(config.get('settings').get('sysctl').items())
-    setting_id = hashlib.sha256(str.encode(settings)).hexdigest()[0:6]
+    rtt = setting_result[0]
+    delivery_rate = setting_result[1]
 
-    # Consult archive db for previous results
-    archive_db_data = archive_db_fetch_setting_data(archive_db_engine=archive_db_engine,
-                                                    breeder_table_name=breeder_table_name,
-                                                    setting_id=setting_id)
-
-    if archive_db_data:
-        logger.debug('setting already explored')
-        is_setting_explored = True
-        result_tuple = json.loads(archive_db_data[0])
-        rtt = result_tuple[0]
-        delivery_rate = result_tuple[1]
-
-    if not is_setting_explored:
-
-        setting_result = perform_effectuation(breeder_id=breeder_id,
-                                              identifier=identifier,
-                                              settings=settings,
-                                              locking_db_url=locking_db_url)
-
-        archive_db_share_knowledge(archive_db_engine=archive_db_engine,
-                                   breeder_table_name=breeder_table_name,
-                                   setting_id=setting_id,
-                                   setting_result=setting_result)
-
-        rtt = setting_result[0]
-        delivery_rate = setting_result[1]
-
-    logger.warning('Done')
+    logger.debug('exiting')
 
     return rtt, delivery_rate
-
