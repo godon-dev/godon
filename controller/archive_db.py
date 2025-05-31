@@ -40,7 +40,13 @@ class queries():
     @staticmethod
     def create_database(breeder_id=None):
         query = f"""
-        CREATE DATABASE {breeder_id}
+        CREATE DATABASE {breeder_id};
         """
         return query
 
+    @staticmethod
+    def drop_database(breeder_id=None):
+        query = f"""
+        DROP DATABASE IF EXISTS {breeder_id};
+        """
+        return query
