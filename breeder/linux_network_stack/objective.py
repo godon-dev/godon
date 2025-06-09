@@ -17,6 +17,26 @@
 # along with this godon. If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Optuna Backend Communication Function Callback
+
+class CommunicationCallback:
+    def __init__(self):
+
+        nats_service = dict(host=os.environ.get('GODON_NATS_SERVICE_HOST'),
+                          port=os.environ.get('GODON_NATS_SERVICE_PORT'))
+
+        self.nats_service_url = "nats://{host}:{port}".format(**nats_service)
+
+    async def __communicate(self):
+        return
+
+    def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
+        import asyncio
+
+        asyncio.run(self.__communicate())
+
+        return
+
 # Optuna Backend Objective Function
 def objective(trial,
               run=None,
