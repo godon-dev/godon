@@ -50,39 +50,44 @@ class CommunicationCallback:
 
         return
 
-# Optuna Backend Objective Function
-def objective(trial,
-              run=None,
-              identifier=None,
-              archive_db_url=None,
-              locking_db_url=None,
-              breeder_id=None):
 
-    import pals
-    import asyncio
+class Objective:
+    def __init__(self, config: dict):
+
+        # Optuna Backend Objective Function
+#        def objective(trial,
+#              run=None,
+#              identifier=None,
+#              archive_db_url=None,
+#              locking_db_url=None,
+#              breeder_id=None):
+
+        self.config = config
+
+        return
 
     ## Compiling settings for effectuation
-    def config_compile_settings(config=None):
-        settings = []
-        setting_full = []
-        for setting_name, setting_config in config.get('settings').get('sysctl').items():
-            constraints = setting_config.get('constraints')
-            step_width = setting_config.get('step')
-            suggested_value = trial.suggest_int(setting_name, constraints.get('lower') , constraints.get('upper'), step_width)
+    def __config_compile_settings(self):
+            settings = []
+            setting_full = []
+            for setting_name, setting_config in self.config.get('settings').get('sysctl').items():
+                constraints = setting_config.get('constraints')
+                step_width = setting_config.get('step')
+                suggested_value = trial.suggest_int(setting_name, constraints.get('lower') , constraints.get('upper'), step_width)
 
-            setting_full.append({ setting_name : suggested_value })
+                setting_full.append({ setting_name : suggested_value })
 
-            if setting_name in ['net.ipv4.tcp_rmem', 'net.ipv4.tcp_wmem']:
-                settings.append(f"sudo sysctl -w {setting_name}='4096 131072 {suggested_value}';")
-            else:
-                settings.append(f"sudo sysctl -w {setting_name}='{suggested_value}';")
-        settings = '\n'.join(settings)
-        settings_full = json.dumps(setting_full)
+                if setting_name in ['net.ipv4.tcp_rmem', 'net.ipv4.tcp_wmem']:
+                    settings.append(f"sudo sysctl -w {setting_name}='4096 131072 {suggested_value}';")
+                else:
+                    settings.append(f"sudo sysctl -w {setting_name}='{suggested_value}';")
+            settings = '\n'.join(settings)
+            settings_full = json.dumps(setting_full)
 
-        return (settings, settings_full)
+            return (settings, settings_full)
 
     ## Effectuation Logic
-    def perform_effectuation(breeder_id=None, identifier=None, settings=None, locking_db_url=None):
+    def __perform_effectuation(self, breeder_id=None, identifier=None, settings=None, locking_db_url=None):
         logger.warning('doing effectuation')
         settings_data = dict(settings=settings)
 
@@ -115,24 +120,34 @@ def objective(trial,
 
         return setting_result
 
-    ## >> OBJECTIVE MAIN PATH << ##
 
-    logger = logging.getLogger('objective')
-    logger.setLevel(logging.DEBUG)
+    def __call__(self, trial):
+        import pals
+        import asyncio
 
-    logger.debug('entering')
 
-    # Assemble Breeder Associated Archive DB Table Name
-    breeder_table_name = f"{breeder_id}_{run_id}_{identifier}"
+        ## >> OBJECTIVE MAIN PATH << ##
 
-    setting_result = perform_effectuation(breeder_id=breeder_id,
-                                          identifier=identifier,
-                                          settings=settings,
-                                          locking_db_url=locking_db_url)
+        logger = logging.getLogger('objective')
+        logger.setLevel(logging.DEBUG)
 
-    rtt = setting_result[0]
-    delivery_rate = setting_result[1]
+        logger.debug('entering')
 
-    logger.debug('exiting')
+        # Assemble Breeder Associated Archive DB Table Name
+        breeder_table_name = f"{breeder_id}_{run_id}_{identifier}"
 
-    return rtt, delivery_rate
+
+        settings = self.__config_compile_settings()
+
+        setting_result = self.__perform_effectuation(breeder_id=breeder_id,
+                                                     identifier=identifier,
+                                                     settings=settings,
+                                                     locking_db_url=locking_db_url)
+
+        rtt = setting_result[0]
+        delivery_rate = setting_result[1]
+
+        logger.debug('exiting')
+
+        return rtt, delivery_rate
+
