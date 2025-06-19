@@ -20,20 +20,33 @@
 # Optuna Backend Communication Function Callback
 
 class CommunicationCallback:
-    def __init__(self):
+    def __init__(self, archive_db_storage : str = None, consolidation_probability: float = None):
 
-        nats_service = dict(host=os.environ.get('GODON_NATS_SERVICE_HOST'),
-                          port=os.environ.get('GODON_NATS_SERVICE_PORT'))
+        self.storage = archive_db_storage
+        self.com_probability = consolidation_probability
 
-        self.nats_service_url = "nats://{host}:{port}".format(**nats_service)
-
-    async def __communicate(self):
         return
 
-    def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
-        import asyncio
+    def __communicate(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
 
-        asyncio.run(self.__communicate())
+        for __study_name in study.get_all_study_names(storage=self.storage):
+            cooperating_study = optuna.load_study(study_name=__study_name, storage=self.storage)
+
+            cooperating_study.add_trial(trial)
+
+        return
+
+
+    def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
+        import random
+
+        logger = logging.getLogger('communication-cb')
+        logger.setLevel(logging.DEBUG)
+
+        random_value = random.random()
+
+        if self.com_probability > random_value:
+            self.__communicate()
 
         return
 
