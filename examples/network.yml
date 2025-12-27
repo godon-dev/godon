@@ -1,64 +1,72 @@
 ---
 meta:
-  version: "0.1"
+  version: "0.2"
 breeder:
   name: "linux_network_stack_breeder"
-  settings:
-    sysctl:
-      net.ipv4.tcp_rmem:
-        step: 100
-        constraints:
-          lower: 4096
-          upper: 6291456
-      net.ipv4.tcp_wmem:
-        step: 100
-        constraints:
-          lower: 4096
-          upper: 6291456
-      net.core.netdev_budget:
-        step: 10
-        constraints:
-          lower: 10
-          upper: 2000
-      net.core.netdev_max_backlog:
-        step: 10
-        constraints:
-          lower: 10
-          upper: 5000
-      net.core.dev_weight:
-        step: 10
-        constraints:
-          lower: 10
-          upper: 2000
-  run:
-    parallel: 1
-    iterations:
-      min: 10
-      max: 1000
-    timing:
-      # start: 1m
-      end: 10d
-      interval: 60
-  cooperation:
-    active: true
-    consolidation:
-      probability: 0.8
-  objectives:
-    - name: "tcp_rtt"
-      direction: minimize
-      reconaissance:
-        service: prometheus
-        query: "scalar(quantile(0.5, tcp_rtt))" # median
-    - name: "tcp_delivery_rate_bytes"
-      direction: maximize
-      reconaissance:
-        service: prometheus
-        query: "scalar(quantile(0.5, tcp_delivery_rate_bytes))" # median
-  effectuation:
-    targets:
-      - user: godon_robot
-        key_file: "/opt/airflow/credentials/id_rsa"
-        address: "10.0.5.53"
-      - user: godon_robot
-        key_file: "/opt/airflow/credentials/id_rsa"
-        address: "10.0.5.54"
+settings:
+  sysctl:
+    net.ipv4.tcp_rmem:
+      step: 100
+      constraints:
+        lower: 4096
+        upper: 6291456
+    net.ipv4.tcp_wmem:
+      step: 100
+      constraints:
+        lower: 4096
+        upper: 6291456
+    net.core.netdev_budget:
+      step: 10
+      constraints:
+        lower: 10
+        upper: 2000
+    net.core.netdev_max_backlog:
+      step: 10
+      constraints:
+        lower: 10
+        upper: 5000
+    net.core.dev_weight:
+      step: 10
+      constraints:
+        lower: 10
+        upper: 2000
+run:
+  parallel: 1
+  iterations:
+    min: 10
+    max: 1000
+timing:
+  # start: 1m
+  end: 10d
+  interval: 60
+cooperation:
+  active: true
+  consolidation:
+    probability: 0.8
+objectives:
+  - name: "tcp_rtt"
+    direction: minimize
+    reconnaisance:
+      service: prometheus
+      query: "quantile_over_time(0.95, rate(tcp_rtt[30s]))"
+      stabilization_seconds: 120
+      samples: 5
+      interval: 10
+  - name: "tcp_delivery_rate_bytes"
+    direction: maximize
+    reconnaisance:
+      service: prometheus
+      query: "quantile_over_time(0.95, rate(tcp_delivery_rate_bytes[30s]))"
+      stabilization_seconds: 120
+      samples: 5
+      interval: 10
+effectuation:
+  targets:
+    - id: "target_1"
+      hostname: "10.0.5.53"
+      username: "godon_robot"
+      ssh_key_variable_path: "u/user/godon_ssh_key"
+    - id: "target_2"
+      hostname: "10.0.5.54"
+      username: "godon_robot"
+      ssh_key_variable_path: "u/user/godon_ssh_key"
