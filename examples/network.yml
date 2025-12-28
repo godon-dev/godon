@@ -1,72 +1,98 @@
 ---
+# Godon Optimization Configuration
+# Config format version - independent from godon software version
 meta:
-  version: "0.2"
+  configVersion: "0.2"
+
+# Breeder identification
 breeder:
   name: "linux_network_stack_breeder"
+
+# Parameter search space - sysctl knobs to optimize
 settings:
   sysctl:
+    # TCP read buffer sizes (min/default/max)
     net.ipv4.tcp_rmem:
-      step: 100
+      step: 100                           # Granularity of parameter adjustments
       constraints:
-        lower: 4096
-        upper: 6291456
+        lower: 4096                       # Minimum buffer size (bytes)
+        upper: 6291456                    # Maximum buffer size (bytes)
+
+    # TCP write buffer sizes (min/default/max)
     net.ipv4.tcp_wmem:
       step: 100
       constraints:
         lower: 4096
         upper: 6291456
+
+    # Network device budget (processing time per NAPI poll)
     net.core.netdev_budget:
       step: 10
       constraints:
-        lower: 10
-        upper: 2000
+        lower: 10                         # Conservative: process fewer packets per poll
+        upper: 2000                       # Aggressive: process more packets per poll
+
+    # Maximum backlog queue length
     net.core.netdev_max_backlog:
       step: 10
       constraints:
         lower: 10
         upper: 5000
+
+    # CPU weight for network device processing
     net.core.dev_weight:
       step: 10
       constraints:
         lower: 10
         upper: 2000
+
+# Execution control
 run:
-  parallel: 1
+  parallel: 3                             # Number of parallel workers (triggers algorithm diversity)
   iterations:
-    min: 10
-    max: 1000
+    min: 10                               # Minimum trials before considering early stopping
+    max: 1000                             # Maximum trials before forcing termination
+
 timing:
-  # start: 1m
-  end: 10d
-  interval: 60
+  # start: "1m"                          # Optional: delay before first trial
+  end: "10d"                              # Maximum lifetime of the optimization run
+  interval: 60                            # Seconds between parameter application and metric collection
+
+# Cooperative optimization mode
 cooperation:
-  active: true
+  active: true                            # Enable shared learning between parallel workers
   consolidation:
-    probability: 0.8
+    probability: 0.8                      # Probability of incorporating shared trial results
+
+# Optimization objectives
 objectives:
   - name: "tcp_rtt"
-    direction: minimize
-    reconnaisance:
-      service: prometheus
-      query: "quantile_over_time(0.95, rate(tcp_rtt[30s]))"
-      stabilization_seconds: 120
-      samples: 5
-      interval: 10
+    direction: minimize                   # Minimize round-trip time
+    reconnaissance:
+      service: prometheus                 # Metric source type
+      query: "scalar(quantile(0.5, tcp_rtt))"  # Prometheus query for median TCP RTT
+      stabilization_seconds: 10           # Wait period after parameter change before sampling
+      samples: 5                          # Number of samples to collect
+      interval: 2                         # Seconds between samples
+
   - name: "tcp_delivery_rate_bytes"
-    direction: maximize
-    reconnaisance:
+    direction: maximize                   # Maximize delivery rate (throughput)
+    reconnaissance:
       service: prometheus
-      query: "quantile_over_time(0.95, rate(tcp_delivery_rate_bytes[30s]))"
-      stabilization_seconds: 120
+      query: "scalar(quantile(0.5, tcp_delivery_rate_bytes))"
+      stabilization_seconds: 10
       samples: 5
-      interval: 10
+      interval: 2
+
+# Parameter application (effectuation) configuration
 effectuation:
   targets:
-    - id: "target_1"
-      hostname: "10.0.5.53"
-      username: "godon_robot"
-      ssh_key_variable_path: "u/user/godon_ssh_key"
-    - id: "target_2"
-      hostname: "10.0.5.54"
-      username: "godon_robot"
-      ssh_key_variable_path: "u/user/godon_ssh_key"
+    - address: "10.0.5.53"                # Target system IP address
+      connection:
+        username: "godon_robot"           # SSH username
+        private_key: "/opt/godon/credentials/id_rsa"  # SSH private key path
+
+    - address: "10.0.5.54"
+      connection:
+        username: "godon_robot"
+        private_key: "/opt/godon/credentials/id_rsa"
