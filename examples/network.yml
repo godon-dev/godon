@@ -59,9 +59,22 @@ run:
     quality_achieved: true                # Stop when all quality_threshold objectives are met
 
 cooperation:
-  active: true                            # Enable shared learning between parallel workers
-  consolidation:
-    probability: 0.8                      # Probability of incorporating shared trial results
+  active: true                            # Enable shared learning between parallel workers (requires parallel > 1)
+  
+  # Sharing strategy: "probabilistic", "best", "worst", "extremes"
+  # - "probabilistic": Share trials randomly with probability P (legacy approach)
+  # - "best": Share only top-performing trials (top percentile)
+  # - "worst": Share only bottom-performing trials (bottom percentile)
+  # - "extremes": Share both top and bottom-performing trials (learn from successes and failures)
+  share_strategy: "extremes"
+  
+  # Quality-based filtering parameters (used for "best", "worst", "extremes" strategies)
+  top_percentile: 0.2                     # Share top 20% of trials
+  bottom_percentile: 0.2                  # Share bottom 20% of trials
+  min_trials_for_filtering: 10            # Wait for 10 trials before quality filtering kicks in
+  
+  # Legacy probabilistic sharing (only used when share_strategy is "probabilistic")
+  probability: 0.8                        # 80% chance to share each trial
 
 # Optimization objectives
 objectives:
