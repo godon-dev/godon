@@ -103,11 +103,11 @@ effectuation:
   targets:
     - type: "ssh"                         # Target type (must match breeder's supported types)
       id: "target_1"
-      hostname: "10.0.5.53"
+      address: "10.0.5.53"                # Target system IP address
       username: "godon_robot"
       ssh_key_variable_path: "u/user/godon_ssh_key"
     - type: "ssh"                         # Target type (must match breeder's supported types)
       id: "target_2"
-      hostname: "10.0.5.54"
+      address: "10.0.5.54"                # Target system IP address
       username: "godon_robot"
       ssh_key_variable_path: "u/user/godon_ssh_key"
