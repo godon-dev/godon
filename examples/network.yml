@@ -48,7 +48,7 @@ settings:
 
 # Execution control
 run:
-  parallel: 3                             # Number of parallel workers (triggers algorithm diversity)
+  parallel: 3                             # Number of parallel workers (auto-enables algorithm diversity with multiple samplers)
 
   completion_criteria:
     iterations:
@@ -102,13 +102,12 @@ objectives:
 effectuation:
   targets:
     - type: "ssh"                         # Target type (must match breeder's supported types)
-      address: "10.0.5.53"                # Target system IP address
-      connection:
-        username: "godon_robot"           # SSH username
-        private_key: "/opt/godon/credentials/id_rsa"  # SSH private key path
-
+      id: "target_1"
+      hostname: "10.0.5.53"
+      username: "godon_robot"
+      ssh_key_variable_path: "u/user/godon_ssh_key"
     - type: "ssh"                         # Target type (must match breeder's supported types)
-      address: "10.0.5.54"
-      connection:
-        username: "godon_robot"
-        private_key: "/opt/godon/credentials/id_rsa"
+      id: "target_2"
+      hostname: "10.0.5.54"
+      username: "godon_robot"
+      ssh_key_variable_path: "u/user/godon_ssh_key"
