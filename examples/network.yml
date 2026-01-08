@@ -105,9 +105,9 @@ effectuation:
       id: "target_1"
       address: "10.0.5.53"                # Target system IP address
       username: "godon_robot"
-      ssh_key_variable_path: "u/user/godon_ssh_key"
+      credentialName: "godon_ssh_key"     # Credential name from credential catalog
     - type: "ssh"                         # Target type (must match breeder's supported types)
       id: "target_2"
       address: "10.0.5.54"                # Target system IP address
       username: "godon_robot"
-      ssh_key_variable_path: "u/user/godon_ssh_key"
+      credentialName: "godon_ssh_key"     # Credential name from credential catalog
