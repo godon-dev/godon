@@ -4,19 +4,19 @@
 meta:
   configVersion: "0.2"
 
-# Breeder identification
+# Breeder worker configuration
 breeder:
-  name: "linux_performance"  # Breeder type (maps to breeder worker implementation)
+  type: "linux_performance"  # Which breeder worker implementation to use
 
 # Parameter search space - sysctl knobs to optimize
 settings:
   sysctl:
     # TCP read buffer sizes (min/default/max)
     net.ipv4.tcp_rmem:
-      step: 100                           # Granularity of parameter adjustments
+      step: 100  # Granularity of parameter adjustments
       constraints:
-        lower: 4096                       # Minimum buffer size (bytes)
-        upper: 6291456                    # Maximum buffer size (bytes)
+        lower: 4096  # Minimum buffer size (bytes)
+        upper: 6291456  # Maximum buffer size (bytes)
 
     # TCP write buffer sizes (min/default/max)
     net.ipv4.tcp_wmem:
@@ -29,8 +29,8 @@ settings:
     net.core.netdev_budget:
       step: 10
       constraints:
-        lower: 10                         # Conservative: process fewer packets per poll
-        upper: 2000                       # Aggressive: process more packets per poll
+        lower: 10  # Conservative: process fewer packets per poll
+        upper: 2000  # Aggressive: process more packets per poll
 
     # Maximum backlog queue length
     net.core.netdev_max_backlog:
@@ -48,49 +48,45 @@ settings:
 
 # Execution control
 run:
-  parallel: 3                             # Number of parallel workers (auto-enables algorithm diversity with multiple samplers)
+  parallel: 3  # Number of parallel workers
 
   completion_criteria:
     iterations:
-      min: 10                             # Minimum trials before considering early stopping
-      max: 1000                           # Maximum trials before forcing termination
+      min: 10  # Minimum trials before considering early stopping
+      max: 1000  # Maximum trials before forcing termination
     timing:
-      end: "7d"                           # Maximum lifetime of the optimization run (e.g., 7d, 24h, 60m)
-    quality_achieved: true                # Stop when all quality_threshold objectives are met
+      end: "7d"  # Maximum lifetime of the optimization run (e.g., 7d, 24h, 60m)
+    quality_achieved: true  # Stop when all quality_threshold objectives are met
 
 cooperation:
-  active: true                            # Enable shared learning between parallel workers (requires parallel > 1)
-  
+  active: true  # Enable shared learning between parallel workers
+
   # Sharing strategy: "probabilistic", "best", "worst", "extremes"
-  # - "probabilistic": Share trials randomly with probability P (legacy approach)
-  # - "best": Share only top-performing trials (top percentile)
-  # - "worst": Share only bottom-performing trials (bottom percentile)
-  # - "extremes": Share both top and bottom-performing trials (learn from successes and failures)
   share_strategy: "extremes"
-  
-  # Quality-based filtering parameters (used for "best", "worst", "extremes" strategies)
-  top_percentile: 0.2                     # Share top 20% of trials
-  bottom_percentile: 0.2                  # Share bottom 20% of trials
-  min_trials_for_filtering: 10            # Wait for 10 trials before quality filtering kicks in
-  
-  # Legacy probabilistic sharing (only used when share_strategy is "probabilistic")
-  probability: 0.8                        # 80% chance to share each trial
+
+  # Quality-based filtering parameters
+  top_percentile: 0.2  # Share top 20% of trials
+  bottom_percentile: 0.2  # Share bottom 20% of trials
+  min_trials_for_filtering: 10  # Wait for 10 trials before quality filtering kicks in
+
+  # Legacy probabilistic sharing
+  probability: 0.8  # 80% chance to share each trial
 
 # Optimization objectives
 objectives:
   - name: "tcp_rtt"
-    direction: minimize                   # Minimize round-trip time
-    quality_threshold: 50                 # Stop when RTT <= 50ms (optional)
+    direction: minimize  # Minimize round-trip time
+    quality_threshold: 50  # Stop when RTT <= 50ms (optional)
     reconnaissance:
-      service: prometheus                 # Metric source type
-      query: "scalar(tcp_rtt * 1000)"     # Prometheus query (converts to milliseconds)
-      stabilization_seconds: 10           # Wait period after parameter change before sampling
-      samples: 5                          # Number of samples to collect
-      interval: 2                         # Seconds between samples
+      service: prometheus  # Metric source type
+      query: "scalar(tcp_rtt * 1000)"  # Prometheus query (converts to milliseconds)
+      stabilization_seconds: 10  # Wait period after parameter change before sampling
+      samples: 5  # Number of samples to collect
+      interval: 2  # Seconds between samples
 
   - name: "tcp_delivery_rate_bytes"
-    direction: maximize                   # Maximize delivery rate (throughput)
-    quality_threshold: 1048576            # Stop when throughput >= 1MB/s (optional)
+    direction: maximize  # Maximize delivery rate (throughput)
+    quality_threshold: 1048576  # Stop when throughput >= 1MB/s (optional)
     reconnaissance:
       service: prometheus
       query: "scalar(rate(tcp_delivery_rate_bytes[1m]))"
@@ -101,17 +97,18 @@ objectives:
 # Parameter application (effectuation) configuration
 effectuation:
   targets:
-    - type: "ssh"                         # Target type (must match breeder's supported types)
+    - type: "ssh"  # Target type (must match breeder's supported types)
       id: "target_1"
-      address: "10.0.5.53"                # Target system IP address
+      address: "10.0.5.53"  # Target system IP address
       username: "godon_robot"
-      credentialName: "godon_ssh_key"     # Credential name from credential catalog
+      credentialName: "godon_ssh_key"  # Credential name from credential catalog
       # Alternatively, use credentialId to reference by UUID:
       # credentialId: "123e4567-e89b-12d3-a456-426614174000"
-    - type: "ssh"                         # Target type (must match breeder's supported types)
+
+    - type: "ssh"  # Target type (must match breeder's supported types)
       id: "target_2"
-      address: "10.0.5.54"                # Target system IP address
+      address: "10.0.5.54"  # Target system IP address
       username: "godon_robot"
-      credentialName: "godon_ssh_key"     # Credential name from credential catalog
+      credentialName: "godon_ssh_key"  # Credential name from credential catalog
       # Alternatively, use credentialId to reference by UUID:
       # credentialId: "123e4567-e89b-12d3-a456-426614174000"
