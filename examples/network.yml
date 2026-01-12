@@ -155,6 +155,7 @@ effectuation:
       credentialName: "godon_ssh_key"  # Credential name from credential catalog
       # Alternatively, use credentialId to reference by UUID:
       # credentialId: "123e4567-e89b-12d3-a456-426614174000"
+      allows_downtime: false  # Target cannot be unavailable (production-safe tuning only)
 
     - type: "ssh"  # Target type (must match breeder's supported types)
       id: "target_2"
@@ -163,3 +164,4 @@ effectuation:
       credentialName: "godon_ssh_key"  # Credential name from credential catalog
       # Alternatively, use credentialId to reference by UUID:
       # credentialId: "123e4567-e89b-12d3-a456-426614174000"
+      allows_downtime: false  # Target cannot be unavailable (production-safe tuning only)
