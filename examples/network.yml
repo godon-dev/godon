@@ -1,14 +1,37 @@
 ---
 # Godon Optimization Configuration
+#
+# This configuration defines Linux kernel/networking parameter optimization for
+# minimizing latency and maximizing throughput while maintaining system safety.
+#
+# DESIGN NOTES:
+# - No 'type' field on parameters: breeder knows parameter types internally
+# - Multiple disjoint ranges enable parallel workers to explore different regions
+# - Objectives = what we optimize (multi-objective Pareto optimization)
+# - Guardrails = safety limits (trigger rollback if exceeded)
+# - Separate breeders for different target classes (avoids per-target complexity)
+#
 # Config format version - independent from godon software version
 meta:
-  configVersion: "0.2"
+  configVersion: "0.3"
 
 # Breeder worker configuration
 breeder:
   type: "linux_performance"  # Which breeder worker implementation to use
 
-# Parameter search space - Linux kernel tuning knobs to optimize
+# ============================================================================
+# PARAMETER SEARCH SPACE
+# ============================================================================
+# Define the Linux tuning knobs to optimize. Each parameter type (sysctl, sysfs,
+# cpufreq, ethtool) represents a different mechanism for modifying system behavior.
+#
+# Parameter types are inferred by the breeder from its internal registry - no
+# 'type' field needed in config. This keeps the config clean and avoids errors.
+#
+# Multiple disjoint ranges (e.g., tcp_rmem with conservative and performance
+# ranges) allow parallel workers to explore different regions of the search space
+# simultaneously, accelerating discovery of optimal configurations.
+# ============================================================================
 settings:
   # System Control (proc/sys) - key-value parameters
   sysctl:
@@ -123,7 +146,17 @@ cooperation:
   # Legacy probabilistic sharing
   probability: 0.8  # 80% chance to share each trial
 
-# Optimization objectives
+# ============================================================================
+# OPTIMIZATION OBJECTIVES
+# ============================================================================
+# Define what we want to optimize. Multiple objectives are optimized simultaneously
+# using Pareto efficiency - the breeder finds the Pareto frontier of optimal
+# tradeoffs between competing objectives (e.g., low latency vs high throughput).
+#
+# IMPORTANT: Objectives are NOT used for rollback. If a trial is worse in one
+# objective but better in another, it may still be kept on the Pareto frontier.
+# Rollback is only triggered by guardrails (see below).
+# ============================================================================
 objectives:
   - name: "tcp_rtt"
     direction: minimize  # Minimize round-trip time
@@ -145,6 +178,60 @@ objectives:
       samples: 5
       interval: 2
 
+# ============================================================================
+# ROLLBACK STRATEGIES
+# ============================================================================
+# Define reusable rollback configurations. Strategies are referenced by targets
+# using the rollback.strategy field. This allows multiple targets to share the
+# same rollback behavior while maintaining per-target enablement control.
+#
+# Rollback is ONLY triggered by guardrails (see below), not by objectives.
+# The multi-objective optimization (Pareto frontier) is handled by Optuna.
+# ============================================================================
+rollback_strategies:
+  standard:
+    consecutive_failures: 3  # Avoid false positives from transient spikes
+    target_state: "previous"  # previous | best | baseline
+    max_attempts: 3  # Retry rollback if it fails
+    on_failure: "stop_optimization"  # What to do if rollback fails: stop_optimization | continue | mark_unhealthy
+    timeout_seconds: 60  # Maximum time to complete rollback
+    after:
+      action: "pause"  # pause | continue | stop
+      duration: 300  # Required if action=pause: wait seconds before resuming
+
+# ============================================================================
+# SAFETY GUARDRAILS
+# ============================================================================
+# Define safety limits that trigger automatic rollback if exceeded. Unlike
+# objectives (which we optimize), guardrails are constraints that must NOT be
+# violated.
+#
+# Key difference from objectives:
+# - Objectives: Multi-objective Pareto optimization (tradeoffs allowed)
+# - Guardrails: Binary safety limits (rollback immediately if exceeded)
+#
+# Example: We want to minimize RTT (objective) while keeping CPU < 90% (guardrail).
+# If RTT improves but CPU hits 95%, we rollback - system safety comes first.
+# ============================================================================
+guardrails:
+  - name: "cpu_usage"
+    hard_limit: 90  # Rollback if CPU usage exceeds 90%
+    reconnaissance:
+      service: prometheus
+      query: "avg(rate(process_cpu_seconds_total[5m])) * 100"
+      stabilization_seconds: 10
+      samples: 3
+      interval: 2
+
+  - name: "system_errors"
+    hard_limit: 10  # Rollback if system errors exceed 10 per minute
+    reconnaissance:
+      service: prometheus
+      query: "rate(kernel_errors_total[1m])"
+      stabilization_seconds: 10
+      samples: 3
+      interval: 2
+
 # Parameter application (effectuation) configuration
 effectuation:
   targets:
@@ -156,6 +243,9 @@ effectuation:
       # Alternatively, use credentialId to reference by UUID:
       # credentialId: "123e4567-e89b-12d3-a456-426614174000"
       allows_downtime: false  # Target cannot be unavailable (production-safe tuning only)
+      rollback:
+        enabled: true  # Enable automatic rollback on guardrail violations
+        strategy: "standard"  # Reference to rollback_strategies section
 
     - type: "ssh"  # Target type (must match breeder's supported types)
       id: "target_2"
@@ -165,3 +255,6 @@ effectuation:
       # Alternatively, use credentialId to reference by UUID:
       # credentialId: "123e4567-e89b-12d3-a456-426614174000"
       allows_downtime: false  # Target cannot be unavailable (production-safe tuning only)
+      rollback:
+        enabled: true  # Enable automatic rollback on guardrail violations
+        strategy: "standard"  # Reference to rollback_strategies section
