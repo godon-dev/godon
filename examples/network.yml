@@ -8,43 +8,118 @@ meta:
 breeder:
   type: "linux_performance"  # Which breeder worker implementation to use
 
-# Parameter search space - sysctl knobs to optimize
+# Parameter search space - Linux kernel tuning knobs to optimize
 settings:
+  # System Control (proc/sys) - key-value parameters
   sysctl:
-    # TCP read buffer sizes (min/default/max)
+    # TCP read buffer sizes - multiple disjoint ranges for parallel exploration
     net.ipv4.tcp_rmem:
-      step: 100  # Granularity of parameter adjustments
-      constraints:
-        lower: 4096  # Minimum buffer size (bytes)
-        upper: 6291456  # Maximum buffer size (bytes)
+      type: "int"
+      - {step: 100, lower: 4096, upper: 131072}     # Conservative
+      - {step: 100, lower: 262144, upper: 6291456}   # Performance
 
-    # TCP write buffer sizes (min/default/max)
+    # TCP write buffer sizes
     net.ipv4.tcp_wmem:
+      type: "int"
       step: 100
       constraints:
         lower: 4096
         upper: 6291456
 
-    # Network device budget (processing time per NAPI poll)
+    # Network device budget - conservative vs aggressive
     net.core.netdev_budget:
-      step: 10
-      constraints:
-        lower: 10  # Conservative: process fewer packets per poll
-        upper: 2000  # Aggressive: process more packets per poll
+      type: "int"
+      - {step: 10, lower: 10, upper: 100}
+      - {step: 10, lower: 500, upper: 2000}
 
-    # Maximum backlog queue length
+    # Maximum backlog queue length - disjoint ranges
     net.core.netdev_max_backlog:
-      step: 10
-      constraints:
-        lower: 10
-        upper: 5000
+      type: "int"
+      - {step: 10, lower: 10, upper: 1000}
+      - {step: 10, lower: 3000, upper: 5000}
 
     # CPU weight for network device processing
     net.core.dev_weight:
+      type: "int"
       step: 10
       constraints:
         lower: 10
         upper: 2000
+
+  # System Filesystem (sysfs) - use aliases for long paths
+  sysfs:
+    # CPU frequency scaling governor
+    cpu_governor:
+      path: "/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+      type: "categorical"
+      constraints:
+        enum: ["performance", "powersave", "ondemand"]
+
+    # Transparent huge pages
+    transparent_hugepage:
+      path: "/sys/kernel/mm/transparent_hugepage/enabled"
+      type: "categorical"
+      constraints:
+        enum: ["always", "madvise", "never"]
+
+    # Network interface queue discipline
+    qdisc:
+      path: "/sys/class/net/eth0/queue/disc"
+      type: "categorical"
+      constraints:
+        enum: ["fq", "pfifo_fast", "htb"]
+
+  # CPU Frequency Scaling - structured config
+  cpufreq:
+    governor:
+      type: "categorical"
+      constraints:
+        enum: ["performance", "powersave", "ondemand", "schedutil"]
+
+    min_freq_ghz:
+      type: "discrete_float"
+      step: 0.2
+      constraints:
+        lower: 1.2
+        upper: 2.4
+
+    max_freq_ghz:
+      type: "discrete_float"
+      step: 0.2
+      constraints:
+        lower: 2.4
+        upper: 4.8
+
+  # Network Interface (ethtool) - structured config
+  ethtool:
+    eth0:
+      # TCP Segmentation Offload
+      tso:
+        type: "categorical"
+        constraints:
+          enum: ["on", "off"]
+
+      # Generic Receive Offload
+      gro:
+        type: "categorical"
+        constraints:
+          enum: ["on", "off"]
+
+      # RX ring buffer size
+      rx_ring:
+        type: "int"
+        step: 512
+        constraints:
+          lower: 512
+          upper: 8192
+
+      # TX ring buffer size
+      tx_ring:
+        type: "int"
+        step: 512
+        constraints:
+          lower: 512
+          upper: 8192
 
 # Execution control
 run:
