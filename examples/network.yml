@@ -193,7 +193,12 @@ rollback_strategies:
     consecutive_failures: 3  # Avoid false positives from transient spikes
     target_state: "previous"  # previous | best | baseline
     max_attempts: 3  # Retry rollback if it fails
-    on_failure: "stop_optimization"  # What to do if rollback fails: stop_optimization | continue | mark_unhealthy
+
+    # What to do if rollback fails after all attempts:
+    # - stop: Halt the entire optimization run
+    # - continue: Keep trying trials (including with the failed target)
+    # - skip_target: Mark failed target as unhealthy, continue with other targets
+    on_failure: "stop"
     timeout_seconds: 60  # Maximum time to complete rollback
     after:
       action: "pause"  # pause | continue | stop
