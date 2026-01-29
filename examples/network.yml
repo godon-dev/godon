@@ -148,11 +148,21 @@ cooperation:
   probability: 0.8  # 80% chance to share each trial
 
 # ============================================================================
-# OPTIMIZATION OBJECTIVES
+# RECONNAISSANCE CONFIGURATION
 # ============================================================================
-# Define what we want to optimize. Multiple objectives are optimized simultaneously
-# using Pareto efficiency - the breeder finds the Pareto frontier of optimal
-# tradeoffs between competing objectives (e.g., low latency vs high throughput).
+# Global default settings for metric collection. These can be overridden
+# per-objective or per-guardrail if needed.
+# ============================================================================
+reconnaissance:
+  prometheus:
+    url: "http://prometheus:9090"  # Prometheus server URL
+
+# ============================================================================
+# OBJECTIVES
+# ============================================================================
+# Objectives define the metrics to optimize during trial evaluation. We use
+# multi-objective Pareto optimization to find configurations that balance
+# competing goals.
 #
 # IMPORTANT: Objectives are NOT used for rollback. If a trial is worse in one
 # objective but better in another, it may still be kept on the Pareto frontier.
