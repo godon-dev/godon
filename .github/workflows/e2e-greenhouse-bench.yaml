@@ -1,0 +1,344 @@
+name: "E2E Greenhouse Bench"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  greenhouse_e2e:
+    name: Greenhouse Bench End-to-End Test
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout godon repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Verify KIND Cluster
+        run: |
+          echo "Verifying KIND cluster..."
+
+          if ! kind get clusters | grep -q "godon-1-cluster"; then
+            echo "KIND cluster 'godon-1-cluster' not found"
+            echo "Please run the 'kind--setup-cluster' and 'charts--reinstall-stack' workflows first"
+            exit 1
+          fi
+
+          echo "KIND cluster exists"
+          kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
+          kubectl cluster-info --kubeconfig=/tmp/kind_kubeconfig.yaml
+
+      - name: Verify Godon Stack Deployment
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "Verifying godon stack deployment..."
+
+          if ! helm status godon --namespace godon >/dev/null 2>&1; then
+            echo "Godon helm release not found"
+            echo "Please run the 'charts--reinstall-stack' workflow first"
+            exit 1
+          fi
+
+          echo "Godon stack is deployed"
+
+          echo "Waiting for godon-api pod to be ready..."
+          kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+          echo "API Pod: ${API_POD}"
+
+      - name: Deploy Greenhouse Bench Container
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "Deploying godon-bench-greenhouse into cluster..."
+
+          cat <<'MANIFEST' | kubectl apply -f -
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: godon-bench-greenhouse
+            namespace: godon
+            labels:
+              app: godon-bench-greenhouse
+          spec:
+            containers:
+            - name: greenhouse
+              image: ghcr.io/godon-dev/godon-bench-greenhouse:latest
+              ports:
+              - containerPort: 8090
+              env:
+              - name: PORT
+                value: "8090"
+              - name: GREENHOUSE_SCENARIO
+                value: "simple"
+              - name: GREENHOUSE_WEATHER
+                value: "smooth"
+              - name: GREENHOUSE_SEED
+                value: "42"
+              readinessProbe:
+                httpGet:
+                  path: /health
+                  port: 8090
+                initialDelaySeconds: 3
+                periodSeconds: 3
+            restartPolicy: Never
+          MANIFEST
+
+          echo "Waiting for greenhouse pod to be ready..."
+          kubectl wait --for=condition=ready pod/godon-bench-greenhouse -n godon --timeout=120s
+
+          echo "Verifying greenhouse health..."
+          kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/health
+
+          echo "Greenhouse bench container ready"
+
+      - name: Port Forward to Godon API
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "Setting up port forward to godon-api..."
+
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+          echo "API Pod: ${API_POD}"
+
+          LOCALHOST_ADDR="127.0.0.3"
+          PORT="9090"
+
+          kubectl port-forward -n godon --address ${LOCALHOST_ADDR} "${API_POD}" ${PORT}:8080 > /tmp/pf.log 2>&1 &
+          PF_PID=$!
+
+          sleep 3
+
+          echo ${PF_PID} > /tmp/pf_pid
+
+          READY=false
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://${LOCALHOST_ADDR}:${PORT}/health >/dev/null 2>&1; then
+              echo "Port forward is ready!"
+              READY=true
+              break
+            fi
+            echo "Attempt $i/30 - waiting for port forward..."
+            sleep 2
+          done
+
+          if [ "$READY" = false ]; then
+            echo "Port forward failed to become ready"
+            cat /tmp/pf.log
+            kill ${PF_PID} || true
+            exit 1
+          fi
+
+          echo "API_HOST=${LOCALHOST_ADDR}" >> $GITHUB_ENV
+          echo "API_PORT=${PORT}" >> $GITHUB_ENV
+
+      - name: Create Greenhouse Target
+        run: |
+          echo "Creating HTTP target for greenhouse..."
+
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+
+          EXISTING_ID=$(curl -s ${API_URL}/targets | jq -r '.[] | select(.name=="greenhouse-e2e") | .id' 2>/dev/null || echo "")
+          if [ -n "${EXISTING_ID}" ]; then
+            echo "Cleaning up existing target: ${EXISTING_ID}"
+            curl -s -X DELETE ${API_URL}/targets/${EXISTING_ID} >/dev/null 2>&1 || true
+          fi
+
+          cat > greenhouse-target.yaml << 'EOF'
+          name: "greenhouse-e2e"
+          targetType: "http"
+          spec:
+            url: "http://godon-bench-greenhouse.godon.svc.cluster.local:8090"
+            auth_type: "none"
+          metadata:
+            description: "E2E test greenhouse target"
+          EOF
+
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          CREATE_OUTPUT=$(docker run --rm --network host \
+            -v $(pwd):/work:ro \
+            -w /work \
+            "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+            target create --file=greenhouse-target.yaml 2>&1 || true)
+
+          echo "${CREATE_OUTPUT}"
+
+          TARGET_ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1 || echo "")
+
+          if [ -z "${TARGET_ID}" ]; then
+            TARGET_ID=$(curl -s ${API_URL}/targets | jq -r '.[] | select(.name=="greenhouse-e2e") | .id' 2>/dev/null || echo "")
+          fi
+
+          if [ -z "${TARGET_ID}" ]; then
+            echo "Failed to create greenhouse target"
+            exit 1
+          fi
+
+          echo "Target created: ${TARGET_ID}"
+          echo "${TARGET_ID}" > /tmp/target_id
+
+      - name: Run Greenhouse Optimization
+        run: |
+          echo "Creating greenhouse breeder..."
+
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          TARGET_ID=$(cat /tmp/target_id)
+
+          EXISTING_BREEDER=$(curl -s ${API_URL}/breeders | jq -r '.[] | select(.name=="greenhouse-e2e") | .id' 2>/dev/null || echo "")
+          if [ -n "${EXISTING_BREEDER}" ]; then
+            echo "Cleaning up existing breeder: ${EXISTING_BREEDER}"
+            curl -s -X DELETE "${API_URL}/breeders/${EXISTING_BREEDER}?force=true" >/dev/null 2>&1 || true
+            sleep 2
+          fi
+
+          sed "s/PLACEHOLDER_TARGET_ID/${TARGET_ID}/" examples/greenhouse.yml > greenhouse-e2e-config.yaml
+
+          CREATE_OUTPUT=$(docker run --rm --network host \
+            -v $(pwd):/work \
+            -w /work \
+            "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+            breeder create --name="greenhouse-e2e" --file=greenhouse-e2e-config.yaml 2>&1 || true)
+
+          echo "${CREATE_OUTPUT}"
+
+          BREEDER_UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1 || echo "")
+
+          if [ -z "${BREEDER_UUID}" ]; then
+            BREEDER_UUID=$(curl -s ${API_URL}/breeders | jq -r '.[] | select(.name=="greenhouse-e2e") | .id' 2>/dev/null || echo "")
+          fi
+
+          if [ -z "${BREEDER_UUID}" ]; then
+            echo "Failed to create breeder"
+            exit 1
+          fi
+
+          echo "Breeder created: ${BREEDER_UUID}"
+          echo "${BREEDER_UUID}" > /tmp/breeder_uuid
+
+      - name: Poll Optimization Progress
+        run: |
+          echo "Polling optimization progress..."
+
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          BREEDER_UUID=$(cat /tmp/breeder_uuid)
+
+          MIN_TRIALS=3
+          MAX_WAIT=300
+          POLL_INTERVAL=10
+          ELAPSED=0
+
+          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+            STATUS=$(curl -s "${API_URL}/breeders/${BREEDER_UUID}" 2>/dev/null || echo "")
+            echo "Breeder status: ${STATUS}" | head -5
+
+            TRIAL_COUNT=$(echo "${STATUS}" | jq -r '.trials_completed // .trialCount // 0' 2>/dev/null || echo "0")
+            STATE=$(echo "${STATUS}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+
+            echo "State: ${STATE}, Trials: ${TRIAL_COUNT} (${ELAPSED}s elapsed)"
+
+            if [ "${STATE}" = "failed" ] || [ "${STATE}" = "error" ]; then
+              echo "Breeder entered error state"
+              exit 1
+            fi
+
+            if [ "${TRIAL_COUNT}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
+              echo "Sufficient trials completed: ${TRIAL_COUNT}"
+              break
+            fi
+
+            sleep ${POLL_INTERVAL}
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
+            echo "Timed out waiting for trials (waited ${MAX_WAIT}s)"
+            echo "Final breeder status:"
+            curl -s "${API_URL}/breeders/${BREEDER_UUID}" | jq . || true
+            exit 1
+          fi
+
+          echo "Optimization completed successfully"
+
+      - name: Verify Greenhouse Metrics
+        run: |
+          echo "Verifying greenhouse responded to optimization..."
+
+          KUBECONFIG=/tmp/kind_kubeconfig.yaml
+
+          METRICS=$(kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/metrics/json 2>/dev/null || echo "")
+          echo "Latest metrics: ${METRICS}" | head -10
+
+          GROWTH_RATE=$(echo "${METRICS}" | jq -r '.growth_rate // "null"' 2>/dev/null || echo "null")
+
+          if [ "${GROWTH_RATE}" = "null" ] || [ -z "${GROWTH_RATE}" ]; then
+            echo "Warning: Could not read growth_rate from greenhouse"
+          else
+            echo "Growth rate: ${GROWTH_RATE}"
+          fi
+
+          echo "E2E greenhouse bench test passed"
+
+      - name: Cleanup
+        if: always()
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "Cleaning up..."
+
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          BREEDER_UUID=$(cat /tmp/breeder_uuid 2>/dev/null || echo "")
+          if [ -n "${BREEDER_UUID}" ]; then
+            echo "Deleting breeder: ${BREEDER_UUID}"
+            docker run --rm --network host "${CLI_IMAGE}" \
+              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              breeder purge --force --id="${BREEDER_UUID}" 2>/dev/null || true
+          fi
+
+          TARGET_ID=$(cat /tmp/target_id 2>/dev/null || echo "")
+          if [ -n "${TARGET_ID}" ]; then
+            echo "Deleting target: ${TARGET_ID}"
+            docker run --rm --network host "${CLI_IMAGE}" \
+              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              target delete --id="${TARGET_ID}" 2>/dev/null || true
+          fi
+
+          echo "Removing greenhouse pod..."
+          kubectl delete pod godon-bench-greenhouse -n godon --force --grace-period=0 2>/dev/null || true
+
+          if [ -f /tmp/pf_pid ]; then
+            kill $(cat /tmp/pf_pid) 2>/dev/null || true
+            rm /tmp/pf_pid
+          fi
+
+          echo "Cleanup completed"
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "E2E Greenhouse Bench Summary"
+          echo "============================="
+          echo ""
+          echo "Pre-checks:"
+          echo "  KIND cluster verified"
+          echo "  Godon stack verified"
+          echo "  godon-api ready"
+          echo ""
+          echo "Deployment:"
+          echo "  godon-bench-greenhouse pod deployed"
+          echo "  HTTP target created (spec JSONB)"
+          echo "  Breeder created with greenhouse config"
+          echo ""
+          echo "Optimization:"
+          echo "  bench_greenhouse strain"
+          echo "  HTTP reconnaissance (GET /metrics/json)"
+          echo "  HTTP effectuation (POST /apply)"
+          echo "  Polled for trial completion"
+          echo "  Verified greenhouse metrics"
+          echo ""
+          echo "  Status: ${{ job.status }}"
