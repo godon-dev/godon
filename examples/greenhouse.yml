@@ -142,12 +142,8 @@ guardrails:
 
 effectuation:
   type: http
-  targets:
-    - id: greenhouse
-      url: "http://greenhouse:8090"
-      rollback:
-        enabled: true
-        strategy: standard
+  targetRefs:
+    - "greenhouse"
   endpoint_config:
     method: POST
     path: /apply
