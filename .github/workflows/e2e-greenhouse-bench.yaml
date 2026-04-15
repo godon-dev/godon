@@ -267,20 +267,70 @@ jobs:
         run: |
           echo "Verifying greenhouse responded to optimization..."
 
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           KUBECONFIG=/tmp/kind_kubeconfig.yaml
+          BREEDER_UUID=$(cat /tmp/breeder_uuid)
 
-          METRICS=$(kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/metrics/json 2>/dev/null || echo "")
-          echo "Latest metrics: ${METRICS}" | head -10
+          echo "=== Optimization Results ==="
+          BREEDER_JSON=$(curl -s "${API_URL}/breeders/${BREEDER_UUID}" 2>/dev/null || echo "{}")
+          echo "${BREEDER_JSON}" | jq '.' 2>/dev/null || echo "${BREEDER_JSON}"
 
-          GROWTH_RATE=$(echo "${METRICS}" | jq -r '.growth_rate // "null"' 2>/dev/null || echo "null")
+          echo ""
+          echo "=== Greenhouse Final Metrics ==="
+          METRICS=$(kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/metrics/json 2>/dev/null || echo "{}")
+          echo "${METRICS}" | jq '.' 2>/dev/null || echo "${METRICS}"
 
-          if [ "${GROWTH_RATE}" = "null" ] || [ -z "${GROWTH_RATE}" ]; then
-            echo "Warning: Could not read growth_rate from greenhouse"
-          else
-            echo "Growth rate: ${GROWTH_RATE}"
+          echo ""
+          echo "=== Greenhouse Final Status ==="
+          kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/status 2>/dev/null | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "E2E greenhouse bench test passed"
+
+      - name: Diagnose Failure
+        if: failure()
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "=== Diagnostic Output ==="
+
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          BREEDER_UUID=$(cat /tmp/breeder_uuid 2>/dev/null || echo "")
+
+          if [ -n "${BREEDER_UUID}" ]; then
+            echo "--- Breeder Final State ---"
+            curl -s "${API_URL}/breeders/${BREEDER_UUID}" | jq '.' 2>/dev/null || true
           fi
 
-          echo "E2E greenhouse bench test passed"
+          echo ""
+          echo "--- Controller Logs (last 80 lines) ---"
+          CONTROLLER_POD=$(kubectl get pods -n godon -l component=controller -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          if [ -n "${CONTROLLER_POD}" ]; then
+            kubectl logs -n godon "${CONTROLLER_POD}" --tail=80 2>/dev/null || true
+          else
+            echo "Controller pod not found"
+          fi
+
+          echo ""
+          echo "--- Breeder/Worker Logs (last 80 lines) ---"
+          WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          if [ -z "${WORKER_POD}" ]; then
+            WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          fi
+          if [ -n "${WORKER_POD}" ]; then
+            kubectl logs -n godon "${WORKER_POD}" --tail=80 2>/dev/null || true
+          else
+            echo "No worker pod found. All pods:"
+            kubectl get pods -n godon -o wide 2>/dev/null || true
+          fi
+
+          echo ""
+          echo "--- Greenhouse Container Logs (last 30 lines) ---"
+          kubectl logs -n godon godon-bench-greenhouse --tail=30 2>/dev/null || true
+
+          echo ""
+          echo "--- All Pods ---"
+          kubectl get pods -n godon -o wide 2>/dev/null || true
 
       - name: Cleanup
         if: always()
