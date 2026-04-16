@@ -1,0 +1,7 @@
+name: "greenhouse-e2e"
+targetType: "http"
+spec:
+  url: "GREENHOUSE_URL"
+  auth_type: "none"
+metadata:
+  description: "E2E test greenhouse target"
