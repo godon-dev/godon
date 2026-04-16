@@ -96,6 +96,10 @@ jobs:
           echo "GREENHOUSE_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "GREENHOUSE_PORT=${GREENHOUSE_PORT}" >> $GITHUB_ENV
 
+          GREENHOUSE_INTERNAL_HOST=$(docker network inspect kind -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' 2>/dev/null || echo "172.17.0.1")
+          echo "GREENHOUSE_INTERNAL_HOST=${GREENHOUSE_INTERNAL_HOST}" >> $GITHUB_ENV
+          echo "Greenhouse internal host for K8s pods: ${GREENHOUSE_INTERNAL_HOST}"
+
       - name: Port Forward to Godon API
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
@@ -141,7 +145,7 @@ jobs:
           echo "Creating HTTP target for greenhouse..."
 
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          GREENHOUSE_URL="http://${{ env.GREENHOUSE_HOST }}:${{ env.GREENHOUSE_PORT }}"
+          GREENHOUSE_URL="http://${{ env.GREENHOUSE_INTERNAL_HOST }}:${{ env.GREENHOUSE_PORT }}"
 
           EXISTING_ID=$(curl -s ${API_URL}/targets | jq -r '.[] | select(.name=="greenhouse-e2e") | .id' 2>/dev/null || echo "")
           if [ -n "${EXISTING_ID}" ]; then
