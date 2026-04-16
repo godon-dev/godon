@@ -223,11 +223,16 @@ jobs:
           echo "${BREEDER_UUID}" > /tmp/breeder_uuid
 
       - name: Poll Optimization Progress
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           echo "Polling optimization progress..."
 
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           BREEDER_UUID=$(cat /tmp/breeder_uuid)
+
+          kubectl port-forward -n godon svc/windmill-app 8000:8000 &>/dev/null &
+          sleep 3
 
           MIN_TRIALS=${{ inputs.min_trials }}
           MAX_WAIT=$((${{ inputs.max_wait_minutes }} * 60))
@@ -239,8 +244,9 @@ jobs:
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             STATUS=$(curl -s "${API_URL}/breeders/${BREEDER_UUID}" 2>/dev/null || echo "")
 
-            TRIAL_COUNT=$(echo "${STATUS}" | jq -r '.trials_completed // .trialCount // 0' 2>/dev/null || echo "0")
             STATE=$(echo "${STATUS}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+
+            TRIAL_COUNT=$(kubectl exec -n godon deploy/godon-metrics-exporter -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null | grep 'godon_breeder_total_trials{' | grep -oP '\} \K[0-9]+' | head -1 || echo "0")
 
             echo "State: ${STATE}, Trials: ${TRIAL_COUNT}/${MIN_TRIALS} (${ELAPSED}s elapsed)"
 
