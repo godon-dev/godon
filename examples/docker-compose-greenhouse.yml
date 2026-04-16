@@ -1,0 +1,14 @@
+services:
+  greenhouse:
+    image: ghcr.io/godon-dev/godon-bench-greenhouse:latest
+    network_mode: host
+    environment:
+      - PORT=${PORT:-8090}
+      - GREENHOUSE_SCENARIO=${SCENARIO:-simple}
+      - GREENHOUSE_WEATHER=${WEATHER:-smooth}
+      - GREENHOUSE_SEED=${SEED:-42}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8090}/health"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
