@@ -246,7 +246,7 @@ jobs:
 
             STATE=$(echo "${STATUS}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
 
-            TRIAL_COUNT=$(kubectl exec -n godon deploy/godon-metrics-exporter -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null | grep 'godon_breeder_total_trials{' | grep -oP '\} \K[0-9]+' | head -1 || echo "0")
+            TRIAL_COUNT=$(kubectl exec -n godon deploy/godon-metrics-exporter -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null | grep 'godon_breeder_total_trials{' | grep -oP '\} \K[0-9]+' | sort -rn | head -1 || echo "0")
 
             echo "State: ${STATE}, Trials: ${TRIAL_COUNT}/${MIN_TRIALS} (${ELAPSED}s elapsed)"
 
