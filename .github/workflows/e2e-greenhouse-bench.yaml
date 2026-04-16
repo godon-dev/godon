@@ -303,22 +303,35 @@ jobs:
           fi
 
           echo ""
-          echo "--- Controller Logs (last 80 lines) ---"
+          echo "--- Loki: Controller Logs (last 5m) ---"
+          LOKI_URL="http://godon-observability-loki.godon-observability.svc.cluster.local:3100"
           CONTROLLER_POD=$(kubectl get pods -n godon -l component=controller -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
           if [ -n "${CONTROLLER_POD}" ]; then
-            kubectl logs -n godon "${CONTROLLER_POD}" --tail=80 2>/dev/null || true
+            kubectl exec -n godon "${CONTROLLER_POD}" -- curl -s "${LOKI_URL}/loki/api/v1/query_range" \
+              --data-urlencode 'query={component="controller"}' \
+              --data-urlencode "start=$(date -d '5 minutes ago' +%s)000000000" \
+              --data-urlencode "end=$(date +%s)000000000" \
+              --data-urlencode "limit=80" \
+              --data-urlencode "direction=backward" 2>/dev/null | jq -r '.data.result[].values[]?.[1]' 2>/dev/null || \
+              kubectl logs -n godon "${CONTROLLER_POD}" --tail=80 2>/dev/null || true
           else
             echo "Controller pod not found"
           fi
 
           echo ""
-          echo "--- Breeder/Worker Logs (last 80 lines) ---"
+          echo "--- Loki: Worker Logs (last 5m) ---"
           WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
           if [ -z "${WORKER_POD}" ]; then
             WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
           fi
           if [ -n "${WORKER_POD}" ]; then
-            kubectl logs -n godon "${WORKER_POD}" --tail=80 2>/dev/null || true
+            kubectl exec -n godon "${WORKER_POD}" -- curl -s "${LOKI_URL}/loki/api/v1/query_range" \
+              --data-urlencode 'query={component=~"breeder|windmill-worker"}' \
+              --data-urlencode "start=$(date -d '5 minutes ago' +%s)000000000" \
+              --data-urlencode "end=$(date +%s)000000000" \
+              --data-urlencode "limit=80" \
+              --data-urlencode "direction=backward" 2>/dev/null | jq -r '.data.result[].values[]?.[1]' 2>/dev/null || \
+              kubectl logs -n godon "${WORKER_POD}" --tail=80 2>/dev/null || true
           else
             echo "No worker pod found. All pods:"
             kubectl get pods -n godon -o wide 2>/dev/null || true
@@ -331,6 +344,8 @@ jobs:
           echo ""
           echo "--- All Pods ---"
           kubectl get pods -n godon -o wide 2>/dev/null || true
+          echo ""
+          kubectl get pods -n godon-observability -o wide 2>/dev/null || true
 
       - name: Cleanup
         if: always()
