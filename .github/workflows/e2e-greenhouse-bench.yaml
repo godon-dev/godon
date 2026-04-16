@@ -75,7 +75,7 @@ jobs:
           export SCENARIO="${{ inputs.greenhouse_scenario }}"
           export WEATHER="${{ inputs.greenhouse_weather }}"
 
-          docker compose -f examples/docker-compose-greenhouse.yml -p greenhouse-e2e up -d
+          docker compose -f .github/workflows/e2e/docker-compose-greenhouse.yml -p greenhouse-e2e up -d
 
           echo "Waiting for greenhouse to be healthy..."
           for i in $(seq 1 30); do
@@ -149,7 +149,7 @@ jobs:
             curl -s -X DELETE ${API_URL}/targets/${EXISTING_ID} >/dev/null 2>&1 || true
           fi
 
-          sed "s|GREENHOUSE_URL|${GREENHOUSE_URL}|" examples/greenhouse-target.yaml > greenhouse-target-e2e.yaml
+          sed "s|GREENHOUSE_URL|${GREENHOUSE_URL}|" .github/workflows/e2e/greenhouse-target.yaml > greenhouse-target-e2e.yaml
 
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
@@ -334,7 +334,7 @@ jobs:
 
           echo ""
           echo "--- Greenhouse Container Logs (last 30 lines) ---"
-          docker compose -f examples/docker-compose-greenhouse.yml -p greenhouse-e2e logs --tail=30 2>/dev/null || true
+          docker compose -f .github/workflows/e2e/docker-compose-greenhouse.yml -p greenhouse-e2e logs --tail=30 2>/dev/null || true
 
           echo ""
           echo "--- All Pods ---"
@@ -367,7 +367,7 @@ jobs:
           fi
 
           echo "Stopping greenhouse container..."
-          docker compose -f examples/docker-compose-greenhouse.yml -p greenhouse-e2e down -v 2>/dev/null || true
+          docker compose -f .github/workflows/e2e/docker-compose-greenhouse.yml -p greenhouse-e2e down -v 2>/dev/null || true
 
           if [ -f /tmp/pf_pid ]; then
             kill $(cat /tmp/pf_pid) 2>/dev/null || true
