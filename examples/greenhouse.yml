@@ -38,7 +38,7 @@ settings:
         - {step: 10, lower: 10, upper: 200}
 
 run:
-  parallel: 1
+  parallel: 2
 
   completion_criteria:
     iterations:
@@ -49,7 +49,7 @@ run:
     quality_achieved: true
 
 cooperation:
-  active: false
+  active: true
   share_strategy: "extremes"
   top_percentile: 0.2
   bottom_percentile: 0.2
