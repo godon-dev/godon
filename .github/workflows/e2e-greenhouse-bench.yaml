@@ -2,10 +2,27 @@ name: "E2E Greenhouse Bench"
 
 on:
   workflow_dispatch:
+    inputs:
+      min_trials:
+        description: "Minimum trials to complete for success"
+        required: false
+        default: "10"
+      max_wait_minutes:
+        description: "Max wait time in minutes"
+        required: false
+        default: "10"
+      greenhouse_scenario:
+        description: "Greenhouse scenario (simple, medium, complex)"
+        required: false
+        default: "simple"
+      greenhouse_weather:
+        description: "Weather mode (smooth, noisy, adversarial)"
+        required: false
+        default: "smooth"
 
 jobs:
   greenhouse_e2e:
-    name: Greenhouse Bench End-to-End Test
+    name: Greenhouse Bench E2E (${{ inputs.min_trials }} trials, ${{ inputs.greenhouse_scenario }}/${{ inputs.greenhouse_weather }})
     runs-on: [self-hosted, linux]
 
     steps:
@@ -48,51 +65,53 @@ jobs:
           API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
           echo "API Pod: ${API_POD}"
 
-      - name: Deploy Greenhouse Bench Container
-        env:
-          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+      - name: Start Greenhouse Bench Container
         run: |
-          echo "Deploying godon-bench-greenhouse into cluster..."
+          echo "Starting godon-bench-greenhouse via docker compose..."
 
-          cat <<'MANIFEST' | kubectl apply -f -
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: godon-bench-greenhouse
-            namespace: godon
-            labels:
-              app: godon-bench-greenhouse
-          spec:
-            containers:
-            - name: greenhouse
+          GREENHOUSE_PORT=18090
+
+          cat > /tmp/docker-compose-greenhouse.yml << 'COMPOSE'
+          services:
+            greenhouse:
               image: ghcr.io/godon-dev/godon-bench-greenhouse:latest
-              ports:
-              - containerPort: 8090
-              env:
-              - name: PORT
-                value: "8090"
-              - name: GREENHOUSE_SCENARIO
-                value: "simple"
-              - name: GREENHOUSE_WEATHER
-                value: "smooth"
-              - name: GREENHOUSE_SEED
-                value: "42"
-              readinessProbe:
-                httpGet:
-                  path: /health
-                  port: 8090
-                initialDelaySeconds: 3
-                periodSeconds: 3
-            restartPolicy: Never
-          MANIFEST
+              network_mode: host
+              environment:
+                - PORT=${PORT}
+                - GREENHOUSE_SCENARIO=${SCENARIO}
+                - GREENHOUSE_WEATHER=${WEATHER}
+                - GREENHOUSE_SEED=42
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
+                interval: 3s
+                timeout: 2s
+                retries: 10
+          COMPOSE
 
-          echo "Waiting for greenhouse pod to be ready..."
-          kubectl wait --for=condition=ready pod/godon-bench-greenhouse -n godon --timeout=120s
+          export PORT=${GREENHOUSE_PORT}
+          export SCENARIO="${{ inputs.greenhouse_scenario }}"
+          export WEATHER="${{ inputs.greenhouse_weather }}"
 
-          echo "Verifying greenhouse health..."
-          kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/health
+          docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e up -d
 
-          echo "Greenhouse bench container ready"
+          echo "Waiting for greenhouse to be healthy..."
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.1:${GREENHOUSE_PORT}/health >/dev/null 2>&1; then
+              echo "Greenhouse is healthy"
+              break
+            fi
+            echo "Attempt $i/30 - waiting for greenhouse..."
+            sleep 2
+          done
+
+          curl -s http://127.0.0.1:${GREENHOUSE_PORT}/health | jq '.' || {
+            echo "Greenhouse failed to start"
+            docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e logs
+            exit 1
+          }
+
+          echo "GREENHOUSE_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "GREENHOUSE_PORT=${GREENHOUSE_PORT}" >> $GITHUB_ENV
 
       - name: Port Forward to Godon API
         env:
@@ -139,6 +158,7 @@ jobs:
           echo "Creating HTTP target for greenhouse..."
 
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          GREENHOUSE_URL="http://${{ env.GREENHOUSE_HOST }}:${{ env.GREENHOUSE_PORT }}"
 
           EXISTING_ID=$(curl -s ${API_URL}/targets | jq -r '.[] | select(.name=="greenhouse-e2e") | .id' 2>/dev/null || echo "")
           if [ -n "${EXISTING_ID}" ]; then
@@ -146,11 +166,11 @@ jobs:
             curl -s -X DELETE ${API_URL}/targets/${EXISTING_ID} >/dev/null 2>&1 || true
           fi
 
-          cat > greenhouse-target.yaml << 'EOF'
+          cat > greenhouse-target.yaml << EOF
           name: "greenhouse-e2e"
           targetType: "http"
           spec:
-            url: "http://godon-bench-greenhouse.godon.svc.cluster.local:8090"
+            url: "${GREENHOUSE_URL}"
             auth_type: "none"
           metadata:
             description: "E2E test greenhouse target"
@@ -226,19 +246,20 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           BREEDER_UUID=$(cat /tmp/breeder_uuid)
 
-          MIN_TRIALS=3
-          MAX_WAIT=300
+          MIN_TRIALS=${{ inputs.min_trials }}
+          MAX_WAIT=$((${{ inputs.max_wait_minutes }} * 60))
           POLL_INTERVAL=10
           ELAPSED=0
 
+          echo "Waiting for ${MIN_TRIALS} trials (timeout: ${MAX_WAIT}s)"
+
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             STATUS=$(curl -s "${API_URL}/breeders/${BREEDER_UUID}" 2>/dev/null || echo "")
-            echo "Breeder status: ${STATUS}" | head -5
 
             TRIAL_COUNT=$(echo "${STATUS}" | jq -r '.trials_completed // .trialCount // 0' 2>/dev/null || echo "0")
             STATE=$(echo "${STATUS}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
 
-            echo "State: ${STATE}, Trials: ${TRIAL_COUNT} (${ELAPSED}s elapsed)"
+            echo "State: ${STATE}, Trials: ${TRIAL_COUNT}/${MIN_TRIALS} (${ELAPSED}s elapsed)"
 
             if [ "${STATE}" = "failed" ] || [ "${STATE}" = "error" ]; then
               echo "Breeder entered error state"
@@ -246,7 +267,7 @@ jobs:
             fi
 
             if [ "${TRIAL_COUNT}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
-              echo "Sufficient trials completed: ${TRIAL_COUNT}"
+              echo "Trial target reached: ${TRIAL_COUNT}/${MIN_TRIALS}"
               break
             fi
 
@@ -255,7 +276,7 @@ jobs:
           done
 
           if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "Timed out waiting for trials (waited ${MAX_WAIT}s)"
+            echo "Timed out waiting for ${MIN_TRIALS} trials (waited ${MAX_WAIT}s)"
             echo "Final breeder status:"
             curl -s "${API_URL}/breeders/${BREEDER_UUID}" | jq . || true
             exit 1
@@ -265,24 +286,23 @@ jobs:
 
       - name: Verify Greenhouse Metrics
         run: |
-          echo "Verifying greenhouse responded to optimization..."
+          echo "Verifying optimization results..."
 
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          KUBECONFIG=/tmp/kind_kubeconfig.yaml
           BREEDER_UUID=$(cat /tmp/breeder_uuid)
 
-          echo "=== Optimization Results ==="
+          echo "=== Breeder Final State ==="
           BREEDER_JSON=$(curl -s "${API_URL}/breeders/${BREEDER_UUID}" 2>/dev/null || echo "{}")
           echo "${BREEDER_JSON}" | jq '.' 2>/dev/null || echo "${BREEDER_JSON}"
 
           echo ""
           echo "=== Greenhouse Final Metrics ==="
-          METRICS=$(kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/metrics/json 2>/dev/null || echo "{}")
+          METRICS=$(curl -s http://${{ env.GREENHOUSE_HOST }}:${{ env.GREENHOUSE_PORT }}/metrics/json 2>/dev/null || echo "{}")
           echo "${METRICS}" | jq '.' 2>/dev/null || echo "${METRICS}"
 
           echo ""
           echo "=== Greenhouse Final Status ==="
-          kubectl exec -n godon godon-bench-greenhouse -- curl -s http://localhost:8090/status 2>/dev/null | jq '.' 2>/dev/null || true
+          curl -s http://${{ env.GREENHOUSE_HOST }}:${{ env.GREENHOUSE_PORT }}/status 2>/dev/null | jq '.' 2>/dev/null || true
 
           echo ""
           echo "E2E greenhouse bench test passed"
@@ -339,7 +359,7 @@ jobs:
 
           echo ""
           echo "--- Greenhouse Container Logs (last 30 lines) ---"
-          kubectl logs -n godon godon-bench-greenhouse --tail=30 2>/dev/null || true
+          docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e logs --tail=30 2>/dev/null || true
 
           echo ""
           echo "--- All Pods ---"
@@ -349,8 +369,6 @@ jobs:
 
       - name: Cleanup
         if: always()
-        env:
-          KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           echo "Cleaning up..."
 
@@ -373,8 +391,8 @@ jobs:
               target delete --id="${TARGET_ID}" 2>/dev/null || true
           fi
 
-          echo "Removing greenhouse pod..."
-          kubectl delete pod godon-bench-greenhouse -n godon --force --grace-period=0 2>/dev/null || true
+          echo "Stopping greenhouse container..."
+          docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e down -v 2>/dev/null || true
 
           if [ -f /tmp/pf_pid ]; then
             kill $(cat /tmp/pf_pid) 2>/dev/null || true
@@ -389,21 +407,22 @@ jobs:
           echo "E2E Greenhouse Bench Summary"
           echo "============================="
           echo ""
-          echo "Pre-checks:"
+          echo "Parameters:"
+          echo "  Scenario: ${{ inputs.greenhouse_scenario }}"
+          echo "  Weather: ${{ inputs.greenhouse_weather }}"
+          echo "  Min trials: ${{ inputs.min_trials }}"
+          echo "  Max wait: ${{ inputs.max_wait_minutes }}m"
+          echo ""
+          echo "Stack:"
           echo "  KIND cluster verified"
           echo "  Godon stack verified"
-          echo "  godon-api ready"
+          echo "  Greenhouse via docker compose (host network)"
           echo ""
-          echo "Deployment:"
-          echo "  godon-bench-greenhouse pod deployed"
+          echo "Flow:"
           echo "  HTTP target created (spec JSONB)"
-          echo "  Breeder created with greenhouse config"
-          echo ""
-          echo "Optimization:"
-          echo "  bench_greenhouse strain"
-          echo "  HTTP reconnaissance (GET /metrics/json)"
-          echo "  HTTP effectuation (POST /apply)"
+          echo "  Breeder created with bench_greenhouse strain"
+          echo "  HTTP effectuation -> POST /apply"
+          echo "  HTTP reconnaissance -> GET /metrics/json"
           echo "  Polled for trial completion"
-          echo "  Verified greenhouse metrics"
           echo ""
           echo "  Status: ${{ job.status }}"
