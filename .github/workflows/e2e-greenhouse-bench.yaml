@@ -71,28 +71,11 @@ jobs:
 
           GREENHOUSE_PORT=18090
 
-          cat > /tmp/docker-compose-greenhouse.yml << 'COMPOSE'
-          services:
-            greenhouse:
-              image: ghcr.io/godon-dev/godon-bench-greenhouse:latest
-              network_mode: host
-              environment:
-                - PORT=${PORT}
-                - GREENHOUSE_SCENARIO=${SCENARIO}
-                - GREENHOUSE_WEATHER=${WEATHER}
-                - GREENHOUSE_SEED=42
-              healthcheck:
-                test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
-                interval: 3s
-                timeout: 2s
-                retries: 10
-          COMPOSE
-
           export PORT=${GREENHOUSE_PORT}
           export SCENARIO="${{ inputs.greenhouse_scenario }}"
           export WEATHER="${{ inputs.greenhouse_weather }}"
 
-          docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e up -d
+          docker compose -f examples/docker-compose-greenhouse.yml -p greenhouse-e2e up -d
 
           echo "Waiting for greenhouse to be healthy..."
           for i in $(seq 1 30); do
@@ -166,15 +149,7 @@ jobs:
             curl -s -X DELETE ${API_URL}/targets/${EXISTING_ID} >/dev/null 2>&1 || true
           fi
 
-          cat > greenhouse-target.yaml << EOF
-          name: "greenhouse-e2e"
-          targetType: "http"
-          spec:
-            url: "${GREENHOUSE_URL}"
-            auth_type: "none"
-          metadata:
-            description: "E2E test greenhouse target"
-          EOF
+          sed "s|GREENHOUSE_URL|${GREENHOUSE_URL}|" examples/greenhouse-target.yaml > greenhouse-target-e2e.yaml
 
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
@@ -182,7 +157,7 @@ jobs:
             -v $(pwd):/work:ro \
             -w /work \
             "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-            target create --file=greenhouse-target.yaml 2>&1 || true)
+            target create --file=greenhouse-target-e2e.yaml 2>&1 || true)
 
           echo "${CREATE_OUTPUT}"
 
@@ -359,7 +334,7 @@ jobs:
 
           echo ""
           echo "--- Greenhouse Container Logs (last 30 lines) ---"
-          docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e logs --tail=30 2>/dev/null || true
+          docker compose -f examples/docker-compose-greenhouse.yml -p greenhouse-e2e logs --tail=30 2>/dev/null || true
 
           echo ""
           echo "--- All Pods ---"
@@ -392,7 +367,7 @@ jobs:
           fi
 
           echo "Stopping greenhouse container..."
-          docker compose -f /tmp/docker-compose-greenhouse.yml -p greenhouse-e2e down -v 2>/dev/null || true
+          docker compose -f examples/docker-compose-greenhouse.yml -p greenhouse-e2e down -v 2>/dev/null || true
 
           if [ -f /tmp/pf_pid ]; then
             kill $(cat /tmp/pf_pid) 2>/dev/null || true
