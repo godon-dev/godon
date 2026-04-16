@@ -191,7 +191,7 @@ jobs:
             sleep 2
           fi
 
-          sed "s/PLACEHOLDER_TARGET_ID/${TARGET_ID}/" examples/greenhouse.yml > greenhouse-e2e-config.yaml
+          sed "s/\"greenhouse\"/\"${TARGET_ID}\"/" examples/greenhouse.yml > greenhouse-e2e-config.yaml
           chmod 644 greenhouse-e2e-config.yaml
 
           CREATE_OUTPUT=$(docker run --rm --network host \
