@@ -150,6 +150,7 @@ jobs:
           fi
 
           sed "s|GREENHOUSE_URL|${GREENHOUSE_URL}|" .github/workflows/e2e/greenhouse-target.yaml > greenhouse-target-e2e.yaml
+          chmod 644 greenhouse-target-e2e.yaml
 
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
