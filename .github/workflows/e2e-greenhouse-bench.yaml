@@ -96,7 +96,7 @@ jobs:
           echo "GREENHOUSE_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "GREENHOUSE_PORT=${GREENHOUSE_PORT}" >> $GITHUB_ENV
 
-          GREENHOUSE_INTERNAL_HOST=$(docker network inspect kind -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' 2>/dev/null || echo "172.17.0.1")
+          GREENHOUSE_INTERNAL_HOST=$(docker network inspect kind --format '{{json .IPAM.Config}}' 2>/dev/null | python3 -c "import sys,json; configs=json.load(sys.stdin); print(configs[0]['Gateway'])" 2>/dev/null || echo "172.17.0.1")
           echo "GREENHOUSE_INTERNAL_HOST=${GREENHOUSE_INTERNAL_HOST}" >> $GITHUB_ENV
           echo "Greenhouse internal host for K8s pods: ${GREENHOUSE_INTERNAL_HOST}"
 
