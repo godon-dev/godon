@@ -109,25 +109,22 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          GH1_URL="http://${{ env.GH1_IP }}:8090"
+          GH2_URL="http://${{ env.GH2_IP }}:8090"
 
           create_target() {
             local NAME=$1
             local URL=$2
-            local FILE=$3
+            local TEMPLATE=$3
+            local FILE=$4
 
             EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             if [ -n "${EXISTING}" ]; then
               curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
             fi
 
-            cat > ${FILE} <<EOF
-          name: "${NAME}"
-          targetType: "http"
-          spec:
-            url: "${URL}"
-            auth_type: "none"
-          EOF
-            sed -i 's/^          //' ${FILE}
+            sed -e "s/GH1_TARGET\|GH2_TARGET/${NAME}/" -e "s|GH1_URL\|GH2_URL|${URL}|" \
+              ${TEMPLATE} > ${FILE}
 
             CREATE_OUTPUT=$(docker run --rm --network host \
               -v $(pwd):/work:ro -w /work \
@@ -147,8 +144,8 @@ jobs:
             echo "${ID}"
           }
 
-          TARGET_1_ID=$(create_target "bench-s2-gh1" "http://${{ env.GH1_IP }}:8090" "target-gh1.yaml")
-          TARGET_2_ID=$(create_target "bench-s2-gh2" "http://${{ env.GH2_IP }}:8090" "target-gh2.yaml")
+          TARGET_1_ID=$(create_target "bench-s2-gh1" "${GH1_URL}" examples/bench/scenario-2/targets/greenhouse-1.yaml target-gh1.yaml)
+          TARGET_2_ID=$(create_target "bench-s2-gh2" "${GH2_URL}" examples/bench/scenario-2/targets/greenhouse-2.yaml target-gh2.yaml)
 
           echo "${TARGET_1_ID}" > /tmp/target_1_id
           echo "${TARGET_2_ID}" > /tmp/target_2_id
