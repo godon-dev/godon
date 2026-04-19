@@ -189,7 +189,7 @@ jobs:
             if [ -n "${EXISTING}" ]; then
               echo "Deleting existing breeder: ${EXISTING}" >&2
               curl -s -X DELETE "${API_URL}/breeders/${EXISTING}?force=true" >/dev/null 2>&1 || true
-              sleep 2
+              sleep 5
             fi
 
             sed -e "s/\"greenhouse-1\"/\"${TARGET_ID}\"/" \
@@ -199,19 +199,28 @@ jobs:
                 ${SRC} > ${DST}
             chmod 644 ${DST}
 
-            echo "Creating breeder ${NAME}..." >&2
-            CREATE_OUTPUT=$(docker run --rm --network host \
-              -v $(pwd):/work -w /work \
-              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
-            echo "${CREATE_OUTPUT}" >&2
+            local UUID=""
+            for ATTEMPT in 1 2 3 4 5; do
+              echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
+              CREATE_OUTPUT=$(docker run --rm --network host \
+                -v $(pwd):/work -w /work \
+                "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
+              echo "${CREATE_OUTPUT}" >&2
 
-            local UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              if [ -z "${UUID}" ]; then
+                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+              fi
+              if [ -n "${UUID}" ]; then
+                break
+              fi
+              echo "Attempt ${ATTEMPT} failed, retrying in 10s..." >&2
+              sleep 10
+            done
+
             if [ -z "${UUID}" ]; then
-              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
-            fi
-            if [ -z "${UUID}" ]; then
-              echo "Failed to create breeder ${NAME}" >&2
+              echo "Failed to create breeder ${NAME} after 5 attempts" >&2
               exit 1
             fi
             echo "Breeder ${NAME}: ${UUID}" >&2

@@ -163,7 +163,7 @@ jobs:
           if [ -n "${EXISTING}" ]; then
             echo "Deleting existing breeder: ${EXISTING}" >&2
             curl -s -X DELETE "${API_URL}/breeders/${EXISTING}?force=true" >/dev/null 2>&1 || true
-            sleep 2
+            sleep 5
           fi
 
           sed -e "s/\"greenhouse-1\"/\"${TARGET_1_ID}\"/" \
@@ -171,19 +171,28 @@ jobs:
               examples/bench/scenario-1/breeders/breeder.yml > breeder-s1-config.yaml
           chmod 644 breeder-s1-config.yaml
 
-          echo "Creating breeder bench-s1..." >&2
-          CREATE_OUTPUT=$(docker run --rm --network host \
-            -v $(pwd):/work -w /work \
-            "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-            breeder create --name="bench-s1" --file=breeder-s1-config.yaml 2>&1 || true)
-          echo "${CREATE_OUTPUT}" >&2
+          BREEDER_1_UUID=""
+          for ATTEMPT in 1 2 3 4 5; do
+            echo "Creating breeder bench-s1 (attempt ${ATTEMPT})..." >&2
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              breeder create --name="bench-s1" --file=breeder-s1-config.yaml 2>&1 || true)
+            echo "${CREATE_OUTPUT}" >&2
 
-          BREEDER_1_UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            BREEDER_1_UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${BREEDER_1_UUID}" ]; then
+              BREEDER_1_UUID=$(curl -s ${API_URL}/breeders | jq -r '.[] | select(.name=="bench-s1") | .id' 2>/dev/null || echo "")
+            fi
+            if [ -n "${BREEDER_1_UUID}" ]; then
+              break
+            fi
+            echo "Attempt ${ATTEMPT} failed, retrying in 10s..." >&2
+            sleep 10
+          done
+
           if [ -z "${BREEDER_1_UUID}" ]; then
-            BREEDER_1_UUID=$(curl -s ${API_URL}/breeders | jq -r '.[] | select(.name=="bench-s1") | .id' 2>/dev/null || echo "")
-          fi
-          if [ -z "${BREEDER_1_UUID}" ]; then
-            echo "Failed to create breeder" >&2
+            echo "Failed to create breeder bench-s1 after 5 attempts" >&2
             exit 1
           fi
           echo "Breeder: ${BREEDER_1_UUID}" >&2
