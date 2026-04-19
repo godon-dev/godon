@@ -122,38 +122,38 @@ jobs:
             local URL=$2
             local TEMPLATE=$3
             local FILE=$4
+            local OUTFILE=$5
 
             EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing target: ${EXISTING}" >&2
               curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
             fi
 
             sed -e "s/GH1_TARGET\|GH2_TARGET/${NAME}/" -e "s|GH1_URL\|GH2_URL|${URL}|" \
               ${TEMPLATE} > ${FILE}
 
+            echo "Creating target ${NAME} from ${TEMPLATE}..." >&2
             CREATE_OUTPUT=$(docker run --rm --network host \
               -v $(pwd):/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               target create --file=${FILE} 2>&1 || true)
+            echo "${CREATE_OUTPUT}" >&2
 
             local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
             if [ -z "${ID}" ]; then
               ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             fi
             if [ -z "${ID}" ]; then
-              echo "Failed to create target ${NAME}"
-              echo "${CREATE_OUTPUT}"
+              echo "Failed to create target ${NAME}" >&2
               exit 1
             fi
-            echo "${NAME}: ${ID}"
-            echo "${ID}"
+            echo "Target ${NAME}: ${ID}" >&2
+            echo "${ID}" > "${OUTFILE}"
           }
 
-          TARGET_1_ID=$(create_target "bench-s4-gh1" "${GH1_URL}" examples/bench/scenario-4/targets/greenhouse-1.yaml target-gh1.yaml)
-          TARGET_2_ID=$(create_target "bench-s4-gh2" "${GH2_URL}" examples/bench/scenario-4/targets/greenhouse-2.yaml target-gh2.yaml)
-
-          echo "${TARGET_1_ID}" > /tmp/target_1_id
-          echo "${TARGET_2_ID}" > /tmp/target_2_id
+          create_target "bench-s4-gh1" "${GH1_URL}" examples/bench/scenario-4/targets/greenhouse-1.yaml target-gh1.yaml /tmp/target_1_id
+          create_target "bench-s4-gh2" "${GH2_URL}" examples/bench/scenario-4/targets/greenhouse-2.yaml target-gh2.yaml /tmp/target_2_id
 
       - name: Create Breeders
         run: |
@@ -170,9 +170,11 @@ jobs:
             local RECON_URL=$3
             local SRC=$4
             local DST=$5
+            local OUTFILE=$6
 
             EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing breeder: ${EXISTING}" >&2
               curl -s -X DELETE "${API_URL}/breeders/${EXISTING}?force=true" >/dev/null 2>&1 || true
               sleep 2
             fi
@@ -183,31 +185,29 @@ jobs:
                 -e "s|http://greenhouse-2:8090|${RECON_URL}|" \
                 ${SRC} > ${DST}
 
+            echo "Creating breeder ${NAME}..." >&2
             CREATE_OUTPUT=$(docker run --rm --network host \
               -v $(pwd):/work -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
+            echo "${CREATE_OUTPUT}" >&2
 
             local UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
             if [ -z "${UUID}" ]; then
               UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             fi
             if [ -z "${UUID}" ]; then
-              echo "Failed to create breeder ${NAME}"
-              echo "${CREATE_OUTPUT}"
+              echo "Failed to create breeder ${NAME}" >&2
               exit 1
             fi
-            echo "${NAME}: ${UUID}"
-            echo "${UUID}"
+            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "${UUID}" > "${OUTFILE}"
           }
 
-          BREEDER_1_UUID=$(create_breeder "bench-s4-1" "${TARGET_1_ID}" "${GH1_URL}" \
-            examples/bench/scenario-4/breeders/breeder-1.yml breeder-s4-1-config.yaml)
-          BREEDER_2_UUID=$(create_breeder "bench-s4-2" "${TARGET_2_ID}" "${GH2_URL}" \
-            examples/bench/scenario-4/breeders/breeder-2.yml breeder-s4-2-config.yaml)
-
-          echo "${BREEDER_1_UUID}" > /tmp/breeder_1_uuid
-          echo "${BREEDER_2_UUID}" > /tmp/breeder_2_uuid
+          create_breeder "bench-s4-1" "${TARGET_1_ID}" "${GH1_URL}" \
+            examples/bench/scenario-4/breeders/breeder-1.yml breeder-s4-1-config.yaml /tmp/breeder_1_uuid
+          create_breeder "bench-s4-2" "${TARGET_2_ID}" "${GH2_URL}" \
+            examples/bench/scenario-4/breeders/breeder-2.yml breeder-s4-2-config.yaml /tmp/breeder_2_uuid
 
       - name: Poll Optimization Progress
         env:
