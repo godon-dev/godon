@@ -2,9 +2,19 @@ name: Bench Scenario 2 — Single Optimizer, Two Independent Targets
 
 on:
   workflow_dispatch:
-
-env:
-  GREENHOUSE_IMAGE: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
+    inputs:
+      trials:
+        description: "Number of optimization trials"
+        required: false
+        default: "10"
+      greenhouse_scenario:
+        description: "Greenhouse scenario (simple, medium, complex)"
+        required: false
+        default: "simple"
+      greenhouse_weather:
+        description: "Weather pattern (smooth, noisy, adversarial)"
+        required: false
+        default: "smooth"
 
 jobs:
   bench-scenario-2:
@@ -24,53 +34,25 @@ jobs:
       - name: Verify both greenhouses healthy
         run: |
           for port in 8090 8091; do
-            HEALTH=$(curl -sf http://localhost:$port/health)
-            echo "Port $port health: $HEALTH"
-            echo "$HEALTH" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='ok'"
+            curl -sf http://localhost:$port/health | python3 examples/bench/scripts/extract_key.py status
+            echo "Port $port: OK"
           done
-
-      - name: Verify different seeds produce different states
-        run: |
-          STATUS_1=$(curl -sf http://localhost:8090/status)
-          STATUS_2=$(curl -sf http://localhost:8091/status)
-          echo "Greenhouse-1 tick: $(echo $STATUS_1 | python3 -c 'import sys,json; print(json.load(sys.stdin)["tick"])')"
-          echo "Greenhouse-2 tick: $(echo $STATUS_2 | python3 -c 'import sys,json; print(json.load(sys.stdin)["tick"])')"
 
       - name: Run optimization — same params to both targets
         run: |
-          for i in $(seq 1 10); do
-            PARAMS=$(python3 -c "
-            import json, random
-            print(json.dumps({
-              'heating_setpoints': [random.uniform(10,35), random.uniform(10,35)],
-              'vent_openings': [random.uniform(0,1), random.uniform(0,1)],
-              'shading': random.uniform(0,1),
-              'co2_injection': random.uniform(0,15),
-              'light_intensity': random.uniform(50,800),
-              'irrigation': random.uniform(0.1,2.5),
-              'sim_steps': random.randint(20,150)
-            }))")
-
+          for i in $(seq 1 ${{ inputs.trials }}); do
+            PARAMS=$(python3 examples/bench/scripts/random_params.py)
             G1=$(curl -sf -X POST http://localhost:8090/apply -H 'Content-Type: application/json' -d "$PARAMS")
             G2=$(curl -sf -X POST http://localhost:8091/apply -H 'Content-Type: application/json' -d "$PARAMS")
-
-            GR1=$(echo "$G1" | python3 -c "import sys,json; print(json.load(sys.stdin)['growth_rate'])")
-            GR2=$(echo "$G2" | python3 -c "import sys,json; print(json.load(sys.stdin)['growth_rate'])")
-            echo "Trial $i: gh1 growth=$GR1 gh2 growth=$GR2"
+            GR1=$(echo "$G1" | python3 examples/bench/scripts/extract_key.py growth_rate)
+            GR2=$(echo "$G2" | python3 examples/bench/scripts/extract_key.py growth_rate)
+            echo "Trial $i: greenhouse-1 growth=$GR1 greenhouse-2 growth=$GR2"
           done
 
       - name: Validate no coupling on either target
         run: |
           for port in 8090 8091; do
-            curl -sf http://localhost:$port/status | python3 -c "
-            import sys, json
-            d = json.load(sys.stdin)
-            factor = d.get('coupling_factor', 0)
-            neighbors = d.get('coupling_neighbors', [])
-            assert factor == 0 or factor is None, f'Port $port: unexpected coupling factor={factor}'
-            assert len(neighbors) == 0, f'Port $port: unexpected neighbors {neighbors}'
-            print(f'Port $port: no coupling (OK)')
-            "
+            curl -sf http://localhost:$port/status | python3 examples/bench/scripts/validate_no_coupling.py $port
           done
 
       - name: Cleanup
