@@ -47,12 +47,7 @@ run:
     quality_achieved: true
 
 cooperation:
-  active: true
-  share_strategy: "extremes"
-  top_percentile: 0.2
-  bottom_percentile: 0.2
-  min_trials_for_filtering: 10
-  probability: 0.8
+  active: false
 
 reconnaissance:
   type: http
