@@ -1,3 +1,33 @@
+# Scenario 4: Hidden Coupling — Two Independent Optimizers, Two Coupled Targets
+#
+# Two breeders, each optimizing its own greenhouse. The breeders are completely
+# independent — no shared trials, no communication. But the greenhouses are
+# PHYSICALLY COUPLED via 4 hidden channels:
+#
+#   1. Waste heat:    neighbor avg temp nudges outside_temp
+#   2. CO2 exhaust:   neighbor energy usage nudges outside_co2
+#   3. Power sag:     neighbor energy usage reduces effective light
+#   4. Humidity drift: neighbor avg humidity nudges outside_humidity
+#
+# Layout:
+#   [Breeder-1] --effectuate/recon--> [greenhouse-1] <~~coupling~~> [greenhouse-2] <--effectuate/recon-- [Breeder-2]
+#
+# COUPLING_FACTOR=0.1 means moderate coupling. Each greenhouse fetches its
+# neighbor's /status on every /apply call and adjusts its own environmental
+# conditions accordingly. Neither breeder knows this is happening.
+#
+# This is the EXPERIMENTAL condition. The coupling is real but invisible to
+# the optimizers. Post-hoc analysis of combined trial traces should reveal
+# Granger-causal relationships that are absent in scenario 3.
+#
+# Key comparison: Scenario 3 (no coupling) vs Scenario 4 (coupling).
+# Everything else is identical — same breeder configs, same objectives,
+# same search space. The only difference is COUPLING_NEIGHBORS/COUPLING_FACTOR.
+#
+# Run:
+#   docker compose up -d
+#   # Then submit breeder-1.yml and breeder-2.yml to godon-api as separate breeders
+#
 services:
   greenhouse-1:
     image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0

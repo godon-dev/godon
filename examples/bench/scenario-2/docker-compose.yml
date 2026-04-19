@@ -1,3 +1,26 @@
+# Scenario 2: Multi-Target — Single Optimizer, Two Independent Targets
+#
+# One breeder applying the same parameters to two independent greenhouses
+# simultaneously. Tests multi-target optimization within a single study.
+#
+# Layout:
+#   [Breeder] --effectuate--> [greenhouse-1], [greenhouse-2]
+#   [Breeder] --recon-------> [greenhouse-1]  (reads metrics from one)
+#
+# Both greenhouses have the same scenario config but different seeds,
+# producing different internal states and responses to identical parameters.
+#
+# Key question: Can a single optimizer find params that work well across
+# two different greenhouse instances? Or does it overfit to one?
+#
+# Note: Reconnaissance currently reads from greenhouse-1 only. The effectuator
+# applies params to both targets. This means the optimizer sees metrics from
+# greenhouse-1 but its actions affect both.
+#
+# Run:
+#   docker compose up -d
+#   # Then submit breeder.yml to godon-api
+#
 services:
   greenhouse-1:
     image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
