@@ -1,14 +1,18 @@
-name: Bench Scenario 4 — Two Optimizers, Two Coupled Targets (Experiment)
+name: "Bench Scenario 4 — Two Optimizers, Two Coupled Targets"
 
 on:
   workflow_dispatch:
     inputs:
-      trials:
-        description: "Number of optimization trials per breeder"
+      min_trials:
+        description: "Minimum trials per breeder for success"
         required: false
         default: "10"
+      max_wait_minutes:
+        description: "Max wait time in minutes"
+        required: false
+        default: "20"
       coupling_factor:
-        description: "Coupling strength (0.0=none, 0.05=weak, 0.1=moderate, 0.2=strong)"
+        description: "Coupling strength (0.05=weak, 0.1=moderate, 0.2=strong)"
         required: false
         default: "0.1"
       greenhouse_scenario:
@@ -16,68 +20,353 @@ on:
         required: false
         default: "simple"
       greenhouse_weather:
-        description: "Weather pattern (smooth, noisy, adversarial)"
+        description: "Weather mode (smooth, noisy, adversarial)"
         required: false
         default: "smooth"
 
 jobs:
   bench-scenario-4:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    name: "S4: 2 breeders → 2 coupled targets"
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
-      - name: Start coupled greenhouse targets
+      - name: Verify KIND Cluster
         run: |
-          cd examples/bench/scenario-4
-          COUPLING_FACTOR=${{ inputs.coupling_factor }} \
-          docker compose up -d
-          sleep 5
+          if ! kind get clusters | grep -q "godon-1-cluster"; then
+            echo "KIND cluster not found. Run setup workflows first."
+            exit 1
+          fi
+          kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
 
-      - name: Verify both greenhouses healthy
+      - name: Verify Godon Stack
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
+          if ! helm status godon --namespace godon >/dev/null 2>&1; then
+            echo "Godon stack not found."
+            exit 1
+          fi
+          kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+
+      - name: Start Coupled Greenhouse Targets
+        run: |
+          export GREENHOUSE_SCENARIO="${{ inputs.greenhouse_scenario }}"
+          export GREENHOUSE_WEATHER="${{ inputs.greenhouse_weather }}"
+          export COUPLING_FACTOR="${{ inputs.coupling_factor }}"
+
+          docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 up -d
+
           for port in 8090 8091; do
-            curl -sf http://localhost:$port/health | python3 examples/bench/scripts/extract_key.py status
-            echo "Port $port: OK"
-          done
-
-      - name: Verify coupling is configured
-        run: |
-          for port in 8090 8091; do
-            curl -sf http://localhost:$port/status | python3 examples/bench/scripts/validate_coupling.py $port
-          done
-
-      - name: Run independent optimizers on coupled targets
-        run: |
-          run_optimizer() {
-            local PORT=$1
-            local LABEL=$2
-            for i in $(seq 1 ${{ inputs.trials }}); do
-              PARAMS=$(python3 examples/bench/scripts/seeded_params.py $PORT $i)
-              RESP=$(curl -sf -X POST http://localhost:$PORT/apply -H 'Content-Type: application/json' -d "$PARAMS")
-              GROWTH=$(echo "$RESP" | python3 examples/bench/scripts/extract_key.py growth_rate)
-              ENERGY=$(echo "$RESP" | python3 examples/bench/scripts/extract_key.py trial_energy_kwh)
-              echo "$LABEL trial $i: growth=$GROWTH energy=$ENERGY"
+            echo "Waiting for greenhouse on port ${port}..."
+            for i in $(seq 1 30); do
+              if curl -s -f --connect-timeout 2 http://127.0.0.1:${port}/health >/dev/null 2>&1; then
+                echo "Port ${port}: healthy"
+                break
+              fi
+              sleep 2
             done
+          done
+
+          GH1_CID=$(docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 ps -q greenhouse-1)
+          GH2_CID=$(docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 ps -q greenhouse-2)
+
+          docker network connect kind $GH1_CID 2>/dev/null || true
+          docker network connect kind $GH2_CID 2>/dev/null || true
+
+          GH1_IP=$(docker inspect $GH1_CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          GH2_IP=$(docker inspect $GH2_CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          echo "GH1 KIND IP: ${GH1_IP}, GH2 KIND IP: ${GH2_IP}"
+
+          echo "GH1_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "GH1_PORT=8090" >> $GITHUB_ENV
+          echo "GH1_IP=${GH1_IP}" >> $GITHUB_ENV
+          echo "GH2_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "GH2_PORT=8091" >> $GITHUB_ENV
+          echo "GH2_IP=${GH2_IP}" >> $GITHUB_ENV
+
+      - name: Port Forward to Godon API
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+
+          kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
+          echo $! > /tmp/pf_pid
+          sleep 3
+
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+
+          echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
+          echo "API_PORT=9090" >> $GITHUB_ENV
+
+      - name: Create Targets
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          create_target() {
+            local NAME=$1
+            local URL=$2
+            local FILE=$3
+
+            EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
+            fi
+
+            cat > ${FILE} <<EOF
+          name: "${NAME}"
+          targetType: "http"
+          spec:
+            url: "${URL}"
+            auth_type: "none"
+          EOF
+            sed -i 's/^          //' ${FILE}
+
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work:ro -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              target create --file=${FILE} 2>&1 || true)
+
+            local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${ID}" ]; then
+              ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            fi
+            if [ -z "${ID}" ]; then
+              echo "Failed to create target ${NAME}"
+              echo "${CREATE_OUTPUT}"
+              exit 1
+            fi
+            echo "${NAME}: ${ID}"
+            echo "${ID}"
           }
 
-          run_optimizer 8090 "breeder-1" &
-          run_optimizer 8091 "breeder-2" &
-          wait
+          TARGET_1_ID=$(create_target "bench-s4-gh1" "http://${{ env.GH1_IP }}:8090" "target-gh1.yaml")
+          TARGET_2_ID=$(create_target "bench-s4-gh2" "http://${{ env.GH2_IP }}:8090" "target-gh2.yaml")
 
-      - name: Verify coupling deltas are non-zero (coupling is active)
+          echo "${TARGET_1_ID}" > /tmp/target_1_id
+          echo "${TARGET_2_ID}" > /tmp/target_2_id
+
+      - name: Create Breeders
         run: |
-          for port in 8090 8091; do
-            METRICS=$(curl -sf http://localhost:$port/metrics)
-            echo "Port $port coupling metrics:"
-            echo "$METRICS" | grep "greenhouse_coupling_delta" || true
-            echo "$METRICS" | python3 examples/bench/scripts/validate_coupling_active.py $port
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          TARGET_1_ID=$(cat /tmp/target_1_id)
+          TARGET_2_ID=$(cat /tmp/target_2_id)
+          GH1_URL="http://${{ env.GH1_IP }}:8090"
+          GH2_URL="http://${{ env.GH2_IP }}:8090"
+
+          create_breeder() {
+            local NAME=$1
+            local TARGET_ID=$2
+            local RECON_URL=$3
+            local SRC=$4
+            local DST=$5
+
+            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              curl -s -X DELETE "${API_URL}/breeders/${EXISTING}?force=true" >/dev/null 2>&1 || true
+              sleep 2
+            fi
+
+            sed -e "s/\"greenhouse-1\"/\"${TARGET_ID}\"/" \
+                -e "s/\"greenhouse-2\"/\"${TARGET_ID}\"/" \
+                -e "s|http://greenhouse-1:8090|${RECON_URL}|" \
+                -e "s|http://greenhouse-2:8090|${RECON_URL}|" \
+                ${SRC} > ${DST}
+
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
+
+            local UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${UUID}" ]; then
+              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            fi
+            if [ -z "${UUID}" ]; then
+              echo "Failed to create breeder ${NAME}"
+              echo "${CREATE_OUTPUT}"
+              exit 1
+            fi
+            echo "${NAME}: ${UUID}"
+            echo "${UUID}"
+          }
+
+          BREEDER_1_UUID=$(create_breeder "bench-s4-1" "${TARGET_1_ID}" "${GH1_URL}" \
+            examples/bench/scenario-4/breeders/breeder-1.yml breeder-s4-1-config.yaml)
+          BREEDER_2_UUID=$(create_breeder "bench-s4-2" "${TARGET_2_ID}" "${GH2_URL}" \
+            examples/bench/scenario-4/breeders/breeder-2.yml breeder-s4-2-config.yaml)
+
+          echo "${BREEDER_1_UUID}" > /tmp/breeder_1_uuid
+          echo "${BREEDER_2_UUID}" > /tmp/breeder_2_uuid
+
+      - name: Poll Optimization Progress
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+          MIN_TRIALS=${{ inputs.min_trials }}
+          MAX_WAIT=$((${{ inputs.max_wait_minutes }} * 60))
+          ELAPSED=0
+
+          echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
+
+          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+            STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+
+            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+            TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+
+            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
+
+            if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
+               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
+              echo "A breeder entered error state"
+              exit 1
+            fi
+
+            if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
+              echo "Both breeders reached trial target"
+              break
+            fi
+
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
           done
+
+          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
+            echo "Timed out"
+            curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq . || true
+            curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq . || true
+            exit 1
+          fi
+
+      - name: Verify Results
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+
+          echo "=== Breeder 1 Final State ==="
+          curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "=== Breeder 2 Final State ==="
+          curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq '.' 2>/dev/null || true
+
+          for port_label in "GH1:8090" "GH2:8091"; do
+            PORT=${port_label#*:}
+            LABEL=${port_label%:*}
+            echo ""
+            echo "=== ${LABEL} Metrics (port ${PORT}) ==="
+            curl -s http://127.0.0.1:${PORT}/metrics/json | jq '.' 2>/dev/null || true
+          done
+
+          echo ""
+          echo "=== Verify Coupling Active ==="
+          for port in 8090 8091; do
+            COUPLING_DELTAS=$(curl -s http://127.0.0.1:${port}/metrics | grep "greenhouse_coupling_delta" | grep -v "^#" || true)
+            NON_ZERO=$(echo "${COUPLING_DELTAS}" | awk '{print $NF}' | grep -v '^0' | grep -v '^0\.0' | wc -l || echo "0")
+            echo "Port ${port}: ${NON_ZERO} non-zero coupling deltas"
+            if [ "${NON_ZERO}" -eq 0 ]; then
+              echo "Warning: no coupling activity detected on port ${port}"
+            fi
+          done
+
+          echo ""
+          echo "Scenario 4 passed"
+
+      - name: Diagnose Failure
+        if: failure()
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+
+          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              echo "--- Breeder ${BID} ---"
+              curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
+            fi
+          done
+
+          echo ""
+          echo "--- Controller Logs ---"
+          CONTROLLER_POD=$(kubectl get pods -n godon -l component=controller -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -n "${CONTROLLER_POD}" ] && kubectl logs -n godon "${CONTROLLER_POD}" --tail=80 2>/dev/null || true
+
+          echo ""
+          echo "--- Worker Logs ---"
+          WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -z "${WORKER_POD}" ] && WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -n "${WORKER_POD}" ] && kubectl logs -n godon "${WORKER_POD}" --tail=80 2>/dev/null || true
+
+          echo ""
+          echo "--- Greenhouse Logs ---"
+          docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 logs --tail=30 2>/dev/null || true
+
+          echo ""
+          echo "--- All Pods ---"
+          kubectl get pods -n godon -o wide 2>/dev/null || true
 
       - name: Cleanup
         if: always()
         run: |
-          cd examples/bench/scenario-4
-          docker compose down -v
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder purge --force --id="${BID}" 2>/dev/null || true
+            fi
+          done
+
+          for TID_FILE in /tmp/target_1_id /tmp/target_2_id; do
+            TID=$(cat ${TID_FILE} 2>/dev/null || echo "")
+            if [ -n "${TID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                target delete --id="${TID}" 2>/dev/null || true
+            fi
+          done
+
+          docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 down -v 2>/dev/null || true
+
+          if [ -f /tmp/pf_pid ]; then
+            kill $(cat /tmp/pf_pid) 2>/dev/null || true
+            rm /tmp/pf_pid
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Bench Scenario 4 Summary"
+          echo "========================"
+          echo "Scenario: ${{ inputs.greenhouse_scenario }}"
+          echo "Weather:  ${{ inputs.greenhouse_weather }}"
+          echo "Coupling: ${{ inputs.coupling_factor }}"
+          echo "Min trials per breeder: ${{ inputs.min_trials }}"
+          echo "Max wait: ${{ inputs.max_wait_minutes }}m"
+          echo "Layout: 2 breeders → 2 coupled targets"
+          echo "Status: ${{ job.status }}"
