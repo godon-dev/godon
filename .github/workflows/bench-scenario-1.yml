@@ -115,6 +115,7 @@ jobs:
 
           sed -e "s/GH1_TARGET/bench-s1-gh1/" -e "s|GH1_URL|${GH1_URL}|" \
             examples/bench/scenario-1/targets/greenhouse-1.yaml > target-gh1.yaml
+          chmod 644 target-gh1.yaml
 
           echo "Creating target bench-s1-gh1..." >&2
           CREATE_OUTPUT=$(docker run --rm --network host \
@@ -151,6 +152,7 @@ jobs:
           sed -e "s/\"greenhouse-1\"/\"${TARGET_1_ID}\"/" \
               -e "s|http://greenhouse-1:8090|${GH1_URL}|" \
               examples/bench/scenario-1/breeders/breeder.yml > breeder-s1-config.yaml
+          chmod 644 breeder-s1-config.yaml
 
           echo "Creating breeder bench-s1..." >&2
           CREATE_OUTPUT=$(docker run --rm --network host \
