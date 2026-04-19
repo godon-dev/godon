@@ -37,7 +37,7 @@ settings:
         - {step: 10, lower: 10, upper: 200}
 
 run:
-  parallel: 2
+  parallel: 1
   completion_criteria:
     iterations:
       min: 10
