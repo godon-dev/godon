@@ -1,0 +1,143 @@
+meta:
+  configVersion: "0.3"
+  strict_validation: false
+
+breeder:
+  type: "bench_greenhouse"
+
+settings:
+  greenhouse:
+    zones: 2
+    heating_setpoints:
+      constraints:
+        - {step: 0.5, lower: 5.0, upper: 40.0}
+    vent_openings:
+      constraints:
+        - {step: 0.05, lower: 0.0, upper: 1.0}
+    shading:
+      constraints:
+        - {step: 0.05, lower: 0.0, upper: 1.0}
+    co2_injection:
+      constraints:
+        - {step: 0.5, lower: 0.0, upper: 20.0}
+    light_intensity:
+      constraints:
+        - {step: 10.0, lower: 0.0, upper: 1000.0}
+    irrigation:
+      constraints:
+        - {step: 0.1, lower: 0.0, upper: 3.0}
+    sim_steps:
+      constraints:
+        - {step: 10, lower: 10, upper: 200}
+
+run:
+  parallel: 2
+  completion_criteria:
+    iterations:
+      min: 10
+      max: 200
+    timing:
+      end: "30m"
+    quality_achieved: true
+
+cooperation:
+  active: true
+  share_strategy: "extremes"
+  top_percentile: 0.2
+  bottom_percentile: 0.2
+  min_trials_for_filtering: 10
+  probability: 0.8
+
+reconnaissance:
+  type: http
+  http:
+    url: "http://greenhouse-1:8090"
+
+objectives:
+  - name: "growth_rate"
+    direction: maximize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: growth_rate
+      stabilization_seconds: 2
+      samples: 1
+      interval: 0
+      aggregation: median
+
+  - name: "trial_energy_kwh"
+    direction: minimize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: trial_energy_kwh
+      stabilization_seconds: 2
+      samples: 1
+      interval: 0
+      aggregation: median
+
+  - name: "trial_water_liters"
+    direction: minimize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: trial_water_liters
+      stabilization_seconds: 2
+      samples: 1
+      interval: 0
+      aggregation: median
+
+rollback_strategies:
+  standard:
+    consecutive_failures: 3
+    target_state: "previous"
+    max_attempts: 3
+    on_failure: "stop"
+    timeout_seconds: 60
+    after:
+      action: "pause"
+      duration: 300
+
+guardrails:
+  - name: "max_temp"
+    hard_limit: 40
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: max_temp
+      stabilization_seconds: 2
+      samples: 1
+      interval: 0
+      aggregation: median
+
+  - name: "max_humidity"
+    hard_limit: 0.9
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: max_humidity
+      stabilization_seconds: 2
+      samples: 1
+      interval: 0
+      aggregation: median
+
+  - name: "max_co2"
+    hard_limit: 1500
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: max_co2
+      stabilization_seconds: 2
+      samples: 1
+      interval: 0
+      aggregation: median
+
+effectuation:
+  type: http
+  targetRefs:
+    - "greenhouse-1"
+    - "greenhouse-2"
+  endpoint_config:
+    method: POST
+    path: /apply
+    timeout_seconds: 30
