@@ -105,7 +105,7 @@ jobs:
           echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
           echo "API_PORT=9090" >> $GITHUB_ENV
 
-      - name: Create Targets
+      - name: Create Targets and Breeders
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
@@ -129,7 +129,7 @@ jobs:
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
-            echo "Creating target ${NAME} from ${TEMPLATE}..." >&2
+            echo "Creating target ${NAME}..." >&2
             CREATE_OUTPUT=$(docker run --rm --network host \
               -v $(pwd):/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
@@ -147,18 +147,6 @@ jobs:
             echo "Target ${NAME}: ${ID}" >&2
             echo "${ID}" > "${OUTFILE}"
           }
-
-          create_target "bench-s3-gh1" "${GH1_URL}" examples/bench/scenario-3/targets/greenhouse-1.yaml target-gh1.yaml /tmp/target_1_id
-          create_target "bench-s3-gh2" "${GH2_URL}" examples/bench/scenario-3/targets/greenhouse-2.yaml target-gh2.yaml /tmp/target_2_id
-
-      - name: Create Breeders
-        run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
-          TARGET_1_ID=$(cat /tmp/target_1_id)
-          TARGET_2_ID=$(cat /tmp/target_2_id)
-          GH1_URL="http://${{ env.GH1_IP }}:8090"
-          GH2_URL="http://${{ env.GH2_IP }}:8090"
 
           create_breeder() {
             local NAME=$1
@@ -200,6 +188,12 @@ jobs:
             echo "Breeder ${NAME}: ${UUID}" >&2
             echo "${UUID}" > "${OUTFILE}"
           }
+
+          create_target "bench-s3-gh1" "${GH1_URL}" examples/bench/scenario-3/targets/greenhouse-1.yaml target-gh1.yaml /tmp/target_1_id
+          create_target "bench-s3-gh2" "${GH2_URL}" examples/bench/scenario-3/targets/greenhouse-2.yaml target-gh2.yaml /tmp/target_2_id
+
+          TARGET_1_ID=$(cat /tmp/target_1_id)
+          TARGET_2_ID=$(cat /tmp/target_2_id)
 
           create_breeder "bench-s3-1" "${TARGET_1_ID}" "${GH1_URL}" \
             examples/bench/scenario-3/breeders/breeder-1.yml breeder-s3-1-config.yaml /tmp/breeder_1_uuid
