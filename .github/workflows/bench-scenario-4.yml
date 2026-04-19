@@ -130,7 +130,7 @@ jobs:
               curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
             fi
 
-            sed -e "s/GH1_TARGET\|GH2_TARGET/${NAME}/" -e "s|GH1_URL\|GH2_URL|${URL}|" \
+            sed -e "s/TARGET_NAME/${NAME}/" -e "s|TARGET_URL|${URL}|" \
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 

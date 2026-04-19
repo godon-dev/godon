@@ -113,7 +113,7 @@ jobs:
             curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
           fi
 
-          sed -e "s/GH1_TARGET/bench-s1-gh1/" -e "s|GH1_URL|${GH1_URL}|" \
+          sed -e "s/TARGET_NAME/bench-s1-gh1/" -e "s|TARGET_URL|${GH1_URL}|" \
             examples/bench/scenario-1/targets/greenhouse-1.yaml > target-gh1.yaml
           chmod 644 target-gh1.yaml
 

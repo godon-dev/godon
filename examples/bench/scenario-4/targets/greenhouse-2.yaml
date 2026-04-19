@@ -1,5 +1,5 @@
-name: "GH2_TARGET"
+name: "TARGET_NAME"
 targetType: "http"
 spec:
-  url: "GH2_URL"
+  url: "TARGET_URL"
   auth_type: "none"
