@@ -2,10 +2,6 @@ name: Bench Scenario 3 — Two Optimizers, Two Uncoupled Targets (Control)
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'examples/bench/scenario-3/**'
-      - '.github/workflows/bench-scenario-3.yml'
 
 env:
   GREENHOUSE_IMAGE: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
