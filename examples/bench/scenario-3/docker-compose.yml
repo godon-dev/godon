@@ -1,3 +1,25 @@
+# Scenario 3: Negative Control — Two Independent Optimizers, Two Uncoupled Targets
+#
+# Two breeders, each optimizing its own greenhouse. The targets are physically
+# independent (no coupling). The breeders are also independent — they do not
+# share trials, studies, or any information.
+#
+# Layout:
+#   [Breeder-1] --effectuate/recon--> [greenhouse-1]
+#   [Breeder-2] --effectuate/recon--> [greenhouse-2]
+#
+# Purpose: This is the NEGATIVE CONTROL for coupling detection (scenario 4).
+# Both breeders optimize the same objective functions on targets with the same
+# scenario config but different seeds. Over time, both independently improve,
+# which may produce spurious correlation in their time series.
+#
+# A coupling detector should NOT flag coupling here. If it does, the false
+# positive rate is too high. Scenario 3 vs 4 is the critical A/B comparison.
+#
+# Run:
+#   docker compose up -d
+#   # Then submit breeder-1.yml and breeder-2.yml to godon-api as separate breeders
+#
 services:
   greenhouse-1:
     image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0

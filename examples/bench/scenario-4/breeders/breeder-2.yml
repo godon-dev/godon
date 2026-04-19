@@ -1,3 +1,9 @@
+# Scenario 4: Breeder-2 — Optimizes greenhouse-2 (coupled to greenhouse-1)
+#
+# Identical to scenario-3/breeder-2.yml. The coupling is invisible to this
+# breeder. From its perspective, greenhouse-2 just has unpredictable
+# environmental shifts caused by greenhouse-1's optimizer actions.
+
 meta:
   configVersion: "0.3"
   strict_validation: false
