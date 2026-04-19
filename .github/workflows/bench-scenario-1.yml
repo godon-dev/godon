@@ -112,14 +112,8 @@ jobs:
             curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
           fi
 
-          cat > target-gh1.yaml <<EOF
-          name: "bench-s1-gh1"
-          targetType: "http"
-          spec:
-            url: "${GH1_URL}"
-            auth_type: "none"
-          EOF
-          sed -i 's/^          //' target-gh1.yaml
+          sed -e "s/GH1_TARGET/bench-s1-gh1/" -e "s|GH1_URL|${GH1_URL}|" \
+            examples/bench/scenario-1/targets/greenhouse-1.yaml > target-gh1.yaml
 
           CREATE_OUTPUT=$(docker run --rm --network host \
             -v $(pwd):/work:ro -w /work \
