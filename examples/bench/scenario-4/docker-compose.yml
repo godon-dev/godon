@@ -35,11 +35,11 @@ services:
       - "8090:8090"
     environment:
       PORT: "8090"
-      GREENHOUSE_SCENARIO: simple
-      GREENHOUSE_WEATHER: smooth
+      GREENHOUSE_SCENARIO: ${GREENHOUSE_SCENARIO:-simple}
+      GREENHOUSE_WEATHER: ${GREENHOUSE_WEATHER:-smooth}
       GREENHOUSE_SEED: "42"
       COUPLING_NEIGHBORS: "http://greenhouse-2:8090"
-      COUPLING_FACTOR: "0.1"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
 
   greenhouse-2:
     image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
@@ -47,8 +47,8 @@ services:
       - "8091:8090"
     environment:
       PORT: "8090"
-      GREENHOUSE_SCENARIO: simple
-      GREENHOUSE_WEATHER: smooth
+      GREENHOUSE_SCENARIO: ${GREENHOUSE_SCENARIO:-simple}
+      GREENHOUSE_WEATHER: ${GREENHOUSE_WEATHER:-smooth}
       GREENHOUSE_SEED: "123"
       COUPLING_NEIGHBORS: "http://greenhouse-1:8090"
-      COUPLING_FACTOR: "0.1"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}

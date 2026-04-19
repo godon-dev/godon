@@ -24,6 +24,6 @@ services:
       - "8090:8090"
     environment:
       PORT: "8090"
-      GREENHOUSE_SCENARIO: simple
-      GREENHOUSE_WEATHER: smooth
+      GREENHOUSE_SCENARIO: ${GREENHOUSE_SCENARIO:-simple}
+      GREENHOUSE_WEATHER: ${GREENHOUSE_WEATHER:-smooth}
       GREENHOUSE_SEED: "42"
