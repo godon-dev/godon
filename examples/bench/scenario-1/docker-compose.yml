@@ -1,3 +1,22 @@
+# Scenario 1: Baseline — Single Optimizer, Single Target
+#
+# The simplest configuration: one breeder optimizing one greenhouse.
+# Establishes baseline performance metrics (convergence speed, best Pareto
+# front) that all other scenarios are measured against.
+#
+# Layout:
+#   [Breeder] --effectuate/recon--> [greenhouse-1]
+#
+# Target environment:
+#   GREENHOUSE_SCENARIO=simple  (2 zones)
+#   GREENHOUSE_WEATHER=smooth   (mild stochastic variation)
+#   GREENHOUSE_SEED=42          (reproducible)
+#   No coupling, no aging, no damage.
+#
+# Run:
+#   docker compose up -d
+#   # Then submit breeder.yml to godon-api as a breeder configuration
+#
 services:
   greenhouse-1:
     image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0

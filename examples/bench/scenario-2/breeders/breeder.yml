@@ -1,3 +1,15 @@
+# Scenario 2: Breeder — Single Optimizer, Two Independent Targets
+#
+# One breeder effectuating the same parameter set to both greenhouse-1 and
+# greenhouse-2 per trial. Reconnaissance reads from greenhouse-1.
+#
+# The optimizer cannot tailor params per target — it finds a single config
+# applied to both. This tests robustness: does a config generalize across
+# target instances with different seeds?
+#
+# Multi-target effectuation is batch mode: the HTTP effectuator iterates
+# over all targets in the targetRefs list, POSTing the same JSON body.
+
 meta:
   configVersion: "0.3"
   strict_validation: false

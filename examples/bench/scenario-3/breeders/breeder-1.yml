@@ -1,3 +1,9 @@
+# Scenario 3: Breeder-1 — Optimizes greenhouse-1
+#
+# Independent optimizer. Does not communicate with breeder-2.
+# Cooperation (extremes sharing) is intra-breeder only — between this
+# breeder's own parallel workers within the same Optuna study.
+
 meta:
   configVersion: "0.3"
   strict_validation: false

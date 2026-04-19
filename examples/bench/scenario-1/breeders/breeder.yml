@@ -1,3 +1,18 @@
+# Scenario 1: Breeder — Single Optimizer, Single Target
+#
+# One breeder with 2 parallel workers cooperating via Optuna study sharing.
+# Optimizes greenhouse-1 for:
+#   - Maximize growth_rate
+#   - Minimize trial_energy_kwh
+#   - Minimize trial_water_liters
+#
+# Safety guardrails trigger rollback if temperature > 40, humidity > 0.9,
+# or CO2 > 1500 ppm.
+#
+# Search space: 7 parameter groups (heating, vent, shading, CO2, light,
+# irrigation, sim_steps) with per-zone variants for heating and vents.
+# Total dimensions: 9 (2 zones x 2 per-zone params + 5 global params).
+
 meta:
   configVersion: "0.3"
   strict_validation: false
