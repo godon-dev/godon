@@ -127,6 +127,7 @@ jobs:
 
             sed -e "s/GH1_TARGET\|GH2_TARGET/${NAME}/" -e "s|GH1_URL\|GH2_URL|${URL}|" \
               ${TEMPLATE} > ${FILE}
+            chmod 644 ${FILE}
 
             echo "Creating target ${NAME} from ${TEMPLATE}..." >&2
             CREATE_OUTPUT=$(docker run --rm --network host \
@@ -169,6 +170,7 @@ jobs:
               -e "s/\"greenhouse-2\"/\"${TARGET_2_ID}\"/" \
               -e "s|http://greenhouse-1:8090|${GH1_URL}|" \
               examples/bench/scenario-2/breeders/breeder.yml > breeder-s2-config.yaml
+          chmod 644 breeder-s2-config.yaml
 
           echo "Creating breeder bench-s2..." >&2
           CREATE_OUTPUT=$(docker run --rm --network host \
