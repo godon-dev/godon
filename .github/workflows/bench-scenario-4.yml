@@ -246,8 +246,8 @@ jobs:
             STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
 
             METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
-            TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
-            TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
 
             echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
 
