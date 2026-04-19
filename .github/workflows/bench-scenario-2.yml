@@ -105,7 +105,7 @@ jobs:
           echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
           echo "API_PORT=9090" >> $GITHUB_ENV
 
-      - name: Create Targets
+      - name: Create Targets and Breeder
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
@@ -129,7 +129,7 @@ jobs:
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
-            echo "Creating target ${NAME} from ${TEMPLATE}..." >&2
+            echo "Creating target ${NAME}..." >&2
             CREATE_OUTPUT=$(docker run --rm --network host \
               -v $(pwd):/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
@@ -151,13 +151,8 @@ jobs:
           create_target "bench-s2-gh1" "${GH1_URL}" examples/bench/scenario-2/targets/greenhouse-1.yaml target-gh1.yaml /tmp/target_1_id
           create_target "bench-s2-gh2" "${GH2_URL}" examples/bench/scenario-2/targets/greenhouse-2.yaml target-gh2.yaml /tmp/target_2_id
 
-      - name: Create Breeder
-        run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           TARGET_1_ID=$(cat /tmp/target_1_id)
           TARGET_2_ID=$(cat /tmp/target_2_id)
-          GH1_URL="http://${{ env.GH1_IP }}:8090"
 
           EXISTING=$(curl -s ${API_URL}/breeders | jq -r '.[] | select(.name=="bench-s2") | .id' 2>/dev/null || echo "")
           if [ -n "${EXISTING}" ]; then

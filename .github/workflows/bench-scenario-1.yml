@@ -101,7 +101,7 @@ jobs:
           echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
           echo "API_PORT=9090" >> $GITHUB_ENV
 
-      - name: Create Target
+      - name: Create Target and Breeder
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           GH1_URL="http://${{ env.GH1_IP }}:8090"
@@ -133,14 +133,6 @@ jobs:
             exit 1
           fi
           echo "Target: ${TARGET_1_ID}" >&2
-          echo "${TARGET_1_ID}" > /tmp/target_1_id
-
-      - name: Create Breeder
-        run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
-          TARGET_1_ID=$(cat /tmp/target_1_id)
-          GH1_URL="http://${{ env.GH1_IP }}:8090"
 
           EXISTING=$(curl -s ${API_URL}/breeders | jq -r '.[] | select(.name=="bench-s1") | .id' 2>/dev/null || echo "")
           if [ -n "${EXISTING}" ]; then
