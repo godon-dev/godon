@@ -1,0 +1,20 @@
+services:
+  greenhouse-1:
+    image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
+    ports:
+      - "8090:8090"
+    environment:
+      PORT: "8090"
+      GREENHOUSE_SCENARIO: simple
+      GREENHOUSE_WEATHER: smooth
+      GREENHOUSE_SEED: "42"
+
+  greenhouse-2:
+    image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
+    ports:
+      - "8091:8090"
+    environment:
+      PORT: "8090"
+      GREENHOUSE_SCENARIO: simple
+      GREENHOUSE_WEATHER: smooth
+      GREENHOUSE_SEED: "123"
