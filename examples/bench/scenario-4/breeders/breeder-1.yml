@@ -50,6 +50,9 @@ run:
 cooperation:
   active: false
 
+interference_detection:
+  mode: active
+
 reconnaissance:
   type: http
   http:
