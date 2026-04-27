@@ -24,7 +24,7 @@ jobs:
   bench-scenario-3:
     name: "S3: 2 breeders → 2 targets (independent)"
     runs-on: [self-hosted, linux]
-    timeout-minutes: ${{ inputs.max_wait_minutes }}
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
     steps:
       - name: Checkout
@@ -240,7 +240,7 @@ jobs:
           BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
           BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
           MIN_TRIALS=${{ inputs.min_trials }}
-          MAX_WAIT=$((${{ inputs.max_wait_minutes }} * 60))
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
           echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
@@ -371,10 +371,9 @@ jobs:
         if: always()
         run: |
           echo "Bench Scenario 3 Summary"
-          echo "========================"
           echo "Scenario: ${{ inputs.greenhouse_scenario }}"
           echo "Weather:  ${{ inputs.greenhouse_weather }}"
           echo "Min trials per breeder: ${{ inputs.min_trials }}"
-          echo "Max wait: ${{ inputs.max_wait_minutes }}m"
+          echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Layout: 2 breeders → 2 targets (independent)"
           echo "Status: ${{ job.status }}"
