@@ -24,7 +24,7 @@ jobs:
   bench-scenario-3:
     name: "S3: 2 breeders → 2 targets (independent)"
     runs-on: [self-hosted, linux]
-    timeout-minutes: ${{ inputs.max_wait_minutes + 10 }}
+    timeout-minutes: ${{ inputs.max_wait_minutes }}
 
     steps:
       - name: Checkout
