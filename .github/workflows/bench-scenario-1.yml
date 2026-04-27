@@ -24,7 +24,7 @@ jobs:
   bench-scenario-1:
     name: "S1: 1 breeder → 1 target"
     runs-on: [self-hosted, linux]
-    timeout-minutes: ${{ inputs.max_wait_minutes }}
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
     steps:
       - name: Checkout
@@ -205,7 +205,7 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
           MIN_TRIALS=${{ inputs.min_trials }}
-          MAX_WAIT=$((${{ inputs.max_wait_minutes }} * 60))
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
           echo "Waiting for ${MIN_TRIALS} trials (timeout: ${MAX_WAIT}s)"
@@ -328,10 +328,9 @@ jobs:
         if: always()
         run: |
           echo "Bench Scenario 1 Summary"
-          echo "========================"
           echo "Scenario: ${{ inputs.greenhouse_scenario }}"
           echo "Weather:  ${{ inputs.greenhouse_weather }}"
           echo "Min trials: ${{ inputs.min_trials }}"
-          echo "Max wait: ${{ inputs.max_wait_minutes }}m"
+          echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Layout: 1 breeder → 1 target"
           echo "Status: ${{ job.status }}"
