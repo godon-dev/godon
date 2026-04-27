@@ -24,7 +24,7 @@ jobs:
   bench-scenario-1:
     name: "S1: 1 breeder → 1 target"
     runs-on: [self-hosted, linux]
-    timeout-minutes: 30
+    timeout-minutes: ${{ inputs.max_wait_minutes }}
 
     steps:
       - name: Checkout
