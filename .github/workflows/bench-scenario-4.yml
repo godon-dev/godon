@@ -28,7 +28,7 @@ jobs:
   bench-scenario-4:
     name: "S4: 2 breeders → 2 coupled targets"
     runs-on: [self-hosted, linux]
-    timeout-minutes: 30
+    timeout-minutes: ${{ inputs.max_wait_minutes + 10 }}
 
     steps:
       - name: Checkout
