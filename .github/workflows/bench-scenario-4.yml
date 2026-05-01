@@ -192,8 +192,10 @@ jobs:
 
             EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             if [ -n "${EXISTING}" ]; then
-              echo "Deleting existing breeder: ${EXISTING}" >&2
-              curl -s -X DELETE "${API_URL}/breeders/${EXISTING}?force=true" >/dev/null 2>&1 || true
+              echo "Deleting existing breeder(s): ${EXISTING}" >&2
+              for EID in ${EXISTING}; do
+                curl -s -X DELETE "${API_URL}/breeders/${EID}?force=true" >/dev/null 2>&1 || true
+              done
               sleep 5
             fi
 
@@ -207,6 +209,14 @@ jobs:
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
               echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
+
+              EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+              if [ -n "${EXISTING}" ]; then
+                echo "Breeder ${NAME} already exists: ${EXISTING}, skipping creation" >&2
+                UUID=$(echo "${EXISTING}" | head -1)
+                break
+              fi
+
               CREATE_OUTPUT=$(docker run --rm --network host \
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
@@ -215,7 +225,7 @@ jobs:
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
               if [ -z "${UUID}" ]; then
-                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               fi
               if [ -n "${UUID}" ]; then
                 break
