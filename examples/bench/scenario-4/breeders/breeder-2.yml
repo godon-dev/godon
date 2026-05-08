@@ -65,7 +65,7 @@ objectives:
       path: /metrics/json
       key: growth_rate
       stabilization_seconds: 2
-      samples: 1
+      samples: 5
       interval: 0
       aggregation: median
 
@@ -76,7 +76,7 @@ objectives:
       path: /metrics/json
       key: trial_energy_kwh
       stabilization_seconds: 2
-      samples: 1
+      samples: 5
       interval: 0
       aggregation: median
 
@@ -87,7 +87,7 @@ objectives:
       path: /metrics/json
       key: trial_water_liters
       stabilization_seconds: 2
-      samples: 1
+      samples: 5
       interval: 0
       aggregation: median
 
@@ -110,7 +110,7 @@ guardrails:
       path: /metrics/json
       key: max_temp
       stabilization_seconds: 2
-      samples: 1
+      samples: 5
       interval: 0
       aggregation: median
 
@@ -121,7 +121,7 @@ guardrails:
       path: /metrics/json
       key: max_humidity
       stabilization_seconds: 2
-      samples: 1
+      samples: 5
       interval: 0
       aggregation: median
 
@@ -132,7 +132,7 @@ guardrails:
       path: /metrics/json
       key: max_co2
       stabilization_seconds: 2
-      samples: 1
+      samples: 5
       interval: 0
       aggregation: median
 
