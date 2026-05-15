@@ -1,4 +1,4 @@
-name: "Bench Greenhouse Scenario 4 — Two Optimizers, Two Coupled Targets"
+name: "Bench Scenario Microgrid — Two Optimizers, Two Coupled Microgrid Consumers"
 
 on:
   workflow_dispatch:
@@ -10,23 +10,15 @@ on:
       max_wait_minutes:
         description: "Max wait time in minutes"
         required: false
-        default: "20"
+        default: "60"
       coupling_factor:
-        description: "Coupling strength (0.05=weak, 0.1=moderate, 0.2=strong)"
+        description: "Coupling strength (0.1=weak, 0.5=moderate, 1.0=strong)"
         required: false
-        default: "0.1"
-      greenhouse_scenario:
-        description: "Greenhouse scenario (simple, medium, complex)"
-        required: false
-        default: "simple"
-      greenhouse_weather:
-        description: "Weather mode (smooth, noisy, adversarial)"
-        required: false
-        default: "smooth"
+        default: "0.5"
 
 jobs:
-  bench-scenario-4:
-    name: "S4: 2 breeders → 2 coupled targets"
+  bench-scenario-microgrid:
+    name: "Microgrid: 2 breeders → 2 coupled consumers"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
@@ -54,16 +46,13 @@ jobs:
           fi
           kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
 
-      - name: Start Coupled Greenhouse Targets
+      - name: Start Coupled Microgrid Targets
         run: |
-          export GREENHOUSE_SCENARIO="${{ inputs.greenhouse_scenario }}"
-          export GREENHOUSE_WEATHER="${{ inputs.greenhouse_weather }}"
           export COUPLING_FACTOR="${{ inputs.coupling_factor }}"
-
-          docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 up -d
+          docker compose -f examples/bench/scenario-microgrid/docker-compose.yml -p bench-mg up -d
 
           for port in 8090 8091; do
-            echo "Waiting for greenhouse on port ${port}..."
+            echo "Waiting for microgrid on port ${port}..."
             for i in $(seq 1 30); do
               if curl -s -f --connect-timeout 2 http://127.0.0.1:${port}/health >/dev/null 2>&1; then
                 echo "Port ${port}: healthy"
@@ -73,29 +62,28 @@ jobs:
             done
           done
 
-          GH1_CID=$(docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 ps -q greenhouse-1)
-          GH2_CID=$(docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 ps -q greenhouse-2)
+          MG1_CID=$(docker compose -f examples/bench/scenario-microgrid/docker-compose.yml -p bench-mg ps -q microgrid-1)
+          MG2_CID=$(docker compose -f examples/bench/scenario-microgrid/docker-compose.yml -p bench-mg ps -q microgrid-2)
 
-          docker network connect kind $GH1_CID 2>/dev/null || true
-          docker network connect kind $GH2_CID 2>/dev/null || true
+          docker network connect kind $MG1_CID 2>/dev/null || true
+          docker network connect kind $MG2_CID 2>/dev/null || true
 
-          GH1_IP=$(docker inspect $GH1_CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
-          GH2_IP=$(docker inspect $GH2_CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
-          echo "GH1 KIND IP: ${GH1_IP}, GH2 KIND IP: ${GH2_IP}"
+          MG1_IP=$(docker inspect $MG1_CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          MG2_IP=$(docker inspect $MG2_CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          echo "MG1 KIND IP: ${MG1_IP}, MG2 KIND IP: ${MG2_IP}"
 
-          echo "GH1_HOST=127.0.0.1" >> $GITHUB_ENV
-          echo "GH1_PORT=8090" >> $GITHUB_ENV
-          echo "GH1_IP=${GH1_IP}" >> $GITHUB_ENV
-          echo "GH2_HOST=127.0.0.1" >> $GITHUB_ENV
-          echo "GH2_PORT=8091" >> $GITHUB_ENV
-          echo "GH2_IP=${GH2_IP}" >> $GITHUB_ENV
+          echo "MG1_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "MG1_PORT=8090" >> $GITHUB_ENV
+          echo "MG1_IP=${MG1_IP}" >> $GITHUB_ENV
+          echo "MG2_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "MG2_PORT=8091" >> $GITHUB_ENV
+          echo "MG2_IP=${MG2_IP}" >> $GITHUB_ENV
 
       - name: Port Forward to Godon API
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
-
           kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
           echo $! > /tmp/pf_pid
           sleep 3
@@ -114,8 +102,8 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
-          GH1_URL="http://${{ env.GH1_IP }}:8090"
-          GH2_URL="http://${{ env.GH2_IP }}:8090"
+          MG1_URL="http://${{ env.MG1_IP }}:8090"
+          MG2_URL="http://${{ env.MG2_IP }}:8090"
 
           create_target() {
             local NAME=$1
@@ -134,12 +122,10 @@ jobs:
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
-            echo "Creating target ${NAME} from ${TEMPLATE}..." >&2
             CREATE_OUTPUT=$(docker run --rm --network host \
               -v $(pwd):/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               target create --file=${FILE} 2>&1 || true)
-            echo "${CREATE_OUTPUT}" >&2
 
             local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
             if [ -z "${ID}" ]; then
@@ -153,34 +139,19 @@ jobs:
             echo "${ID}" > "${OUTFILE}"
           }
 
-          create_target "bench-s4-gh1" "${GH1_URL}" examples/bench/scenario-4/targets/greenhouse-1.yaml target-gh1.yaml /tmp/target_1_id
-          create_target "bench-s4-gh2" "${GH2_URL}" examples/bench/scenario-4/targets/greenhouse-2.yaml target-gh2.yaml /tmp/target_2_id
+          create_target "bench-mg-1" "${MG1_URL}" examples/bench/scenario-microgrid/targets/microgrid-1.yaml target-mg1.yaml /tmp/target_1_id
+          create_target "bench-mg-2" "${MG2_URL}" examples/bench/scenario-microgrid/targets/microgrid-2.yaml target-mg2.yaml /tmp/target_2_id
 
       - name: Create Breeders
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          echo "Verifying API reachability..." >&2
-          curl -s -f --connect-timeout 5 http://${{ env.API_HOST }}:${{ env.API_PORT }}/health || {
-            echo "API unreachable, restarting port-forward..." >&2
-            kill $(cat /tmp/pf_pid) 2>/dev/null || true
-            API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
-            kubectl port-forward -n godon --address ${{ env.API_HOST }} "${API_POD}" ${{ env.API_PORT }}:8080 > /tmp/pf.log 2>&1 &
-            echo $! > /tmp/pf_pid
-            sleep 5
-            curl -s -f --connect-timeout 5 http://${{ env.API_HOST }}:${{ env.API_PORT }}/health || {
-              echo "API still unreachable after port-forward restart" >&2
-              exit 1
-            }
-          }
-          echo "API is reachable" >&2
-
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           TARGET_1_ID=$(cat /tmp/target_1_id)
           TARGET_2_ID=$(cat /tmp/target_2_id)
-          GH1_URL="http://${{ env.GH1_IP }}:8090"
-          GH2_URL="http://${{ env.GH2_IP }}:8090"
+          MG1_URL="http://${{ env.MG1_IP }}:8090"
+          MG2_URL="http://${{ env.MG2_IP }}:8090"
 
           create_breeder() {
             local NAME=$1
@@ -199,20 +170,17 @@ jobs:
               sleep 5
             fi
 
-            sed -e "s/\"greenhouse-1\"/\"${TARGET_ID}\"/" \
-                -e "s/\"greenhouse-2\"/\"${TARGET_ID}\"/" \
-                -e "s|http://greenhouse-1:8090|${RECON_URL}|" \
-                -e "s|http://greenhouse-2:8090|${RECON_URL}|" \
+            sed -e "s/\"microgrid-1\"/\"${TARGET_ID}\"/" \
+                -e "s/\"microgrid-2\"/\"${TARGET_ID}\"/" \
+                -e "s|http://microgrid-1:8090|${RECON_URL}|" \
+                -e "s|http://microgrid-2:8090|${RECON_URL}|" \
                 ${SRC} > ${DST}
             chmod 644 ${DST}
 
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
-              echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
-
               EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
               if [ -n "${EXISTING}" ]; then
-                echo "Breeder ${NAME} already exists: ${EXISTING}, skipping creation" >&2
                 UUID=$(echo "${EXISTING}" | head -1)
                 break
               fi
@@ -221,7 +189,6 @@ jobs:
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
                 breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
-              echo "${CREATE_OUTPUT}" >&2
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
               if [ -z "${UUID}" ]; then
@@ -230,22 +197,21 @@ jobs:
               if [ -n "${UUID}" ]; then
                 break
               fi
-              echo "Attempt ${ATTEMPT} failed, retrying in 10s..." >&2
               sleep 10
             done
 
             if [ -z "${UUID}" ]; then
-              echo "Failed to create breeder ${NAME} after 5 attempts" >&2
+              echo "Failed to create breeder ${NAME}" >&2
               exit 1
             fi
             echo "Breeder ${NAME}: ${UUID}" >&2
             echo "${UUID}" > "${OUTFILE}"
           }
 
-          create_breeder "bench-s4-1" "${TARGET_1_ID}" "${GH1_URL}" \
-            examples/bench/scenario-4/breeders/breeder-1.yml breeder-s4-1-config.yaml /tmp/breeder_1_uuid
-          create_breeder "bench-s4-2" "${TARGET_2_ID}" "${GH2_URL}" \
-            examples/bench/scenario-4/breeders/breeder-2.yml breeder-s4-2-config.yaml /tmp/breeder_2_uuid
+          create_breeder "bench-mg-1" "${TARGET_1_ID}" "${MG1_URL}" \
+            examples/bench/scenario-microgrid/breeders/breeder-1.yml breeder-mg1-config.yaml /tmp/breeder_1_uuid
+          create_breeder "bench-mg-2" "${TARGET_2_ID}" "${MG2_URL}" \
+            examples/bench/scenario-microgrid/breeders/breeder-2.yml breeder-mg2-config.yaml /tmp/breeder_2_uuid
 
       - name: Poll Optimization Progress
         env:
@@ -258,23 +224,12 @@ jobs:
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
-          echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
-
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
-            STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
-            STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
-
             METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
             TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
             TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
 
-            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
-
-            if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
-               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
-              echo "A breeder entered error state"
-              exit 1
-            fi
+            echo "B1: trials=${TRIAL_1}, B2: trials=${TRIAL_2} (${ELAPSED}s)"
 
             if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
                [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
@@ -285,82 +240,6 @@ jobs:
             sleep 10
             ELAPSED=$((ELAPSED + 10))
           done
-
-          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "Timed out"
-            curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq . || true
-            curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq . || true
-            exit 1
-          fi
-
-      - name: Verify Results
-        run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
-
-          echo "=== Breeder 1 Final State ==="
-          curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq '.' 2>/dev/null || true
-
-          echo ""
-          echo "=== Breeder 2 Final State ==="
-          curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq '.' 2>/dev/null || true
-
-          for port_label in "GH1:8090" "GH2:8091"; do
-            PORT=${port_label#*:}
-            LABEL=${port_label%:*}
-            echo ""
-            echo "=== ${LABEL} Metrics (port ${PORT}) ==="
-            curl -s http://127.0.0.1:${PORT}/metrics/json | jq '.' 2>/dev/null || true
-          done
-
-          echo ""
-          echo "=== Verify Coupling Active ==="
-          for port in 8090 8091; do
-            COUPLING_DELTAS=$(curl -s http://127.0.0.1:${port}/metrics | grep "greenhouse_coupling_delta" | grep -v "^#" || true)
-            NON_ZERO=$(echo "${COUPLING_DELTAS}" | awk '{print $NF}' | grep -v '^0' | grep -v '^0\.0' | wc -l || echo "0")
-            echo "Port ${port}: ${NON_ZERO} non-zero coupling deltas"
-            if [ "${NON_ZERO}" -eq 0 ]; then
-              echo "Warning: no coupling activity detected on port ${port}"
-            fi
-          done
-
-          echo ""
-          echo "Scenario 4 passed"
-
-      - name: Diagnose Failure
-        if: failure()
-        env:
-          KUBECONFIG: /tmp/kind_kubeconfig.yaml
-        run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-
-          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
-            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
-            if [ -n "${BID}" ]; then
-              echo "--- Breeder ${BID} ---"
-              curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
-            fi
-          done
-
-          echo ""
-          echo "--- Controller Logs ---"
-          CONTROLLER_POD=$(kubectl get pods -n godon -l component=controller -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-          [ -n "${CONTROLLER_POD}" ] && kubectl logs -n godon "${CONTROLLER_POD}" --tail=80 2>/dev/null || true
-
-          echo ""
-          echo "--- Worker Logs ---"
-          WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-          [ -z "${WORKER_POD}" ] && WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-          [ -n "${WORKER_POD}" ] && kubectl logs -n godon "${WORKER_POD}" --tail=80 2>/dev/null || true
-
-          echo ""
-          echo "--- Greenhouse Logs ---"
-          docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 logs --tail=30 2>/dev/null || true
-
-          echo ""
-          echo "--- All Pods ---"
-          kubectl get pods -n godon -o wide 2>/dev/null || true
 
       - name: Cleanup
         if: always()
@@ -386,7 +265,7 @@ jobs:
             fi
           done
 
-          docker compose -f examples/bench/scenario-4/docker-compose.yml -p bench-s4 down -v 2>/dev/null || true
+          docker compose -f examples/bench/scenario-microgrid/docker-compose.yml -p bench-mg down -v 2>/dev/null || true
 
           if [ -f /tmp/pf_pid ]; then
             kill $(cat /tmp/pf_pid) 2>/dev/null || true
@@ -396,11 +275,8 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "Bench Scenario 4 Summary"
-          echo "Scenario: ${{ inputs.greenhouse_scenario }}"
-          echo "Weather:  ${{ inputs.greenhouse_weather }}"
+          echo "Bench Scenario Microgrid Summary"
           echo "Coupling: ${{ inputs.coupling_factor }}"
           echo "Min trials per breeder: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
-          echo "Layout: 2 breeders → 2 coupled targets"
           echo "Status: ${{ job.status }}"

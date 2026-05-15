@@ -1,0 +1,5 @@
+name: "TARGET_NAME"
+targetType: "http"
+spec:
+  url: "TARGET_URL"
+  auth_type: "none"
