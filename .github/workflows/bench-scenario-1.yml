@@ -1,4 +1,4 @@
-name: "Bench Scenario 1 — Single Optimizer, Single Target"
+name: "Bench Greenhouse Scenario 1 — Single Optimizer, Single Target"
 
 on:
   workflow_dispatch:
