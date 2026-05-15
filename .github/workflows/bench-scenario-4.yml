@@ -1,4 +1,4 @@
-name: "Bench Scenario 4 — Two Optimizers, Two Coupled Targets"
+name: "Bench Greenhouse Scenario 4 — Two Optimizers, Two Coupled Targets"
 
 on:
   workflow_dispatch:
