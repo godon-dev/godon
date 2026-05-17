@@ -1,6 +1,6 @@
 services:
   microgrid-1:
-    image: ghcr.io/godon-dev/godon-bench-microgrid:0.2.0
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.3.0
     ports:
       - "8090:8090"
     environment:
@@ -10,7 +10,7 @@ services:
       COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
 
   microgrid-2:
-    image: ghcr.io/godon-dev/godon-bench-microgrid:0.2.0
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.3.0
     ports:
       - "8091:8090"
     environment:
