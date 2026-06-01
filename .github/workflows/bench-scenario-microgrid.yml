@@ -241,6 +241,21 @@ jobs:
             ELAPSED=$((ELAPSED + 10))
           done
 
+      - name: Watermark Detection
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+
+          echo "=== Detection: B1(${BREEDER_1_UUID}) -> B2(${BREEDER_2_UUID}) ==="
+          RESULT_1=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- "http://localhost:8089/api/watermark-detection/${BREEDER_1_UUID}/${BREEDER_2_UUID}" 2>/dev/null || echo '{"error":"query failed"}')
+          echo "${RESULT_1}" | python3 -m json.tool 2>/dev/null || echo "${RESULT_1}"
+
+          echo "=== Detection: B2(${BREEDER_2_UUID}) -> B1(${BREEDER_1_UUID}) ==="
+          RESULT_2=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- "http://localhost:8089/api/watermark-detection/${BREEDER_2_UUID}/${BREEDER_1_UUID}" 2>/dev/null || echo '{"error":"query failed"}')
+          echo "${RESULT_2}" | python3 -m json.tool 2>/dev/null || echo "${RESULT_2}"
+
       - name: Cleanup
         if: always()
         run: |
