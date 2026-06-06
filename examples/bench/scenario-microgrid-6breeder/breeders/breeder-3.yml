@@ -38,7 +38,7 @@ interference_detection:
 reconnaissance:
   type: http
   http:
-    url: "http://microgrid-2:8090"
+    url: "http://microgrid-3:8090"
 
 objectives:
   - name: "throughput"
@@ -88,7 +88,7 @@ objectives:
 effectuation:
   type: http
   targetRefs:
-    - "microgrid-2"
+    - "microgrid-3"
   endpoint_config:
     method: POST
     path: /apply
