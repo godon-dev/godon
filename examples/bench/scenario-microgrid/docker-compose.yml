@@ -6,7 +6,7 @@ services:
     environment:
       PORT: "8090"
       MICROGRID_SEED: "42"
-      COUPLING_NEIGHBORS: "http://microgrid-2:8090"
+      COUPLING_NEIGHBORS: "http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090"
       COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
 
   microgrid-2:
@@ -16,5 +16,45 @@ services:
     environment:
       PORT: "8090"
       MICROGRID_SEED: "123"
-      COUPLING_NEIGHBORS: "http://microgrid-1:8090"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-3:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8092:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "256"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-4:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8093:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "512"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-5:8090,http://microgrid-6:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-5:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8094:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "789"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-6:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-6:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8095:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "1024"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090"
       COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}

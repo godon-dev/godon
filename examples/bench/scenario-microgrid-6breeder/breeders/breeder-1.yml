@@ -1,0 +1,95 @@
+meta:
+  configVersion: "0.3"
+  strict_validation: false
+
+breeder:
+  type: "bench_microgrid"
+
+settings:
+  microgrid:
+    power_draw:
+      constraints:
+        - {step: 10.0, lower: 0.0, upper: 1000.0}
+    storage_dispatch:
+      constraints:
+        - {step: 10.0, lower: -500.0, upper: 500.0}
+    local_generation:
+      constraints:
+        - {step: 5.0, lower: 0.0, upper: 500.0}
+    sim_steps:
+      constraints:
+        - {step: 10, lower: 10, upper: 200}
+
+run:
+  parallel: 1
+  completion_criteria:
+    iterations:
+      min: 10
+      max: 5000
+    timing:
+      end: "600m"
+
+cooperation:
+  active: false
+
+interference_detection:
+  mode: active
+
+reconnaissance:
+  type: http
+  http:
+    url: "http://microgrid-1:8090"
+
+objectives:
+  - name: "throughput"
+    direction: maximize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: throughput
+      stabilization_seconds: 1
+      samples: 3
+      interval: 0
+      aggregation: median
+
+  - name: "equipment_health"
+    direction: maximize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: equipment_health
+      stabilization_seconds: 1
+      samples: 3
+      interval: 0
+      aggregation: median
+
+  - name: "voltage_stability"
+    direction: maximize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: voltage_stability
+      stabilization_seconds: 1
+      samples: 3
+      interval: 0
+      aggregation: median
+
+  - name: "energy_consumption_kwh"
+    direction: minimize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: energy_consumption_kwh
+      stabilization_seconds: 1
+      samples: 3
+      interval: 0
+      aggregation: median
+
+effectuation:
+  type: http
+  targetRefs:
+    - "microgrid-1"
+  endpoint_config:
+    method: POST
+    path: /apply
+    timeout_seconds: 30
