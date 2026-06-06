@@ -1,0 +1,331 @@
+name: "Bench Scenario Microgrid — Six Optimizers, Six Fully-Coupled Microgrid Consumers"
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_trials:
+        description: "Minimum trials per breeder for success"
+        required: false
+        default: "20"
+      max_wait_minutes:
+        description: "Max wait time in minutes"
+        required: false
+        default: "120"
+      coupling_factor:
+        description: "Coupling strength (0.1=weak, 0.5=moderate, 1.0=strong)"
+        required: false
+        default: "0.1"
+
+jobs:
+  bench-scenario-microgrid-6breeder:
+    name: "Microgrid: 6 breeders → 6 fully-coupled consumers"
+    runs-on: [self-hosted, linux]
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Verify KIND Cluster
+        run: |
+          if ! kind get clusters | grep -q "godon-1-cluster"; then
+            echo "KIND cluster not found. Run setup workflows first."
+            exit 1
+          fi
+          kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
+
+      - name: Verify Godon Stack
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          if ! helm status godon --namespace godon >/dev/null 2>&1; then
+            echo "Godon stack not found."
+            exit 1
+          fi
+          kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+
+      - name: Start Coupled Microgrid Targets
+        run: |
+          export COUPLING_FACTOR="${{ inputs.coupling_factor }}"
+          docker compose -f examples/bench/scenario-microgrid-6breeder/docker-compose.yml -p bench-mg6 up -d
+
+          for port in 8090 8091 8092 8093 8094 8095; do
+            echo "Waiting for microgrid on port ${port}..."
+            for i in $(seq 1 30); do
+              if curl -s -f --connect-timeout 2 http://127.0.0.1:${port}/health >/dev/null 2>&1; then
+                echo "Port ${port}: healthy"
+                break
+              fi
+              sleep 2
+            done
+          done
+
+          for N in 1 2 3 4 5 6; do
+            CID=$(docker compose -f examples/bench/scenario-microgrid-6breeder/docker-compose.yml -p bench-mg6 ps -q microgrid-${N})
+            docker network connect kind $CID 2>/dev/null || true
+            IP=$(docker inspect $CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+            echo "MG${N} KIND IP: ${IP}"
+            echo "MG${N}_HOST=127.0.0.1" >> $GITHUB_ENV
+            echo "MG${N}_PORT=$((8089 + N))" >> $GITHUB_ENV
+            echo "MG${N}_IP=${IP}" >> $GITHUB_ENV
+          done
+
+      - name: Port Forward to Godon API
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+          kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
+          echo $! > /tmp/pf_pid
+          sleep 3
+
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+
+          echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
+          echo "API_PORT=9090" >> $GITHUB_ENV
+
+      - name: Create Targets
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          create_target() {
+            local NAME=$1
+            local URL=$2
+            local TEMPLATE=$3
+            local FILE=$4
+            local OUTFILE=$5
+
+            EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing target: ${EXISTING}" >&2
+              curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
+            fi
+
+            sed -e "s/TARGET_NAME/${NAME}/" -e "s|TARGET_URL|${URL}|" \
+              ${TEMPLATE} > ${FILE}
+            chmod 644 ${FILE}
+
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work:ro -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              target create --file=${FILE} 2>&1 || true)
+
+            local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${ID}" ]; then
+              ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            fi
+            if [ -z "${ID}" ]; then
+              echo "Failed to create target ${NAME}" >&2
+              exit 1
+            fi
+            echo "Target ${NAME}: ${ID}" >&2
+            echo "${ID}" > "${OUTFILE}"
+          }
+
+          for N in 1 2 3 4 5 6; do
+            MG_IP_VAR="MG${N}_IP"
+            MG_IP="${!MG_IP_VAR}"
+            create_target "bench-mg6-${N}" "http://${MG_IP}:8090" \
+              examples/bench/scenario-microgrid-6breeder/targets/microgrid-${N}.yaml \
+              target-mg6-${N}.yaml /tmp/target_${N}_id
+          done
+
+      - name: Create Breeders
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          create_breeder() {
+            local NAME=$1
+            local TARGET_ID=$2
+            local RECON_URL=$3
+            local MG_REF=$4
+            local SRC=$5
+            local DST=$6
+            local OUTFILE=$7
+
+            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing breeder(s): ${EXISTING}" >&2
+              for EID in ${EXISTING}; do
+                curl -s -X DELETE "${API_URL}/breeders/${EID}?force=true" >/dev/null 2>&1 || true
+              done
+              sleep 5
+            fi
+
+            sed -e "s/\"${MG_REF}\"/\"${TARGET_ID}\"/" \
+                -e "s|http://${MG_REF}:8090|${RECON_URL}|" \
+                ${SRC} > ${DST}
+            chmod 644 ${DST}
+
+            local UUID=""
+            for ATTEMPT in 1 2 3 4 5; do
+              EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+              if [ -n "${EXISTING}" ]; then
+                UUID=$(echo "${EXISTING}" | head -1)
+                break
+              fi
+
+              CREATE_OUTPUT=$(docker run --rm --network host \
+                -v $(pwd):/work -w /work \
+                "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
+
+              UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              if [ -z "${UUID}" ]; then
+                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              fi
+              if [ -n "${UUID}" ]; then
+                break
+              fi
+              sleep 10
+            done
+
+            if [ -z "${UUID}" ]; then
+              echo "Failed to create breeder ${NAME}" >&2
+              exit 1
+            fi
+            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "${UUID}" > "${OUTFILE}"
+          }
+
+          for N in 1 2 3 4 5 6; do
+            TARGET_ID=$(cat /tmp/target_${N}_id)
+            MG_IP_VAR="MG${N}_IP"
+            MG_IP="${!MG_IP_VAR}"
+            create_breeder "bench-mg6-${N}" "${TARGET_ID}" "http://${MG_IP}:8090" \
+              "microgrid-${N}" \
+              examples/bench/scenario-microgrid-6breeder/breeders/breeder-${N}.yml \
+              breeder-mg6-${N}-config.yaml /tmp/breeder_${N}_uuid
+          done
+
+      - name: Poll Optimization Progress
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          MIN_TRIALS=${{ inputs.min_trials }}
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
+          ELAPSED=0
+
+          # Build list of breeder UUIDs
+          BREEDER_UUIDS=()
+          for N in 1 2 3 4 5 6; do
+            BREEDER_UUIDS+=("$(cat /tmp/breeder_${N}_uuid)")
+          done
+
+          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+
+            ALL_MET=true
+            TRIAL_SUMMARY=""
+            for N in 1 2 3 4 5 6; do
+              BID="${BREEDER_UUIDS[$((N-1))]}"
+              TRIAL=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+              if [ "${TRIAL}" -lt "${MIN_TRIALS}" ] 2>/dev/null; then
+                ALL_MET=false
+              fi
+              TRIAL_SUMMARY="${TRIAL_SUMMARY} B${N}=${TRIAL}"
+            done
+
+            echo "Trials:${TRIAL_SUMMARY} (${ELAPSED}s)"
+
+            if [ "${ALL_MET}" = "true" ]; then
+              echo "All 6 breeders reached trial target (${MIN_TRIALS})"
+              break
+            fi
+
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+
+          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
+            echo "WARNING: Timed out waiting for all breeders to reach ${MIN_TRIALS} trials"
+          fi
+
+      - name: Watermark Detection
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          DETECTED=0
+          TOTAL=0
+
+          for I in 1 2 3 4 5 6; do
+            BID_I=$(cat /tmp/breeder_${I}_uuid)
+            for J in 1 2 3 4 5 6; do
+              if [ "${I}" -eq "${J}" ]; then
+                continue
+              fi
+              BID_J=$(cat /tmp/breeder_${J}_uuid)
+              TOTAL=$((TOTAL + 1))
+              echo "=== Detection #${TOTAL}: B${I}(${BID_I}) -> B${J}(${BID_J}) ==="
+              RESULT=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- "http://localhost:8089/api/watermark-detection/${BID_I}/${BID_J}" 2>/dev/null || echo '{"error":"query failed"}')
+              echo "${RESULT}" | python3 -m json.tool 2>/dev/null || echo "${RESULT}"
+
+              # Track positive detections
+              DET_FLAG=$(echo "${RESULT}" | jq -r '.detected // empty' 2>/dev/null || echo "")
+              if [ "${DET_FLAG}" = "true" ]; then
+                DETECTED=$((DETECTED + 1))
+              fi
+            done
+          done
+
+          echo ""
+          echo "=== Detection Summary ==="
+          echo "Total directional checks: ${TOTAL}"
+          echo "Positive detections: ${DETECTED}"
+          echo "Detection rate: $(echo "scale=2; ${DETECTED}*100/${TOTAL}" | bc 2>/dev/null || echo "N/A")%"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          for N in 1 2 3 4 5 6; do
+            BID=$(cat /tmp/breeder_${N}_uuid 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              echo "Purging breeder ${N}: ${BID}"
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder purge --force --id="${BID}" 2>/dev/null || true
+            fi
+          done
+
+          for N in 1 2 3 4 5 6; do
+            TID=$(cat /tmp/target_${N}_id 2>/dev/null || echo "")
+            if [ -n "${TID}" ]; then
+              echo "Deleting target ${N}: ${TID}"
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                target delete --id="${TID}" 2>/dev/null || true
+            fi
+          done
+
+          docker compose -f examples/bench/scenario-microgrid-6breeder/docker-compose.yml -p bench-mg6 down -v 2>/dev/null || true
+
+          if [ -f /tmp/pf_pid ]; then
+            kill $(cat /tmp/pf_pid) 2>/dev/null || true
+            rm /tmp/pf_pid
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Bench Scenario Microgrid 6-Breeder Summary"
+          echo "Coupling: ${{ inputs.coupling_factor }}"
+          echo "Min trials per breeder: ${{ inputs.min_trials }}"
+          echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
+          echo "Breeders: 6"
+          echo "Directional detection pairs: 30"
+          echo "Status: ${{ job.status }}"
