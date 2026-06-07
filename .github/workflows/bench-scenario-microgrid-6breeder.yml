@@ -130,6 +130,12 @@ jobs:
             echo "${ID}" > "${OUTFILE}"
           }
 
+          # Clean up stale targets from previous runs (both bench-mg6-* and legacy microgrid-N names)
+          for STALE in $(curl -s ${API_URL}/targets | jq -r '.[] | select(.name | test("^(bench-mg6-|microgrid-)[1-6]$")) | .id' 2>/dev/null); do
+            echo "Deleting stale target: ${STALE}" >&2
+            curl -s -X DELETE ${API_URL}/targets/${STALE} >/dev/null 2>&1 || true
+          done
+
           for N in 1 2 3 4 5 6; do
             MG_IP_VAR="MG${N}_IP"
             MG_IP="${!MG_IP_VAR}"
