@@ -160,7 +160,7 @@ jobs:
               for EID in ${EXISTING}; do
                 curl -s -X DELETE "${API_URL}/breeders/${EID}?force=true" >/dev/null 2>&1 || true
               done
-              sleep 5
+              sleep 10
             fi
 
             sed -e "s/\"${MG_REF}\"/\"${TARGET_ID}\"/" \
@@ -170,9 +170,10 @@ jobs:
 
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
-              EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
-              if [ -n "${EXISTING}" ]; then
-                UUID=$(echo "${EXISTING}" | head -1)
+              # Always check API first — breeder may already exist from a prior attempt
+              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              if [ -n "${UUID}" ]; then
+                echo "Breeder ${NAME} already exists: ${UUID}" >&2
                 break
               fi
 
@@ -183,11 +184,13 @@ jobs:
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
               if [ -z "${UUID}" ]; then
+                sleep 5
                 UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               fi
               if [ -n "${UUID}" ]; then
                 break
               fi
+              echo "Attempt ${ATTEMPT} failed for ${NAME}, retrying..." >&2
               sleep 10
             done
 
