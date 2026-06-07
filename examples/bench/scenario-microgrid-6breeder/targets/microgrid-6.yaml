@@ -1,5 +1,5 @@
-name: "microgrid-6"
+name: "TARGET_NAME"
 targetType: "http"
 spec:
-  url: "http://microgrid-6:8090"
+  url: "TARGET_URL"
   auth_type: "none"
