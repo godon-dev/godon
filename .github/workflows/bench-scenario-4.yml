@@ -100,12 +100,22 @@ jobs:
           echo $! > /tmp/pf_pid
           sleep 3
 
+          API_READY=false
           for i in $(seq 1 30); do
             if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
+              API_READY=true
+              echo "API is healthy"
               break
             fi
+            echo "Waiting for API... attempt $i"
             sleep 2
           done
+
+          if [ "$API_READY" = "false" ]; then
+            echo "ERROR: API never became healthy"
+            cat /tmp/pf.log
+            exit 1
+          fi
 
           echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
           echo "API_PORT=9090" >> $GITHUB_ENV
