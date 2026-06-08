@@ -342,6 +342,45 @@ jobs:
           echo ""
           echo "Scenario 4 passed"
 
+      - name: Dump Trial Data
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+
+          # Port-forward observer
+          fuser -k 9099/tcp 2>/dev/null || true
+          sleep 1
+          kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
+          sleep 3
+
+          cat > /tmp/dump_trials.py << 'PYEOF'
+          import sys, json
+          try:
+              data = json.load(sys.stdin)
+              trials = data if isinstance(data, list) else data.get('trials', data.get('data', []))
+              complete = [t for t in trials if t.get('state') == 'COMPLETE']
+              fail = [t for t in trials if t.get('state') == 'FAIL']
+              print('%d complete / %d fail / %d total' % (len(complete), len(fail), len(trials)))
+              print('%4s %10s %10s %10s %3s' % ('#', 'growth', 'energy', 'water', 'WM'))
+              for t in sorted(complete, key=lambda x: x['number']):
+                  v = t.get('values', [])
+                  gr = '%.4f' % float(v[0]) if len(v) > 0 else '?'
+                  en = '%.4f' % float(v[1]) if len(v) > 1 else '?'
+                  wa = '%.4f' % float(v[2]) if len(v) > 2 else '?'
+                  wm = t.get('user_attrs', {}).get('watermark', '')
+                  wms = 'Y' if wm and wm != 'off' else '-'
+                  print('%4d %10s %10s %10s %3s' % (t['number'], gr, en, wa, wms))
+          except Exception as e:
+              print('ERROR: %s' % e)
+          PYEOF
+
+          for BID in ${BREEDER_1_UUID} ${BREEDER_2_UUID}; do
+            echo "=== Trials for breeder ${BID} ==="
+            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | python3 /tmp/dump_trials.py || echo "Failed to fetch trials for ${BID}"
+          done
+
       - name: Diagnose Failure
         if: failure()
         env:
