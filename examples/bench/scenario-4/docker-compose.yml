@@ -2,12 +2,13 @@
 #
 # Two breeders, each optimizing its own greenhouse. The breeders are completely
 # independent — no shared trials, no communication. But the greenhouses are
-# PHYSICALLY COUPLED via 4 hidden channels:
+# PHYSICALLY COUPLED via 3 structural proximity channels:
 #
-#   1. Waste heat:    neighbor avg temp nudges outside_temp
-#   2. CO2 exhaust:   neighbor energy usage nudges outside_co2
-#   3. Power sag:     neighbor energy usage reduces effective light
-#   4. Humidity drift: neighbor avg humidity nudges outside_humidity
+#   1. Shared wall:      thermal conductance between adjacent greenhouses
+#   2. Air exchange:     shared ventilation duct (CO2 + humidity mixing)
+#   3. Shared water tank: finite reservoir drained by both (20L, slow well influx)
+#
+# Additionally, crop_quality and water_efficiency are tracked as objectives.
 #
 # Layout:
 #   [Breeder-1] --effectuate/recon--> [greenhouse-1] <~~coupling~~> [greenhouse-2] <--effectuate/recon-- [Breeder-2]
@@ -30,7 +31,7 @@
 #
 services:
   greenhouse-1:
-    image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
+    image: ghcr.io/godon-dev/godon-bench-greenhouse:0.2.0
     ports:
       - "8090:8090"
     environment:
@@ -42,7 +43,7 @@ services:
       COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
 
   greenhouse-2:
-    image: ghcr.io/godon-dev/godon-bench-greenhouse:0.1.0
+    image: ghcr.io/godon-dev/godon-bench-greenhouse:0.2.0
     ports:
       - "8091:8090"
     environment:
