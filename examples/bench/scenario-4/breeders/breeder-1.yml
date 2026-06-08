@@ -94,10 +94,10 @@ objectives:
 
 rollback_strategies:
   standard:
-    consecutive_failures: 3
+    consecutive_failures: 10
     target_state: "previous"
     max_attempts: 3
-    on_failure: "stop"
+    on_failure: "continue"
     timeout_seconds: 60
     after:
       action: "pause"
