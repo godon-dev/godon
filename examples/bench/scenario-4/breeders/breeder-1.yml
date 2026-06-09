@@ -52,6 +52,9 @@ cooperation:
 
 interference_detection:
   mode: active
+  impulse:
+    duty_cycle: 0.05
+    direction: random
 
 reconnaissance:
   type: http
