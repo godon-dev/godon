@@ -274,9 +274,6 @@ jobs:
 
           echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
 
-          DETECTION_TRIGGERED=false
-          WARMUP_TRIALS=30
-
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
             STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
@@ -286,21 +283,6 @@ jobs:
             TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
 
             echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
-
-            # Trigger detection rounds after warmup
-            if [ "${DETECTION_TRIGGERED}" = "false" ] && \
-               [ "${TRIAL_1}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null && \
-               [ "${TRIAL_2}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null; then
-              echo "Warmup complete (${TRIAL_1}/${TRIAL_2} trials). Inserting detection rounds..."
-              kubectl exec -n godon yb-tserver-0 -- env PGPASSWORD=*** /home/yugabyte/bin/ysqlsh \
-                -h yb-tserver-0 -U yugabyte -d archive_db -t -c \
-                "INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_1_UUID}');" 2>/dev/null || true
-              kubectl exec -n godon yb-tserver-0 -- env PGPASSWORD=*** /home/yugabyte/bin/ysqlsh \
-                -h yb-tserver-0 -U yugabyte -d archive_db -t -c \
-                "INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_2_UUID}');" 2>/dev/null || true
-              DETECTION_TRIGGERED=true
-              echo "Detection rounds inserted: sender=${BREEDER_1_UUID}, sender=${BREEDER_2_UUID}"
-            fi
 
             if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
                [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
@@ -359,6 +341,45 @@ jobs:
 
           echo ""
           echo "Scenario 4 passed"
+
+      - name: Dump Trial Data
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+
+          # Port-forward observer
+          fuser -k 9099/tcp 2>/dev/null || true
+          sleep 1
+          kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
+          sleep 3
+
+          cat > /tmp/dump_trials.py << 'PYEOF'
+          import sys, json
+          try:
+              data = json.load(sys.stdin)
+              trials = data if isinstance(data, list) else data.get('trials', data.get('data', []))
+              complete = [t for t in trials if t.get('state') == 'COMPLETE']
+              fail = [t for t in trials if t.get('state') == 'FAIL']
+              print('%d complete / %d fail / %d total' % (len(complete), len(fail), len(trials)))
+              print('%4s %10s %10s %10s %3s' % ('#', 'growth', 'energy', 'water', 'WM'))
+              for t in sorted(complete, key=lambda x: x['number']):
+                  v = t.get('values', [])
+                  gr = '%.4f' % float(v[0]) if len(v) > 0 else '?'
+                  en = '%.4f' % float(v[1]) if len(v) > 1 else '?'
+                  wa = '%.4f' % float(v[2]) if len(v) > 2 else '?'
+                  wm = t.get('user_attrs', {}).get('watermark', '')
+                  wms = 'Y' if wm and wm != 'off' else '-'
+                  print('%4d %10s %10s %10s %3s' % (t['number'], gr, en, wa, wms))
+          except Exception as e:
+              print('ERROR: %s' % e)
+          PYEOF
+
+          for BID in ${BREEDER_1_UUID} ${BREEDER_2_UUID}; do
+            echo "=== Trials for breeder ${BID} ==="
+            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | python3 /tmp/dump_trials.py || echo "Failed to fetch trials for ${BID}"
+          done
 
       - name: Diagnose Failure
         if: failure()
