@@ -292,12 +292,8 @@ jobs:
                [ "${TRIAL_1}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null && \
                [ "${TRIAL_2}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null; then
               echo "Warmup complete (${TRIAL_1}/${TRIAL_2} trials). Inserting detection rounds..."
-              kubectl exec -n godon yb-tserver-0 -- env PGPASSWORD=*** /home/yugabyte/bin/ysqlsh \
-                -h yb-tserver-0 -U yugabyte -d archive_db -t -c \
-                "INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_1_UUID}');" 2>/dev/null || true
-              kubectl exec -n godon yb-tserver-0 -- env PGPASSWORD=*** /home/yugabyte/bin/ysqlsh \
-                -h yb-tserver-0 -U yugabyte -d archive_db -t -c \
-                "INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_2_UUID}');" 2>/dev/null || true
+              kubectl exec -n godon yb-tserver-0 -- sh -c \
+                "echo 'yb-tservers.godon.svc.cluster.local:5433:archive_db:yugabyte:yugabyte' > /tmp/.pgpass && chmod 600 /tmp/.pgpass && PGPASSFILE=/tmp/.pgpass /home/yugabyte/bin/ysqlsh -h yb-tservers.godon.svc.cluster.local -p 5433 -U yugabyte -d archive_db -t -c \"INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_1_UUID}');\" && PGPASSFILE=/tmp/.pgpass /home/yugabyte/bin/ysqlsh -h yb-tservers.godon.svc.cluster.local -p 5433 -U yugabyte -d archive_db -t -c \"INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_2_UUID}');\""
               DETECTION_TRIGGERED=true
               echo "Detection rounds inserted: sender=${BREEDER_1_UUID}, sender=${BREEDER_2_UUID}"
             fi
