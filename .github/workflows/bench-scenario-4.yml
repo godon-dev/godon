@@ -274,6 +274,9 @@ jobs:
 
           echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
 
+          DETECTION_TRIGGERED=false
+          WARMUP_TRIALS=30
+
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
             STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
@@ -283,6 +286,17 @@ jobs:
             TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
 
             echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
+
+            # Insert detection rounds after warmup using pgpass for YugaByte auth
+            if [ "${DETECTION_TRIGGERED}" = "false" ] && \
+               [ "${TRIAL_1}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null && \
+               [ "${TRIAL_2}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null; then
+              echo "Warmup complete (${TRIAL_1}/${TRIAL_2} trials). Inserting detection rounds..."
+              kubectl exec -n godon yb-tserver-0 -- sh -c \
+                "echo 'yb-tservers.godon.svc.cluster.local:5433:archive_db:yugabyte:yugabyte' > /tmp/.pgpass && chmod 600 /tmp/.pgpass && PGPASSFILE=/tmp/.pgpass /home/yugabyte/bin/ysqlsh -h yb-tservers.godon.svc.cluster.local -p 5433 -U yugabyte -d archive_db -t -c \"INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_1_UUID}');\" && PGPASSFILE=/tmp/.pgpass /home/yugabyte/bin/ysqlsh -h yb-tservers.godon.svc.cluster.local -p 5433 -U yugabyte -d archive_db -t -c \"INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_2_UUID}');\""
+              DETECTION_TRIGGERED=true
+              echo "Detection rounds inserted: sender=${BREEDER_1_UUID}, sender=${BREEDER_2_UUID}"
+            fi
 
             if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
                [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
