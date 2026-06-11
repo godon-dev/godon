@@ -261,17 +261,6 @@ jobs:
           create_breeder "bench-s4-2" "${TARGET_2_ID}" "${GH2_URL}" \
             examples/bench/scenario-4/breeders/breeder-2.yml breeder-s4-2-config.yaml /tmp/breeder_2_uuid
 
-      - name: Insert Detection Rounds
-        env:
-          KUBECONFIG: /tmp/kind_kubeconfig.yaml
-        run: |
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
-          echo "Inserting detection rounds for ${BREEDER_1_UUID} and ${BREEDER_2_UUID}..."
-          kubectl exec -n godon yb-tserver-0 -- sh -c \
-            "echo 'yb-tservers.godon.svc.cluster.local:5433:archive_db:yugabyte:yugabyte' > /tmp/.pgpass && chmod 600 /tmp/.pgpass && PGPASSFILE=/tmp/.pgpass /home/yugabyte/bin/ysqlsh -h yb-tservers.godon.svc.cluster.local -p 5433 -U yugabyte -d archive_db -t -c \"INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_1_UUID}');\" && PGPASSFILE=/tmp/.pgpass /home/yugabyte/bin/ysqlsh -h yb-tservers.godon.svc.cluster.local -p 5433 -U yugabyte -d archive_db -t -c \"INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_2_UUID}');\""
-          echo "Detection rounds inserted."
-
       - name: Poll Optimization Progress
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
