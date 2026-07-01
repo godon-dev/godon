@@ -204,13 +204,14 @@ jobs:
             local DST=$5
             local OUTFILE=$6
 
+            # Check if breeder already exists FIRST. If yes, reuse it.
+            # Do NOT delete + recreate — that creates a race window for duplicates.
             EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             if [ -n "${EXISTING}" ]; then
-              echo "Deleting existing breeder(s): ${EXISTING}" >&2
-              for EID in ${EXISTING}; do
-                curl -s -X DELETE "${API_URL}/breeders/${EID}?force=true" >/dev/null 2>&1 || true
-              done
-              sleep 5
+              UUID=$(echo "${EXISTING}" | head -1)
+              echo "Breeder ${NAME} already exists: ${UUID}, reusing" >&2
+              echo "${UUID}" > "${OUTFILE}"
+              return 0
             fi
 
             sed -e "s/\"greenhouse-1\"/\"${TARGET_ID}\"/" \
@@ -224,9 +225,10 @@ jobs:
             for ATTEMPT in 1 2 3 4 5; do
               echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
 
+              # Re-check for existing before each attempt
               EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
               if [ -n "${EXISTING}" ]; then
-                echo "Breeder ${NAME} already exists: ${EXISTING}, skipping creation" >&2
+                echo "Breeder ${NAME} already exists: ${EXISTING}, reusing" >&2
                 UUID=$(echo "${EXISTING}" | head -1)
                 break
               fi
