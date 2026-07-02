@@ -55,6 +55,11 @@ interference_detection:
   impulse:
     duty_cycle: 0.05
     direction: upper
+  warmup_trials: 15
+  push_block_size: 15
+  pause_block_size: 15
+  receiver_baseline_trials: 5
+  receiver_post_trials: 5
 
 reconnaissance:
   type: http
