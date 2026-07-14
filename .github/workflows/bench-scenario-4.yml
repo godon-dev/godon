@@ -274,9 +274,6 @@ jobs:
 
           echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
 
-          DETECTION_TRIGGERED=false
-          WARMUP_TRIALS=30
-
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
             STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
@@ -287,20 +284,9 @@ jobs:
 
             echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
 
-            # Trigger detection rounds after warmup
-            if [ "${DETECTION_TRIGGERED}" = "false" ] && \
-               [ "${TRIAL_1}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null && \
-               [ "${TRIAL_2}" -ge "${WARMUP_TRIALS}" ] 2>/dev/null; then
-              echo "Warmup complete (${TRIAL_1}/${TRIAL_2} trials). Inserting detection rounds..."
-              kubectl exec -n godon yb-tserver-0 -- env PGPASSWORD=*** /home/yugabyte/bin/ysqlsh \
-                -h yb-tserver-0 -U yugabyte -d archive_db -t -c \
-                "INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_1_UUID}');" 2>/dev/null || true
-              kubectl exec -n godon yb-tserver-0 -- env PGPASSWORD=*** /home/yugabyte/bin/ysqlsh \
-                -h yb-tserver-0 -U yugabyte -d archive_db -t -c \
-                "INSERT INTO detection_rounds (sender_id) VALUES ('${BREEDER_2_UUID}');" 2>/dev/null || true
-              DETECTION_TRIGGERED=true
-              echo "Detection rounds inserted: sender=${BREEDER_1_UUID}, sender=${BREEDER_2_UUID}"
-            fi
+            # Detection is now fully autonomous — the breeders coordinate through
+            # the sender_lease table and detection_readiness barrier.
+            # No manual detection_rounds inserts needed.
 
             if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
                [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
