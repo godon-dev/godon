@@ -51,14 +51,11 @@ cooperation:
 
 interference_detection:
   mode: active
-  impulse:
-    duty_cycle: 0.05
-    direction: upper
-  warmup_trials: 15
+  min_optimize_trials: 15
+  hold_calib_trials: 5
   push_block_size: 15
   pause_block_size: 15
-  receiver_baseline_trials: 5
-  receiver_post_trials: 5
+  cooldown_trials: 5
 
 reconnaissance:
   type: http
