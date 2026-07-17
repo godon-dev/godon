@@ -103,27 +103,6 @@ objectives:
       interval: 0
       aggregation: median
 
-  - name: "max_temp"
-    direction: minimize
-    reconnaissance:
-      service: http
-      path: /metrics/json
-      key: max_temp
-      stabilization_seconds: 2
-      samples: 5
-      interval: 0
-      aggregation: median
-
-  - name: "max_co2"
-    direction: minimize
-    reconnaissance:
-      service: http
-      path: /metrics/json
-      key: max_co2
-      stabilization_seconds: 2
-      samples: 5
-      interval: 0
-
 rollback_strategies:
   standard:
     consecutive_failures: 10
