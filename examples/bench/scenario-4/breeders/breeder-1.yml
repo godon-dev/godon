@@ -104,6 +104,41 @@ objectives:
       interval: 0
       aggregation: median
 
+observations:
+  # Signals collected per trial for coupling detection.
+  # NOT fed to the optimizer — stored as trial user_attrs.
+  # The observer reads these to detect step changes caused by
+  # a neighboring optimizer's push/pause blocks.
+  - name: "max_temp"
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: max_temp
+      stabilization_seconds: 2
+      samples: 5
+      interval: 0
+      aggregation: median
+
+  - name: "max_co2"
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: max_co2
+      stabilization_seconds: 2
+      samples: 5
+      interval: 0
+      aggregation: median
+
+  - name: "max_humidity"
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: max_humidity
+      stabilization_seconds: 2
+      samples: 5
+      interval: 0
+      aggregation: median
+
 rollback_strategies:
   standard:
     consecutive_failures: 10
