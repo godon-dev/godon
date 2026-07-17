@@ -56,6 +56,13 @@ interference_detection:
   push_block_size: 15
   pause_block_size: 15
   cooldown_trials: 5
+  hold_params:
+    heating_setpoints: [20, 20]
+    vent_openings: [0.5, 0.5]
+    shading: 0.0
+    co2_injection: 10.0
+    light_intensity: 300.0
+    irrigation: 1.5
 
 reconnaissance:
   type: http
