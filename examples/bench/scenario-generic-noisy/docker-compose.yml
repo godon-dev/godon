@@ -1,4 +1,3 @@
-# Scenario: Generic bench — noisy pair (stacked gaussian + colored)
 services:
   bench-generic:
     image: ghcr.io/godon-dev/godon-bench-generic:0.1.0
