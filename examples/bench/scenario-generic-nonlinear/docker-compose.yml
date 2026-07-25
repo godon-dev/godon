@@ -1,0 +1,13 @@
+# Scenario: Generic bench — nonlinear (saturation)
+services:
+  bench-generic:
+    image: ghcr.io/godon-dev/godon-bench-generic:0.1.0
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./topology.yaml:/config/topology.yaml:ro
+    environment:
+      PORT: "8090"
+      CONFIG_PATH: "/config/topology.yaml"
+      GENERIC_SEED: "42"
+      RUST_LOG: "info"
