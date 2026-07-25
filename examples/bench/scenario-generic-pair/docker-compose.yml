@@ -1,0 +1,23 @@
+# Scenario: Generic bench — pair topology
+#
+# Single container running 2 virtual nodes with planted coupling.
+# The topology.yaml IS the ground truth — read it to verify detection results.
+#
+# Run:
+#   docker compose up -d
+#   # Then submit breeder-1.yml and breeder-2.yml to godon-api
+#
+# After detection rounds complete, compare detected edges to topology.yaml.
+
+services:
+  bench-generic:
+    image: ghcr.io/godon-dev/godon-bench-generic:0.1.0
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./topology.yaml:/config/topology.yaml:ro
+    environment:
+      PORT: "8090"
+      CONFIG_PATH: "/config/topology.yaml"
+      GENERIC_SEED: "42"
+      RUST_LOG: "info"

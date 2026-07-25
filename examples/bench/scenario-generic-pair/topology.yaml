@@ -1,0 +1,39 @@
+# Topology: 2-node pair, linear coupling — basic detection validation
+#
+# Ground truth: node-1 → node-2 at strength 0.7 (objective channel 0)
+# No coupling back from node-2 to node-1.
+# This is the simplest case: does the scanner detect the edge and
+# recover ~0.7?
+
+nodes:
+  - id: node-1
+    params: 3
+    objectives: 2
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.3, 0.5, 0.2]
+      - [0.1, 0.4, 0.5]
+
+  - id: node-2
+    params: 3
+    objectives: 2
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.4, 0.3, 0.3]
+      - [0.2, 0.6, 0.2]
+
+edges:
+  - from: node-1
+    from_channel: 0
+    to: node-2
+    to_channel: 0
+    strength: 0.7
+
+noise:
+  gaussian_sigma: 0.02
+  colored_sigma: 0.0
+  drift_rate: 0.0
