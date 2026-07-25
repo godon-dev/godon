@@ -1,8 +1,3 @@
-# Generic bench breeder — node-2
-#
-# Breeder type: bench_generic. Optimizes 3 parameters over range 0-100.
-# The detection coordinator handles push/pause/hold automatically.
-
 meta:
   configVersion: "0.3"
   strict_validation: false
