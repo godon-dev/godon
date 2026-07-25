@@ -1,0 +1,18 @@
+# Scenario: Generic bench — 4-node chain topology (composition test)
+#
+# Single container running 4 virtual nodes in a chain.
+# Ground truth: node-1 → node-2 (0.7) → node-3 (0.5) → node-4 (0.3)
+# Expected composition: 0.7 × 0.5 × 0.3 = 0.105
+
+services:
+  bench-generic:
+    image: ghcr.io/godon-dev/godon-bench-generic:0.1.0
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./topology.yaml:/config/topology.yaml:ro
+    environment:
+      PORT: "8090"
+      CONFIG_PATH: "/config/topology.yaml"
+      GENERIC_SEED: "42"
+      RUST_LOG: "info"
