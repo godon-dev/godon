@@ -15,6 +15,18 @@ on:
         description: "Coupling strength (0.0=none, 0.3=moderate, 0.7=strong)"
         required: false
         default: "0.7"
+      base_function:
+        description: "linear | polynomial | threshold | saturation"
+        required: false
+        default: "linear"
+      noise_gaussian:
+        description: "Gaussian noise sigma"
+        required: false
+        default: "0.02"
+      noise_colored:
+        description: "Colored noise sigma (0=off)"
+        required: false
+        default: "0.0"
 
 jobs:
   bench-generic:
@@ -48,42 +60,16 @@ jobs:
 
       - name: Start Generic Bench Target
         run: |
-          export COUPLING_STRENGTH="${{ inputs.coupling_strength }}"
+          # Use the existing topology as template, override params via sed
+          cp examples/bench/scenario-generic-pair/topology.yaml /tmp/topology.yaml
 
-          # Generate topology.yaml with the desired coupling strength
-          cat > /tmp/topology.yaml << EOF
-          nodes:
-            - id: node-1
-              params: 3
-              objectives: 2
-              base: linear
-              param_lower: 0.0
-              param_upper: 100.0
-              weights:
-                - [0.3, 0.5, 0.2]
-                - [0.1, 0.4, 0.5]
-            - id: node-2
-              params: 3
-              objectives: 2
-              base: linear
-              param_lower: 0.0
-              param_upper: 100.0
-              weights:
-                - [0.4, 0.3, 0.3]
-                - [0.2, 0.6, 0.2]
+          sed -i "s/strength: .*/strength: ${{ inputs.coupling_strength }}/" /tmp/topology.yaml
+          sed -i "s/base: .*/base: ${{ inputs.base_function }}/" /tmp/topology.yaml
+          sed -i "s/gaussian_sigma: .*/gaussian_sigma: ${{ inputs.noise_gaussian }}/" /tmp/topology.yaml
+          sed -i "s/colored_sigma: .*/colored_sigma: ${{ inputs.noise_colored }}/" /tmp/topology.yaml
 
-          edges:
-            - from: node-1
-              from_channel: 0
-              to: node-2
-              to_channel: 0
-              strength: ${COUPLING_STRENGTH}
-
-          noise:
-            gaussian_sigma: 0.02
-            colored_sigma: 0.0
-            drift_rate: 0.0
-          EOF
+          echo "=== Effective topology ==="
+          cat /tmp/topology.yaml
 
           mkdir -p /tmp/bench-generic
           cp /tmp/topology.yaml /tmp/bench-generic/topology.yaml
@@ -413,6 +399,9 @@ jobs:
         run: |
           echo "Bench Generic Summary"
           echo "Coupling strength: ${{ inputs.coupling_strength }}"
+          echo "Base function: ${{ inputs.base_function }}"
+          echo "Noise gaussian: ${{ inputs.noise_gaussian }}"
+          echo "Noise colored: ${{ inputs.noise_colored }}"
           echo "Min trials per breeder: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Layout: 2 breeders -> 2 coupled generic nodes (single container)"
