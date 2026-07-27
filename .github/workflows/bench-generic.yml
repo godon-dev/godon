@@ -77,7 +77,7 @@ jobs:
           docker run -d \
             --name bench-generic \
             -p 8090:8090 \
-            -v /tmp/bench-generic/topology.yaml:/config/topology.yaml:ro \
+            -v /tmp/bench-generic:/config:ro \
             -e CONFIG_PATH=/config/topology.yaml \
             -e PORT=8090 \
             -e GENERIC_SEED=42 \
@@ -88,7 +88,7 @@ jobs:
           for i in $(seq 1 30); do
             if curl -s -f --connect-timeout 2 http://127.0.0.1:8090/health >/dev/null 2>&1; then
               echo "Bench healthy"
-              curl -s http://127.0.0.1:8090/health | python3 -m json.tool
+              curl -s http://127.0.0.1:8090/health | jq '.'
               break
             fi
             sleep 2
@@ -292,12 +292,12 @@ jobs:
 
           echo ""
           echo "=== Bench Node Status ==="
-          curl -s http://127.0.0.1:8090/node-1/status | python3 -m json.tool 2>/dev/null || true
-          curl -s http://127.0.0.1:8090/node-2/status | python3 -m json.tool 2>/dev/null || true
+          curl -s http://127.0.0.1:8090/node-1/status | jq '.' 2>/dev/null || true
+          curl -s http://127.0.0.1:8090/node-2/status | jq '.' 2>/dev/null || true
 
           echo ""
           echo "=== Bench Config (Ground Truth) ==="
-          curl -s http://127.0.0.1:8090/config | python3 -m json.tool 2>/dev/null || true
+          curl -s http://127.0.0.1:8090/config | jq '.' 2>/dev/null || true
 
       - name: Dump Trial Data
         env:
@@ -313,25 +313,12 @@ jobs:
 
           for BID in ${BREEDER_1_UUID} ${BREEDER_2_UUID}; do
             echo "=== Trials for breeder ${BID} ==="
-            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | python3 -c "
-          import sys, json
-          try:
-              data = json.load(sys.stdin)
-              trials = data if isinstance(data, list) else data.get('trials', data.get('data', []))
-              complete = [t for t in trials if t.get('state') == 'COMPLETE']
-              fail = [t for t in trials if t.get('state') == 'FAIL']
-              print('%d complete / %d fail / %d total' % (len(complete), len(fail), len(trials)))
-              print('%4s %10s %3s %5s' % ('#', 'obj_0', 'WM', 'coord'))
-              for t in sorted(complete, key=lambda x: x['number']):
-                  v = t.get('values', [])
-                  obj0 = '%.4f' % float(v[0]) if len(v) > 0 else '?'
-                  ua = t.get('user_attrs', {})
-                  wm = 'Y' if ua.get('watermark', 'off') != 'off' else '-'
-                  coord = ua.get('coord_state', '')[:5]
-                  print('%4d %10s %3s %5s' % (t['number'], obj0, wm, coord))
-          except Exception as e:
-              print('ERROR: %s' % e)
-          " || echo "Failed to fetch trials"
+            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | jq -r '
+              if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
+              | {complete: (map(select(.state == "COMPLETE")) | length),
+                 fail: (map(select(.state == "FAIL")) | length),
+                 total: length}
+            ' 2>/dev/null || echo "Failed to fetch trials"
           done
 
       - name: Diagnose Failure
