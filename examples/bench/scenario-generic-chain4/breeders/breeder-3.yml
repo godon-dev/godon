@@ -53,20 +53,18 @@ objectives:
     reconnaissance:
       service: http
       path: /metrics/json
-      key: objectives
+      key: objective_0
       stabilization_seconds: 0
       samples: 3
       interval: 0
       aggregation: median
-      is_array: true
-      array_index: 0
 
 observations:
   - name: "objective_1"
     reconnaissance:
       service: http
       path: /metrics/json
-      key: objectives
+      key: objective_1
       stabilization_seconds: 0
       samples: 3
       interval: 0
