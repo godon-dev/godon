@@ -1,0 +1,419 @@
+name: "Bench Generic — Two Optimizers, Two Coupled Nodes"
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_trials:
+        description: "Minimum trials per breeder for success"
+        required: false
+        default: "10"
+      max_wait_minutes:
+        description: "Max wait time in minutes"
+        required: false
+        default: "25"
+      coupling_strength:
+        description: "Coupling strength (0.0=none, 0.3=moderate, 0.7=strong)"
+        required: false
+        default: "0.7"
+
+jobs:
+  bench-generic:
+    name: "Generic: 2 breeders -> 2 coupled nodes"
+    runs-on: [self-hosted, linux]
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Verify KIND Cluster
+        run: |
+          if ! kind get clusters | grep -q "godon-1-cluster"; then
+            echo "KIND cluster not found. Run setup workflows first."
+            exit 1
+          fi
+          kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
+
+      - name: Verify Godon Stack
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          if ! helm status godon --namespace godon >/dev/null 2>&1; then
+            echo "Godon stack not found."
+            exit 1
+          fi
+          kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+
+      - name: Start Generic Bench Target
+        run: |
+          export COUPLING_STRENGTH="${{ inputs.coupling_strength }}"
+
+          # Generate topology.yaml with the desired coupling strength
+          cat > /tmp/topology.yaml << EOF
+          nodes:
+            - id: node-1
+              params: 3
+              objectives: 2
+              base: linear
+              param_lower: 0.0
+              param_upper: 100.0
+              weights:
+                - [0.3, 0.5, 0.2]
+                - [0.1, 0.4, 0.5]
+            - id: node-2
+              params: 3
+              objectives: 2
+              base: linear
+              param_lower: 0.0
+              param_upper: 100.0
+              weights:
+                - [0.4, 0.3, 0.3]
+                - [0.2, 0.6, 0.2]
+
+          edges:
+            - from: node-1
+              from_channel: 0
+              to: node-2
+              to_channel: 0
+              strength: ${COUPLING_STRENGTH}
+
+          noise:
+            gaussian_sigma: 0.02
+            colored_sigma: 0.0
+            drift_rate: 0.0
+          EOF
+
+          mkdir -p /tmp/bench-generic
+          cp /tmp/topology.yaml /tmp/bench-generic/topology.yaml
+
+          docker run -d \
+            --name bench-generic \
+            -p 8090:8090 \
+            -v /tmp/bench-generic/topology.yaml:/config/topology.yaml:ro \
+            -e CONFIG_PATH=/config/topology.yaml \
+            -e PORT=8090 \
+            -e GENERIC_SEED=42 \
+            -e RUST_LOG=info \
+            ghcr.io/godon-dev/godon-bench-generic:0.1.0
+
+          echo "Waiting for generic bench..."
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.1:8090/health >/dev/null 2>&1; then
+              echo "Bench healthy"
+              curl -s http://127.0.0.1:8090/health | python3 -m json.tool
+              break
+            fi
+            sleep 2
+          done
+
+          docker network connect kind bench-generic 2>/dev/null || true
+          BENCH_IP=$(docker inspect bench-generic -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          echo "Bench KIND IP: ${BENCH_IP}"
+          echo "BENCH_IP=${BENCH_IP}" >> $GITHUB_ENV
+
+      - name: Port Forward to Godon API
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          fuser -k 9090/tcp 2>/dev/null || true
+          sleep 1
+
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+          kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
+          echo $! > /tmp/pf_pid
+          sleep 3
+
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
+              echo "API is healthy"
+              break
+            fi
+            sleep 2
+          done
+
+          echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
+          echo "API_PORT=9090" >> $GITHUB_ENV
+
+      - name: Create Targets
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          BENCH_URL="http://${{ env.BENCH_IP }}:8090"
+
+          create_target() {
+            local NAME=$1
+            local NODE_PATH=$2
+            local TEMPLATE=$3
+            local FILE=$4
+            local OUTFILE=$5
+
+            EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing target: ${EXISTING}" >&2
+              curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
+            fi
+
+            sed -e "s|http://bench-generic:8090/node-1|${BENCH_URL}/${NODE_PATH}|" \
+              ${TEMPLATE} > ${FILE}
+            chmod 644 ${FILE}
+
+            echo "Creating target ${NAME}..." >&2
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work:ro -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              target create --file=${FILE} 2>&1 || true)
+            echo "${CREATE_OUTPUT}" >&2
+
+            local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${ID}" ]; then
+              ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            fi
+            if [ -z "${ID}" ]; then
+              echo "Failed to create target ${NAME}" >&2
+              exit 1
+            fi
+            echo "Target ${NAME}: ${ID}" >&2
+            echo "${ID}" > "${OUTFILE}"
+          }
+
+          create_target "bench-generic-node-1" "node-1" \
+            examples/bench/scenario-generic-pair/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
+          create_target "bench-generic-node-2" "node-2" \
+            examples/bench/scenario-generic-pair/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
+
+      - name: Create Breeders
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          TARGET_1_ID=$(cat /tmp/target_1_id)
+          TARGET_2_ID=$(cat /tmp/target_2_id)
+          BENCH_URL="http://${{ env.BENCH_IP }}:8090"
+
+          create_breeder() {
+            local NAME=$1
+            local TARGET_ID=$2
+            local RECON_URL=$3
+            local NODE_NUM=$4
+            local OUTFILE=$5
+
+            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              UUID=$(echo "${EXISTING}" | head -1)
+              echo "Breeder ${NAME} already exists: ${UUID}, reusing" >&2
+              echo "${UUID}" > "${OUTFILE}"
+              return 0
+            fi
+
+            # Replace target ref and recon URL
+            sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
+                -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
+                -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
+                -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
+                examples/bench/scenario-generic-pair/breeders/breeder-${NODE_NUM}.yml > /tmp/breeder-config-${NODE_NUM}.yaml
+            chmod 644 /tmp/breeder-config-${NODE_NUM}.yaml
+
+            local UUID=""
+            for ATTEMPT in 1 2 3 4 5; do
+              echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
+
+              CREATE_OUTPUT=$(docker run --rm --network host \
+                -v $(pwd):/work -w /work \
+                "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder create --name="${NAME}" --file=/tmp/breeder-config-${NODE_NUM}.yaml 2>&1 || true)
+              echo "${CREATE_OUTPUT}" >&2
+
+              UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              if [ -z "${UUID}" ]; then
+                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              fi
+              if [ -n "${UUID}" ]; then
+                break
+              fi
+              sleep 10
+            done
+
+            if [ -z "${UUID}" ]; then
+              echo "Failed to create breeder ${NAME}" >&2
+              exit 1
+            fi
+            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "${UUID}" > "${OUTFILE}"
+          }
+
+          create_breeder "bench-generic-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/breeder_1_uuid
+          create_breeder "bench-generic-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/breeder_2_uuid
+
+      - name: Poll Optimization Progress
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+          MIN_TRIALS=${{ inputs.min_trials }}
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
+          ELAPSED=0
+
+          echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
+
+          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+            STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+
+            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+            TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+
+            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
+
+            if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
+               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
+              echo "A breeder entered error state"
+              exit 1
+            fi
+
+            if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
+              echo "Both breeders reached trial target"
+              break
+            fi
+
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+
+          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
+            echo "Timed out"
+            exit 1
+          fi
+
+      - name: Verify Results
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+
+          echo "=== Breeder 1 Final State ==="
+          curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "=== Breeder 2 Final State ==="
+          curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "=== Bench Node Status ==="
+          curl -s http://127.0.0.1:8090/node-1/status | python3 -m json.tool 2>/dev/null || true
+          curl -s http://127.0.0.1:8090/node-2/status | python3 -m json.tool 2>/dev/null || true
+
+          echo ""
+          echo "=== Bench Config (Ground Truth) ==="
+          curl -s http://127.0.0.1:8090/config | python3 -m json.tool 2>/dev/null || true
+
+      - name: Dump Trial Data
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
+          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+
+          fuser -k 9099/tcp 2>/dev/null || true
+          sleep 1
+          kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
+          sleep 3
+
+          for BID in ${BREEDER_1_UUID} ${BREEDER_2_UUID}; do
+            echo "=== Trials for breeder ${BID} ==="
+            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | python3 -c "
+          import sys, json
+          try:
+              data = json.load(sys.stdin)
+              trials = data if isinstance(data, list) else data.get('trials', data.get('data', []))
+              complete = [t for t in trials if t.get('state') == 'COMPLETE']
+              fail = [t for t in trials if t.get('state') == 'FAIL']
+              print('%d complete / %d fail / %d total' % (len(complete), len(fail), len(trials)))
+              print('%4s %10s %3s %5s' % ('#', 'obj_0', 'WM', 'coord'))
+              for t in sorted(complete, key=lambda x: x['number']):
+                  v = t.get('values', [])
+                  obj0 = '%.4f' % float(v[0]) if len(v) > 0 else '?'
+                  ua = t.get('user_attrs', {})
+                  wm = 'Y' if ua.get('watermark', 'off') != 'off' else '-'
+                  coord = ua.get('coord_state', '')[:5]
+                  print('%4d %10s %3s %5s' % (t['number'], obj0, wm, coord))
+          except Exception as e:
+              print('ERROR: %s' % e)
+          " || echo "Failed to fetch trials"
+          done
+
+      - name: Diagnose Failure
+        if: failure()
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+
+          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              echo "--- Breeder ${BID} ---"
+              curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
+            fi
+          done
+
+          echo ""
+          echo "--- Worker Logs (last 100 lines) ---"
+          WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -z "${WORKER_POD}" ] && WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -n "${WORKER_POD}" ] && kubectl logs -n godon "${WORKER_POD}" --tail=100 2>/dev/null || true
+
+          echo ""
+          echo "--- Bench Logs ---"
+          docker logs bench-generic --tail=30 2>&1 || true
+
+          echo ""
+          echo "--- All Pods ---"
+          kubectl get pods -n godon -o wide 2>/dev/null || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder purge --force --id="${BID}" 2>/dev/null || true
+            fi
+          done
+
+          for TID_FILE in /tmp/target_1_id /tmp/target_2_id; do
+            TID=$(cat ${TID_FILE} 2>/dev/null || echo "")
+            if [ -n "${TID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                target delete --id="${TID}" 2>/dev/null || true
+            fi
+          done
+
+          docker rm -f bench-generic 2>/dev/null || true
+
+          if [ -f /tmp/pf_pid ]; then
+            kill $(cat /tmp/pf_pid) 2>/dev/null || true
+            rm /tmp/pf_pid
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Bench Generic Summary"
+          echo "Coupling strength: ${{ inputs.coupling_strength }}"
+          echo "Min trials per breeder: ${{ inputs.min_trials }}"
+          echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
+          echo "Layout: 2 breeders -> 2 coupled generic nodes (single container)"
+          echo "Status: ${{ job.status }}"
