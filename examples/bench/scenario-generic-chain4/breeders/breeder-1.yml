@@ -77,6 +77,8 @@ rollback_strategies:
     max_attempts: 3
     on_failure: "continue"
     timeout_seconds: 60
+    after:
+      action: continue
 
 effectuation:
   type: http
