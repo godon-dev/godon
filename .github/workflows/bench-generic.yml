@@ -199,8 +199,8 @@ jobs:
                 -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
                 -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
                 -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
-                examples/bench/scenario-generic-pair/breeders/breeder-${NODE_NUM}.yml > /tmp/breeder-config-${NODE_NUM}.yaml
-            chmod 644 /tmp/breeder-config-${NODE_NUM}.yaml
+                examples/bench/scenario-generic-pair/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
+            chmod 644 breeder-config-${NODE_NUM}.yaml
 
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
@@ -209,7 +209,7 @@ jobs:
               CREATE_OUTPUT=$(docker run --rm --network host \
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder create --name="${NAME}" --file=/tmp/breeder-config-${NODE_NUM}.yaml 2>&1 || true)
+                breeder create --name="${NAME}" --file=breeder-config-${NODE_NUM}.yaml 2>&1 || true)
               echo "${CREATE_OUTPUT}" >&2
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
