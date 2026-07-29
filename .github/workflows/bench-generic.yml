@@ -142,6 +142,7 @@ jobs:
             fi
 
             sed -e "s|http://bench-generic:8090/node-1|${BENCH_URL}/${NODE_PATH}|" \
+                -e "s|http://bench-generic:8090/node-2|${BENCH_URL}/${NODE_PATH}|" \
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
