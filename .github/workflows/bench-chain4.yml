@@ -1,0 +1,313 @@
+name: "Bench Generic — Chain4 Composition (4 nodes, 3 edges)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_trials:
+        description: "Minimum trials per breeder for success"
+        required: false
+        default: "200"
+      max_wait_minutes:
+        description: "Max wait time in minutes"
+        required: false
+        default: "40"
+
+jobs:
+  bench-chain4:
+    name: "Generic: 4 breeders -> 4 chained nodes (0.7 x 0.5 x 0.3 = 0.105)"
+    runs-on: [self-hosted, linux]
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Verify KIND Cluster
+        run: |
+          if ! kind get clusters | grep -q "godon-1-cluster"; then
+            echo "KIND cluster not found. Run setup workflows first."
+            exit 1
+          fi
+          kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
+
+      - name: Verify Godon Stack
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          if ! helm status godon --namespace godon >/dev/null 2>&1; then
+            echo "Godon stack not found."
+            exit 1
+          fi
+          kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+
+      - name: Start Generic Bench Target
+        run: |
+          cp examples/bench/scenario-generic-chain4/topology.yaml /tmp/topology.yaml
+
+          echo "=== Effective topology ==="
+          cat /tmp/topology.yaml
+
+          mkdir -p /tmp/bench-generic
+          cp /tmp/topology.yaml /tmp/bench-generic/topology.yaml
+
+          docker run -d \
+            --name bench-generic \
+            -p 8090:8090 \
+            -v /tmp/bench-generic:/config:ro \
+            -e CONFIG_PATH=/config/topology.yaml \
+            -e PORT=8090 \
+            -e GENERIC_SEED=42 \
+            -e RUST_LOG=info \
+            ghcr.io/godon-dev/godon-bench-generic:0.1.0
+
+          echo "Waiting for generic bench..."
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.1:8090/health >/dev/null 2>&1; then
+              echo "Bench healthy"
+              curl -s http://127.0.0.1:8090/health | jq '.'
+              break
+            fi
+            sleep 2
+          done
+
+          docker network connect kind bench-generic 2>/dev/null || true
+          BENCH_IP=$(docker inspect bench-generic -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          echo "Bench KIND IP: ${BENCH_IP}"
+          echo "BENCH_IP=${BENCH_IP}" >> $GITHUB_ENV
+
+      - name: Port Forward to Godon API
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          fuser -k 9090/tcp 2>/dev/null || true
+          sleep 1
+
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+          kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
+          echo $! > /tmp/pf_pid
+          sleep 3
+
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
+              echo "API is healthy"
+              break
+            fi
+            sleep 2
+          done
+
+          echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
+          echo "API_PORT=9090" >> $GITHUB_ENV
+
+      - name: Create Targets
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          BENCH_URL="http://${{ env.BENCH_IP }}:8090"
+
+          create_target() {
+            local NAME=$1
+            local NODE_PATH=$2
+            local TEMPLATE=$3
+            local FILE=$4
+            local OUTFILE=$5
+
+            EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing target: ${EXISTING}" >&2
+              curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
+            fi
+
+            sed -e "s|http://bench-generic:8090/node-1|${BENCH_URL}/${NODE_PATH}|" \
+                -e "s|http://bench-generic:8090/node-2|${BENCH_URL}/${NODE_PATH}|" \
+                -e "s|http://bench-generic:8090/node-3|${BENCH_URL}/${NODE_PATH}|" \
+                -e "s|http://bench-generic:8090/node-4|${BENCH_URL}/${NODE_PATH}|" \
+              ${TEMPLATE} > ${FILE}
+            chmod 644 ${FILE}
+
+            echo "Creating target ${NAME}..." >&2
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work:ro -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              target create --file=${FILE} 2>&1 || true)
+            echo "${CREATE_OUTPUT}" >&2
+
+            local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${ID}" ]; then
+              ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            fi
+            if [ -z "${ID}" ]; then
+              echo "Failed to create target ${NAME}" >&2
+              exit 1
+            fi
+            echo "Target ${NAME}: ${ID}" >&2
+            echo "${ID}" > "${OUTFILE}"
+          }
+
+          create_target "bench-chain4-node-1" "node-1" \
+            examples/bench/scenario-generic-chain4/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
+          create_target "bench-chain4-node-2" "node-2" \
+            examples/bench/scenario-generic-chain4/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
+          create_target "bench-chain4-node-3" "node-3" \
+            examples/bench/scenario-generic-chain4/targets/node-3.yaml target-node-3.yaml /tmp/target_3_id
+          create_target "bench-chain4-node-4" "node-4" \
+            examples/bench/scenario-generic-chain4/targets/node-4.yaml target-node-4.yaml /tmp/target_4_id
+
+      - name: Create Breeders
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          BENCH_URL="http://${{ env.BENCH_IP }}:8090"
+
+          create_breeder() {
+            local NAME=$1
+            local TARGET_ID=$2
+            local RECON_URL=$3
+            local NODE_NUM=$4
+            local OUTFILE=$5
+
+            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              UUID=$(echo "${EXISTING}" | head -1)
+              echo "Breeder ${NAME} already exists: ${UUID}, reusing" >&2
+              echo "${UUID}" > "${OUTFILE}"
+              return 0
+            fi
+
+            sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
+                -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
+                -e "s/\"generic-node-3\"/\"${TARGET_ID}\"/" \
+                -e "s/\"generic-node-4\"/\"${TARGET_ID}\"/" \
+                -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
+                -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
+                -e "s|http://bench-generic:8090/node-3|${RECON_URL}|" \
+                -e "s|http://bench-generic:8090/node-4|${RECON_URL}|" \
+                examples/bench/scenario-generic-chain4/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
+            chmod 644 breeder-config-${NODE_NUM}.yaml
+
+            local UUID=""
+            for ATTEMPT in 1 2 3 4 5; do
+              echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
+
+              CREATE_OUTPUT=$(docker run --rm --network host \
+                -v $(pwd):/work -w /work \
+                "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder create --name="${NAME}" --file=breeder-config-${NODE_NUM}.yaml 2>&1 || true)
+              echo "${CREATE_OUTPUT}" >&2
+
+              UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              if [ -z "${UUID}" ]; then
+                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              fi
+              if [ -n "${UUID}" ]; then
+                break
+              fi
+              sleep 10
+            done
+
+            if [ -z "${UUID}" ]; then
+              echo "Failed to create breeder ${NAME}" >&2
+              exit 1
+            fi
+            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "${UUID}" > "${OUTFILE}"
+          }
+
+          T1=$(cat /tmp/target_1_id); T2=$(cat /tmp/target_2_id); T3=$(cat /tmp/target_3_id); T4=$(cat /tmp/target_4_id)
+          create_breeder "bench-chain4-1" "${T1}" "${BENCH_URL}/node-1" 1 /tmp/breeder_1_uuid
+          create_breeder "bench-chain4-2" "${T2}" "${BENCH_URL}/node-2" 2 /tmp/breeder_2_uuid
+          create_breeder "bench-chain4-3" "${T3}" "${BENCH_URL}/node-3" 3 /tmp/breeder_3_uuid
+          create_breeder "bench-chain4-4" "${T4}" "${BENCH_URL}/node-4" 4 /tmp/breeder_4_uuid
+
+      - name: Poll Optimization Progress
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          B1=$(cat /tmp/breeder_1_uuid); B2=$(cat /tmp/breeder_2_uuid)
+          B3=$(cat /tmp/breeder_3_uuid); B4=$(cat /tmp/breeder_4_uuid)
+          MIN_TRIALS=${{ inputs.min_trials }}
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
+          ELAPSED=0
+
+          echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
+          echo "Expected composition: 0.7 x 0.5 x 0.3 = 0.105"
+
+          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+            T1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${B1}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            T2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${B2}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            T3=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${B3}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            T4=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${B4}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+
+            echo "B1=${T1} B2=${T2} B3=${T3} B4=${T4} (${ELAPSED}s)"
+
+            if [ "${T1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${T2}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${T3}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${T4}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
+              echo "All breeders reached trial target"
+              break
+            fi
+
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+
+          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
+            echo "Timed out"
+            exit 1
+          fi
+
+      - name: Dump Trial Data
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          for i in 1 2 3 4; do
+            BID=$(cat /tmp/breeder_${i}_uuid)
+            echo "=== Breeder ${i} (${BID}) ==="
+            echo "${BID}" > /tmp/breeder_${i}_uuid
+          done
+
+      - name: Cleanup
+        if: always()
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          for i in 1 2 3 4; do
+            BID=$(cat /tmp/breeder_${i}_uuid 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder purge --force --id="${BID}" 2>/dev/null || true
+            fi
+          done
+
+          for i in 1 2 3 4; do
+            TID=$(cat /tmp/target_${i}_id 2>/dev/null || echo "")
+            if [ -n "${TID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                target delete --id="${TID}" 2>/dev/null || true
+            fi
+          done
+
+          docker rm -f bench-generic 2>/dev/null || true
+
+          if [ -f /tmp/pf_pid ]; then
+            kill $(cat /tmp/pf_pid) 2>/dev/null || true
+            rm /tmp/pf_pid
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Bench Chain4 Composition Summary"
+          echo "Topology: node-1 -> node-2 (0.7) -> node-3 (0.5) -> node-4 (0.3)"
+          echo "Expected composition: 0.7 x 0.5 x 0.3 = 0.105"
+          echo "Min trials per breeder: ${{ inputs.min_trials }}"
+          echo "Status: ${{ job.status }}"
