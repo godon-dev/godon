@@ -71,6 +71,7 @@ jobs:
           echo "=== Effective topology ==="
           cat /tmp/topology.yaml
 
+          rm -rf /tmp/bench-generic
           mkdir -p /tmp/bench-generic
           cp /tmp/topology.yaml /tmp/bench-generic/topology.yaml
 
