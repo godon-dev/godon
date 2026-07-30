@@ -44,14 +44,10 @@ jobs:
 
       - name: Start Generic Bench Target
         run: |
-          cp examples/bench/scenario-generic-chain4/topology.yaml /tmp/topology.yaml
+          cp examples/bench/scenario-generic-chain4/topology.yaml topology-chain4.yaml
 
           echo "=== Effective topology ==="
-          cat /tmp/topology.yaml
-
-          rm -rf /tmp/bench-generic
-          mkdir -p /tmp/bench-generic
-          cp /tmp/topology.yaml /tmp/bench-generic/topology.yaml
+          cat topology-chain4.yaml
 
           echo "Removing any existing bench container..."
           docker rm -f bench-generic 2>/dev/null || true
@@ -59,7 +55,7 @@ jobs:
           docker run -d \
             --name bench-generic \
             -p 8090:8090 \
-            -v /tmp/bench-generic:/config:ro \
+            -v $(pwd)/topology-chain4.yaml:/config/topology.yaml:ro \
             -e CONFIG_PATH=/config/topology.yaml \
             -e PORT=8090 \
             -e GENERIC_SEED=42 \
