@@ -165,20 +165,21 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
+          # Purge any existing chain4 breeders first
+          EXISTING_BREEDERS=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name | startswith(\"bench-chain4\")) | .id" 2>/dev/null || echo "")
+          for BID in ${EXISTING_BREEDERS}; do
+            echo "Purging existing chain4 breeder: ${BID}" >&2
+            docker run --rm --network host "${CLI_IMAGE}" \
+              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              breeder purge --force --id="${BID}" 2>/dev/null || true
+          done
+
           create_breeder() {
             local NAME=$1
             local TARGET_ID=$2
             local RECON_URL=$3
             local NODE_NUM=$4
             local OUTFILE=$5
-
-            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
-            if [ -n "${EXISTING}" ]; then
-              UUID=$(echo "${EXISTING}" | head -1)
-              echo "Breeder ${NAME} already exists: ${UUID}, reusing" >&2
-              echo "${UUID}" > "${OUTFILE}"
-              return 0
-            fi
 
             sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
                 -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
@@ -203,7 +204,11 @@ jobs:
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
               if [ -z "${UUID}" ]; then
+                # Check if it was actually created despite no UUID in output
                 UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+                if [ -n "${UUID}" ]; then
+                  echo "Breeder ${NAME} found via API lookup (created on previous attempt)" >&2
+                fi
               fi
               if [ -n "${UUID}" ]; then
                 break
