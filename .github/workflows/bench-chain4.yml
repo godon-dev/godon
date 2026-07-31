@@ -55,13 +55,13 @@ jobs:
           docker create \
             --name bench-generic \
             -p 8090:8090 \
-            -e CONFIG_PATH=/tmp/topology.yaml \
+            -e CONFIG_PATH=/topology.yaml \
             -e PORT=8090 \
             -e GENERIC_SEED=42 \
             -e RUST_LOG=info \
             ghcr.io/godon-dev/godon-bench-generic:0.1.0
 
-          docker cp topology-chain4.yaml bench-generic:/tmp/topology.yaml
+          docker cp topology-chain4.yaml bench-generic:/topology.yaml
           docker start bench-generic
 
           echo "Waiting for generic bench..."
