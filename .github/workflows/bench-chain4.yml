@@ -54,6 +54,7 @@ jobs:
 
           docker create \
             --name bench-generic \
+            --user root \
             -p 8090:8090 \
             -e CONFIG_PATH=/topology.yaml \
             -e PORT=8090 \
