@@ -183,20 +183,21 @@ jobs:
           TARGET_2_ID=$(cat /tmp/target_2_id)
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
+          # Purge any existing bench-generic breeders first
+          EXISTING_BREEDERS=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name | startswith(\"bench-generic\")) | .id" 2>/dev/null || echo "")
+          for BID in ${EXISTING_BREEDERS}; do
+            echo "Purging existing bench-generic breeder: ${BID}" >&2
+            docker run --rm --network host "${CLI_IMAGE}" \
+              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              breeder purge --force --id="${BID}" 2>/dev/null || true
+          done
+
           create_breeder() {
             local NAME=$1
             local TARGET_ID=$2
             local RECON_URL=$3
             local NODE_NUM=$4
             local OUTFILE=$5
-
-            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
-            if [ -n "${EXISTING}" ]; then
-              UUID=$(echo "${EXISTING}" | head -1)
-              echo "Breeder ${NAME} already exists: ${UUID}, reusing" >&2
-              echo "${UUID}" > "${OUTFILE}"
-              return 0
-            fi
 
             # Replace target ref and recon URL
             sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
