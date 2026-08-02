@@ -27,6 +27,14 @@ on:
         description: "Colored noise sigma (0=off)"
         required: false
         default: "0.0"
+      push_block_size:
+        description: "Push block size (trials per push phase)"
+        required: false
+        default: "15"
+      pause_block_size:
+        description: "Pause block size (trials per pause phase)"
+        required: false
+        default: "15"
 
 jobs:
   bench-generic:
@@ -206,6 +214,10 @@ jobs:
                 -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
                 examples/bench/scenario-generic-pair/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
             chmod 644 breeder-config-${NODE_NUM}.yaml
+
+            # Override detection block sizes
+            sed -i "s/push_block_size: .*/push_block_size: ${{ inputs.push_block_size }}/" breeder-config-${NODE_NUM}.yaml
+            sed -i "s/pause_block_size: .*/pause_block_size: ${{ inputs.pause_block_size }}/" breeder-config-${NODE_NUM}.yaml
 
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
