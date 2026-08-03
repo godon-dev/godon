@@ -64,16 +64,11 @@ Priority order:
 
 ## Known Technical Debt
 
-### Engine flaws discovered during Aug 2 sweep
-1. **Coordination table lifecycle**: Single global coord table (sender_lease, interference_active_breeders, detection_readiness) survives breeder purge. Second bench run after a previous run gets stuck — breeders see stale leases and never acquire sender role. Requires full reinstall per experiment cell. Proposed fix: tag-based detection groups scoping coord tables per group. See `/projects/godon/papers/detection/experiments/notes-coordination-lifecycle.md`.
-2. **CFAR threshold calibration**: Threshold uses per-sample MAD but compares block medians. The Pfa=0.05 label is not literal — actual false alarm rate is lower (conservative). Signal at noise=0.10/coupling=0.5 is permanently below the asymptotic threshold (k→3.0, signal 0.25 < threshold 0.30). Refining threshold for median statistics would improve sensitivity, but changes the statistical framework.
-3. **Windmill script caching**: After reinstall, first bench run works (trials tagged with impulse_phase). Second run often loses tags — Windmill serves stale scripts despite re-seeding. Root cause unclear; possibly script hash not invalidated on re-seed.
-4. **`_CachedStorage` shutdown check**: Still broken (non-fatal, carried over from prior session).
-
-### Pre-existing
+- `_CachedStorage` shutdown check still broken (non-fatal)
 - HOLD_CALIB skipped when hold_params from config (never tested with auto-calibration)
 - Characterization limited to step amplitude (no full response curve)
-- Coordinator robustness: bugs fixed Jul 31 + Aug 2, likely more at scale
+- Coordinator robustness: 3 bugs fixed this session, likely more at scale
+- Windmill as execution engine: unresolved design question
 - Hardcoded thresholds: STALE_SENDER_MULTIPLIER, WORST_CASE_TRIAL_SECONDS, CFAR min cells
 
 ## Paper Plan
