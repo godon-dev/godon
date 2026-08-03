@@ -1,0 +1,32 @@
+{
+  "detected": false,
+  "method": "cfar_block_step",
+  "pause_trials": 28,
+  "per_objective": [
+    {
+      "baseline_mad": 0.01884917655305925,
+      "baseline_median": 0.5561400918920087,
+      "channel": {
+        "type": "Objective",
+        "value": 0
+      },
+      "confidence": 0.0,
+      "detected": false,
+      "falling_edge": 0.0,
+      "method": "cfar_block_step",
+      "n_baseline_samples": 34,
+      "n_pause_samples": 34,
+      "n_push_samples": 29,
+      "pause_median": 0.5561400918920087,
+      "push_median": 0.6016646066176378,
+      "rising_edge": 0.0,
+      "rounds_detected": 0,
+      "rounds_total": 2,
+      "sender_id": "b034c7eb-c5fd-42a4-947d-a171d8dd0901",
+      "receiver_id": "ff1c217d-e66b-4610-b382-aa403517fb43"
+    }
+  ],
+  "push_trials": 30,
+  "receiver_hold_trials": 74,
+  "note": "push_median 0.6017 vs baseline 0.5561 = step ~0.045. Below CFAR threshold ~0.058. Signal present but undetectable at this noise level."
+}

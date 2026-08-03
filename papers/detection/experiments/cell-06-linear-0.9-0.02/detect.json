@@ -1,0 +1,33 @@
+{
+  "detected": true,
+  "method": "cfar_block_step",
+  "pause_trials": 14,
+  "per_objective": [
+    {
+      "baseline_mad": 0.025852740614576514,
+      "baseline_median": 0.9484225295825349,
+      "channel": {
+        "type": "Objective",
+        "value": 0
+      },
+      "confidence": 0.5,
+      "detected": true,
+      "falling_edge": 0.45647850697238146,
+      "method": "cfar_block_step",
+      "n_baseline_samples": 15,
+      "n_pause_samples": 15,
+      "n_push_samples": 12,
+      "pause_median": 0.9484225295825349,
+      "push_median": 1.4049010365549164,
+      "receiver_id": "4413c0f1-fe19-4ad4-a506-6e811d5a0d1f",
+      "rising_edge": 0.45647850697238146,
+      "rounds_detected": 1,
+      "rounds_total": 2,
+      "sender_id": "7145f484-effb-480f-b644-7bdfb9fc2ae8"
+    }
+  ],
+  "push_trials": 22,
+  "receiver_hold_trials": 44,
+  "receiver_id": "4413c0f1-fe19-4ad4-a506-6e811d5a0d1f",
+  "sender_id": "7145f484-effb-480f-b644-7bdfb9fc2ae8"
+}
