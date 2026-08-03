@@ -1,0 +1,27 @@
+{
+  "detected": true,
+  "method": "cfar_block_step",
+  "pause_trials": 14,
+  "per_objective": [
+    {
+      "baseline_mad": 0.060564191973230576,
+      "baseline_median": 0.7354372581038466,
+      "channel": {
+        "type": "Objective",
+        "value": 0
+      },
+      "confidence": 0.5,
+      "detected": true,
+      "falling_edge": 0.2587907678798854,
+      "method": "cfar_block_step",
+      "n_baseline_samples": 17,
+      "n_pause_samples": 17,
+      "n_push_samples": 16,
+      "pause_median": 0.7354372581038466,
+      "push_median": 0.9942280259837321,
+      "rising_edge": 0.2587907678798854,
+      "receiver_id": "0b8d6d47-811b-444b-ac62-b74237f6d9bd"
+    }
+  ],
+  "note": "noise=0.05, coupling=0.5. MAD tripled vs noise=0.02 but still detected."
+}

@@ -1,0 +1,28 @@
+{
+  "detected": true,
+  "method": "cfar_block_step",
+  "pause_trials": 28,
+  "per_objective": [
+    {
+      "baseline_mad": 0.027661215465055292,
+      "baseline_median": 0.8467637999766771,
+      "channel": {
+        "type": "Objective",
+        "value": 0
+      },
+      "confidence": 0.6666666666666666,
+      "detected": true,
+      "falling_edge": -0.11299575885276658,
+      "method": "cfar_block_step",
+      "n_baseline_samples": 37,
+      "n_pause_samples": 37,
+      "n_push_samples": 24,
+      "pause_median": 0.8467637999766771,
+      "push_median": 0.7358125354789753,
+      "rising_edge": -0.11299575885276658,
+      "rounds_detected": 2,
+      "rounds_total": 3,
+      "note": "saturation: push_median < baseline. Saturated response is LOWER at extreme params. Signal inverted but detected."
+    }
+  ]
+}
