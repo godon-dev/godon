@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>godon cross-examination</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:#0d1117;color:#c9d1d9;font-size:13px}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:16px;color:#e6edf3}header h1 span{color:#3fb950}
+.content{padding:20px 24px;overflow-y:auto;height:calc(100vh - 50px)}
+.cross-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.cross-header .tag{background:#1c2128;border:1px solid #30363d;border-radius:4px;padding:4px 10px;font-size:11px;color:#3fb950}
+.cross-header .vs{color:#484f58;font-size:11px}
+.cross-back{background:none;border:1px solid #30363d;color:#c9d1d9;padding:4px 12px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:11px}
+.cross-back:hover{border-color:#8b949e}
+.legend{display:flex;gap:16px;margin-bottom:6px;font-size:10px;color:#6e7681;flex-wrap:wrap}
+.legend .swatch{width:12px;height:3px;display:inline-block;vertical-align:middle;margin-right:4px;border-radius:1px}
+.tooltip{position:fixed;background:#1c2128;border:1px solid #30363d;border-radius:6px;padding:8px 12px;font-size:11px;pointer-events:none;z-index:100;max-width:320px;display:none;line-height:1.5}
+.tooltip .tt-title{color:#e6edf3;font-size:12px;margin-bottom:4px}
+.tooltip .tt-line{color:#8b949e}
+.tooltip .tt-line span{color:#c9d1d9}
+.tooltip .tt-hint{color:#6e7681;font-size:10px;margin-top:4px;font-style:italic}
+.chart-row{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.timeline-wrap{width:100%}
+.timeline-wrap svg{display:block}
+.lag-wrap{width:100%}
+.lag-wrap svg{display:block}
+.pair-detail{display:none;padding:16px 0;border-top:1px solid #21262d;margin-top:16px}
+.pair-detail.show{display:block}
+.pair-detail-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pair-detail-header h3{margin:0;font-size:12px;color:#c9d1d9;text-transform:none;letter-spacing:0}
+.method-row{display:flex;align-items:center;gap:10px;padding:4px 0;font-size:10px;color:#6e7681}
+.method-row .m-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.method-row .m-dot.on{background:#3fb950}
+.method-row .m-dot.off{background:#30363d}
+.method-row .m-bar{flex:1;height:3px;background:#21262d;border-radius:1.5px;max-width:120px;overflow:hidden}
+.method-row .m-bar-fill{height:100%;border-radius:1.5px}
+.method-row .m-name{width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.method-row .m-val{width:60px;text-align:right}
+.pair-close{background:none;border:none;color:#6e7681;cursor:pointer;font-family:inherit;font-size:11px;padding:0}
+.pair-close:hover{color:#c9d1d9}
+.ranked-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid #21262d;cursor:pointer;transition:background .1s}
+.ranked-row:hover{background:#161b22}
+.ranked-row.active{background:#161b22;border-left:2px solid #3fb950;padding-left:8px}
+.ranked-header{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid #30363d;font-size:10px;color:#6e7681;cursor:pointer;user-select:none}
+.ranked-header:hover{color:#c9d1d9}
+.ranked-header .sort-arrow{margin-left:3px;font-size:8px}
+.ranked-header.sorted{color:#c9d1d9}
+.view-tabs{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid #30363d;padding-bottom:0}
+.view-tabs button{background:none;border:none;color:#6e7681;cursor:pointer;font-family:inherit;font-size:12px;padding:6px 14px;border-bottom:2px solid transparent}
+.view-tabs button:hover{color:#c9d1d9}
+.view-tabs button.active{color:#e6edf3;border-bottom-color:#3fb950}
+</style>
+</head>
+<body>
+<header><h1>godon <span>cross</span></h1><button class="cross-back" onclick="history.back()">&#8592; back</button></header>
+<div class="content" id="content"></div>
+<div class="tooltip" id="tooltip"></div>
+<script>
+try{
+const COLORS=['#58a6ff','#f0883e','#bc8cff','#3fb950','#f85149','#d29922'];
+
+function genTrials(name,n,startTime,quality,noise,coupledWith){
+  const trials=[];
+  let q=quality*0.3;
+  for(let i=0;i<n;i++){
+    const t=startTime+i*900+Math.random()*200;
+    q+=((quality-q)*0.12+noise*(Math.random()-0.5));
+    q=Math.max(0,Math.min(1,q));
+    let coupledNoise=0;
+    if(coupledWith&&coupledWith.length>i-1&&i>0){
+      const prev=coupledWith[i-1];
+      const pprev=coupledWith[Math.max(0,i-2)];
+      const delta=prev-pprev;
+      coupledNoise=delta*0.3*(Math.random()>0.3?1:-0.5);
+    }
+    trials.push({name,number:i,time:t,quality:q+coupledNoise,params:{p1:+(Math.random()*10).toFixed(2),p2:+(Math.random()*10).toFixed(2)}});
+  }
+  return trials;
+}
+
+const breederA={name:'bench-s3-gh1',trials:genTrials('bench-s3-gh1',50,1713614400,0.8,0.15,null)};
+const breederB={name:'bench-s3-gh2',trials:genTrials('bench-s3-gh2',45,1713614430,0.75,0.15,null)};
+const breederC={name:'bench-s4-gh1',trials:genTrials('bench-s4-gh1',40,1713614400,0.65,0.12,null)};
+const coupledQC=breederC.trials.map(t=>t.quality);
+const breederD={name:'bench-s4-gh2',trials:genTrials('bench-s4-gh2',38,1713614430,0.6,0.12,coupledQC)};
+const breederE={name:'prod-web-01',trials:genTrials('prod-web-01',60,1713614400,0.85,0.1,null)};
+const breederF={name:'prod-web-02',trials:genTrials('prod-web-02',55,1713614415,0.82,0.1,null)};
+const coupledQF=null;
+const breederG={name:'prod-db-01',trials:genTrials('prod-db-01',35,1713614430,0.7,0.13,breederE.trials.map(t=>t.quality))};
+const breederH={name:'prod-cache-01',trials:genTrials('prod-cache-01',42,1713614400,0.78,0.11,null)};
+const breederI={name:'staging-01',trials:genTrials('staging-01',20,1713614400,0.5,0.18,null)};
+const coupledQI=breederH.trials.map(t=>t.quality);
+const breederJ={name:'staging-02',trials:genTrials('staging-02',22,1713614410,0.45,0.17,coupledQI)};
+
+function crossCorrelate(xs,ys,maxLag){
+  const n=Math.min(xs.length,ys.length);
+  const mx=xs.slice(0,n).reduce((a,v)=>a+v,0)/n;
+  const my=ys.slice(0,n).reduce((a,v)=>a+v,0)/n;
+  const sx=Math.sqrt(xs.slice(0,n).reduce((a,v)=>a+(v-mx)**2,0)/n)||1;
+  const sy=Math.sqrt(ys.slice(0,n).reduce((a,v)=>a+(v-my)**2,0)/n)||1;
+  const results=[];
+  for(let lag=-maxLag;lag<=maxLag;lag++){
+    let sum=0,count=0;
+    for(let i=0;i<n;i++){
+      const j=i+lag;
+      if(j>=0&&j<n){sum+=(xs[i]-mx)*(ys[j]-my);count++}
+    }
+    results.push({lag,corr:count?sum/count/(sx*sy):0});
+  }
+  return results;
+}
+
+function grangerF(xs,ys,order){
+  const n=Math.min(xs.length,ys.length);
+  if(n<order*3) return 0;
+  const x=xs.slice(0,n),y=ys.slice(0,n);
+  const my=d3.mean(y);
+  const restricted=y.slice(order).map((v,i)=>{
+    let pred=my;
+    for(let k=0;k<order;k++) pred+=0.1*(y[i+order-1-k]-my);
+    return(v-pred)**2;
+  });
+  const unrestricted=y.slice(order).map((v,i)=>{
+    let pred=my;
+    for(let k=0;k<order;k++) pred+=0.1*(y[i+order-1-k]-my);
+    for(let k=0;k<order;k++) pred+=0.1*(x[i+order-1-k]-d3.mean(x));
+    return(v-pred)**2;
+  });
+  const rssR=d3.sum(restricted),rssU=d3.sum(unrestricted);
+  if(rssU===0) return 0;
+  const f=((rssR-rssU)/order)/(rssU/(n-2*order-1));
+  return Math.min(f/5,1);
+}
+
+function transferEntropy(xs,ys,bins,k){
+  const n=Math.min(xs.length,ys.length);
+  if(n<k*4) return 0;
+  const discretize=(arr,b)=>{
+    const mn=d3.min(arr),mx=d3.max(arr),r=mx-mn||1;
+    return arr.map(v=>Math.min(Math.floor((v-mn)/r*b),b-1));
+  };
+  const xd=discretize(xs.slice(0,n),bins),yd=discretize(ys.slice(0,n),bins);
+  const counts={};
+  let total=0;
+  for(let i=k;i<n;i++){
+    const key=xd[i-1]+','+yd[i-1]+','+yd[i];
+    const keyMarg=xd[i-1]+','+yd[i-1];
+    counts[key]=(counts[key]||0)+1;
+    counts[keyMarg]=(counts[keyMarg]||0)+1;
+    const keyCond=yd[i-1]+','+yd[i];
+    counts[keyCond]=(counts[keyCond]||0)+1;
+    const keyPast=yd[i-1];
+    counts[keyPast]=(counts[keyPast]||0)+1;
+    total++;
+  }
+  let te=0;
+  for(let i=k;i<n;i++){
+    const pJoint=(counts[xd[i-1]+','+yd[i-1]+','+yd[i]]||0)/total;
+    const pCondPast=(counts[xd[i-1]+','+yd[i-1]]||0)/total;
+    const pCondNoPast=(counts[yd[i-1]+','+yd[i]]||0)/total;
+    const pPast=(counts[yd[i-1]]||0)/total;
+    if(pJoint>0&&pCondPast>0&&pCondNoPast>0&&pPast>0){
+      te+=pJoint*Math.log2((pJoint/pCondPast)/(pCondNoPast/pPast));
+    }
+  }
+  return Math.min(Math.abs(te)*20,1);
+}
+
+function detrend(vals){
+  const n=vals.length;
+  const xMean=(n-1)/2;
+  let sumY=0,sumXY=0,sumX2=0;
+  for(let i=0;i<n;i++){sumY+=vals[i];sumXY+=(i-xMean)*vals[i];sumX2+=(i-xMean)*(i-xMean)}
+  const slope=sumX2?sumXY/sumX2:0;
+  const intercept=sumY/n-slope*xMean;
+  return vals.map((v,i)=>v-(intercept+slope*i));
+}
+
+function pearsonR(xs,ys){
+  const n=xs.length;
+  const mx=d3.mean(xs),my=d3.mean(ys);
+  let num=0,dx=0,dy=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);dx+=(xs[i]-mx)**2;dy+=(ys[i]-my)**2}
+  const denom=Math.sqrt(dx*dy);
+  return denom?num/denom:0;
+}
+
+function runAnalysis(breeders){
+  const names=breeders.map(b=>b.name);
+  const qs=breeders.map(b=>b.trials.map(t=>t.quality));
+  const results={pairs:[],overall:{high:0,medium:0,low:0}};
+  for(let i=0;i<breeders.length;i++){
+    for(let j=i+1;j<breeders.length;j++){
+      const n=Math.min(qs[i].length,qs[j].length);
+      const a=qs[i].slice(0,n),b=qs[j].slice(0,n);
+      const da=detrend(a),db=detrend(b);
+      const cc=crossCorrelate(da,db,Math.floor(n/4));
+      const maxCC=d3.max(cc,d=>Math.abs(d.corr));
+      const bestLag=cc.reduce((best,d)=>Math.abs(d.corr)>Math.abs(best.corr)?d:best,{lag:0,corr:0});
+      const gc=grangerF(da,db,3);
+      const gcRev=grangerF(db,da,3);
+      const te=transferEntropy(da,db,8,2);
+      const teRev=transferEntropy(db,da,8,2);
+      const methods=[
+        {name:'pattern match',value:maxCC,threshold:0.4,signal:maxCC>=0.4},
+        {name:'predictive link \u2192',value:gc,threshold:0.3,signal:gc>=0.3},
+        {name:'predictive link \u2190',value:gcRev,threshold:0.3,signal:gcRev>=0.3},
+        {name:'info flow \u2192',value:te,threshold:0.2,signal:te>=0.2},
+        {name:'info flow \u2190',value:teRev,threshold:0.2,signal:teRev>=0.2},
+      ];
+      const sigCount=methods.filter(m=>m.signal).length;
+      let tier='low';
+      if(sigCount>=4) tier='high';
+      else if(sigCount>=2) tier='medium';
+      results.pairs.push({a:names[i],b:names[j],idxA:i,idxB:j,methods,tier,sigCount,
+        crossCorr:cc,bestLag,qa:a,qb:b,
+        trialsA:breeders[i].trials.slice(0,n),trialsB:breeders[j].trials.slice(0,n)});
+      results.overall[tier]++;
+    }
+  }
+  return results;
+}
+
+const tierColor=tier=>tier==='high'?'#3fb950':tier==='medium'?'#d29922':'#58a6ff';
+const tierBg=tier=>tier==='high'?'rgba(63,185,80,0.15)':tier==='medium'?'rgba(210,153,34,0.12)':'rgba(88,166,255,0.08)';
+const tierLabel=tier=>tier==='high'?'high certainty':tier==='medium'?'medium':'low';
+
+function showTip(html,x,y){
+  const tip=document.getElementById('tooltip');
+  tip.innerHTML=html;tip.style.display='block';
+  const rect=tip.getBoundingClientRect();
+  tip.style.left=Math.min(x+12,window.innerWidth-rect.width-12)+'px';
+  tip.style.top=Math.min(y+12,window.innerHeight-rect.height-12)+'px';
+}
+function hideTip(){document.getElementById('tooltip').style.display='none'}
+
+let activeRow=null;
+let sortField='score';
+let sortDir=-1;
+let currentView='ranked';
+
+function render(sets){
+  const el=d3.select('#content');
+  el.html('');
+
+  const hdr=el.append('div').attr('class','cross-header');
+  sets.forEach((s,i)=>{
+    if(i>0) hdr.append('span').attr('class','vs').text('\u00d7');
+    hdr.append('span').attr('class','tag').text(s.name);
+  });
+
+  const analysis=runAnalysis(sets);
+
+  const tabs=el.append('div').attr('class','view-tabs');
+  tabs.append('button').classed('active',currentView==='ranked').text('ranked').on('click',()=>{currentView='ranked';render(sets)});
+  tabs.append('button').classed('active',currentView==='matrix').text('matrix').on('click',()=>{currentView='matrix';render(sets)});
+
+  if(currentView==='ranked'){
+    renderRanked(el,sets,analysis);
+  } else {
+    renderMatrixView(el,sets,analysis);
+  }
+
+  el.append('div').attr('class','pair-detail').attr('id','pairDetail');
+}
+
+function renderRanked(el,sets,analysis){
+  const leg=el.append('div').attr('class','legend').style('margin-top','8px');
+  leg.append('span').html('<span class="swatch" style="background:#3fb950;width:10px;height:10px;border-radius:2px;display:inline-block"></span> high certainty');
+  leg.append('span').html('<span class="swatch" style="background:#d29922;width:10px;height:10px;border-radius:2px;display:inline-block"></span> medium');
+  leg.append('span').html('<span class="swatch" style="background:#58a6ff;width:10px;height:10px;border-radius:2px;display:inline-block"></span> low');
+  leg.append('span').text('| click headers to sort | click row to expand');
+
+  const summary=el.append('div').style('margin','10px 0 6px').style('font-size','10px').style('color','#6e7681');
+  summary.text(analysis.pairs.length+' pairs checked: '+
+    analysis.overall.high+' high, '+
+    analysis.overall.medium+' medium, '+
+    analysis.overall.low+' low');
+
+  const ranked=analysis.pairs.map(pair=>{
+    const fwdS=d3.mean([pair.methods[1],pair.methods[3]],m=>m.value);
+    const revS=d3.mean([pair.methods[2],pair.methods[4]],m=>m.value);
+    const maxS=Math.max(fwdS,revS);
+    const tierW=pair.tier==='high'?3:pair.tier==='medium'?2:1;
+    const bestDir=fwdS>=revS?pair.a+'\u2192'+pair.b:pair.b+'\u2192'+pair.a;
+    return{pair,score:maxS*tierW+pair.sigCount*0.1,maxStrength:maxS,bestDir,fwdS,revS};
+  });
+
+  const maxScore=d3.max(ranked,d=>d.score)||1;
+
+  const cols=[
+    {key:'#',width:'30px',field:null},
+    {key:'pair',width:'200px',field:'name'},
+    {key:'strength',width:'160px',field:'score'},
+    {key:'tests',width:'45px',field:'sigCount'},
+    {key:'certainty',width:'60px',field:'tierRank'},
+    {key:'direction',width:'130px',field:'dirStr'},
+    {key:'evidence',width:'90px',field:null},
+  ];
+
+  function doSort(items,field,dir){
+    return items.slice().sort((a,b)=>{
+      if(field==='name') return dir*(a.pair.a+' '+a.pair.b).localeCompare(b.pair.a+' '+b.pair.b);
+      if(field==='score') return dir*(a.score-b.score);
+      if(field==='sigCount') return dir*(a.pair.sigCount-b.pair.sigCount);
+      if(field==='tierRank'){const tw=t=>t==='high'?3:t==='medium'?2:1;return dir*(tw(a.pair.tier)-tw(b.pair.tier))}
+      if(field==='dirStr') return dir*(a.maxStrength-b.maxStrength);
+      return 0;
+    });
+  }
+
+  const listEl=el.append('div').style('margin-top','8px');
+
+  activeRow=null;
+
+  const header=listEl.append('div').attr('class','ranked-header');
+  cols.forEach(col=>{
+    const h=header.append('span').style('width',col.width).style('flex-shrink','0').style('overflow','hidden');
+    if(col.field===sortField) h.attr('class','ranked-header sorted');
+    h.text(col.key);
+    if(col.field===sortField) h.append('span').attr('class','sort-arrow').text(sortDir===-1?'\u25BC':'\u25B2');
+    if(col.field){
+      h.on('click',()=>{
+        if(sortField===col.field) sortDir*=-1;
+        else{sortField=col.field;sortDir=-1}
+        render(sets);
+      });
+    }
+  });
+
+  const sorted=doSort(ranked,sortField,sortDir);
+
+  sorted.forEach((r,idx)=>{
+    const p=r.pair;
+    const row=listEl.append('div').attr('class','ranked-row').attr('id','rank-'+idx);
+
+    row.append('span').style('width','30px').style('color','#484f58').style('font','9px monospace').style('flex-shrink','0')
+      .text('#'+(idx+1));
+
+    row.append('span').style('width','200px').style('white-space','nowrap').style('overflow','hidden').style('text-overflow','ellipsis')
+      .style('font','11px monospace').style('color','#c9d1d9').style('flex-shrink','0')
+      .text(p.a+' \u00d7 '+p.b);
+
+    const barOuter=row.append('span').style('width','160px').style('height','6px')
+      .style('background','#21262d').style('border-radius','3px').style('overflow','hidden').style('flex-shrink','0');
+    barOuter.append('span').style('display','block').style('height','100%')
+      .style('width',(r.score/maxScore*100)+'%')
+      .style('background',tierColor(p.tier)).style('border-radius','3px');
+
+    row.append('span').style('width','45px').style('text-align','right')
+      .style('font','9px monospace').style('color','#6e7681').style('flex-shrink','0')
+      .text(p.sigCount+'/5');
+
+    row.append('span').style('width','60px')
+      .style('font','9px monospace').style('color',tierColor(p.tier)).style('flex-shrink','0')
+      .text(p.tier);
+
+    row.append('span').style('width','130px')
+      .style('font','9px monospace').style('color','#8b949e').style('flex-shrink','0')
+      .text(r.bestDir+' '+(r.maxStrength*100).toFixed(0)+'%');
+
+    const dots=row.append('span').style('display','flex').style('gap','3px').style('flex-shrink','0');
+    p.methods.forEach(m=>{
+      dots.append('span').style('width','5px').style('height','5px').style('border-radius','50%')
+        .style('background',m.signal?'#3fb950':'#30363d');
+    });
+
+    row.on('click',()=>showPairDetail(p,sets,idx));
+  });
+}
+
+function renderMatrixView(el,sets,analysis){
+  const leg=el.append('div').attr('class','legend').style('margin-top','8px');
+  leg.append('span').html('<span class="swatch" style="background:#3fb950;width:10px;height:10px;border-radius:2px;display:inline-block"></span> high');
+  leg.append('span').html('<span class="swatch" style="background:#d29922;width:10px;height:10px;border-radius:2px;display:inline-block"></span> medium');
+  leg.append('span').html('<span class="swatch" style="background:#58a6ff;width:10px;height:10px;border-radius:2px;display:inline-block"></span> low');
+  leg.append('span').text('| upper triangle = row \u2192 column | click cell for detail');
+
+  renderMatrix(el,sets,analysis);
+}
+
+function showPairDetail(pair,sets,idx){
+  const el=d3.select('#pairDetail');
+  el.html('').classed('show',true);
+
+  if(activeRow!==null) d3.select('#rank-'+activeRow).classed('active',false);
+  if(idx!==undefined&&idx!==null){
+    d3.select('#rank-'+idx).classed('active',true);
+    activeRow=idx;
+  }
+
+  const hdr=el.append('div').attr('class','pair-detail-header');
+  hdr.append('h3').text(pair.a+' \u00d7 '+pair.b+' \u2014 '+tierLabel(pair.tier));
+  hdr.append('button').attr('class','pair-close').text('close').on('click',()=>{
+    el.classed('show',false);el.html('');
+    if(activeRow!==null) d3.select('#rank-'+activeRow).classed('active',false);
+    activeRow=null;
+  });
+
+  const methodsDiv=el.append('div').style('margin-bottom','12px');
+  pair.methods.forEach(m=>{
+    const row=methodsDiv.append('div').attr('class','method-row');
+    row.append('span').attr('class','m-dot '+(m.signal?'on':'off'));
+    row.append('span').attr('class','m-name').text(m.name);
+    const bar=row.append('span').attr('class','m-bar');
+    bar.append('span').attr('class','m-bar-fill')
+      .style('width',(m.value*100)+'%')
+      .style('background',m.signal?'#3fb950':'#484f58');
+    row.append('span').attr('class','m-val').text((m.value*100).toFixed(1)+'%');
+  });
+
+  const chartRow=el.append('div').attr('class','chart-row');
+  const timelineBox=chartRow.append('div').attr('class','timeline-wrap').style('flex','1');
+  renderTimeline(timelineBox,pair);
+  const lagBox=chartRow.append('div').attr('class','lag-wrap').style('width','340px').style('flex-shrink','0');
+  renderLagScan(lagBox,pair);
+
+  document.getElementById('pairDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderMatrix(container,sets,analysis){
+  const sep=container.append('div').style('margin','24px 0 12px').style('border-top','1px solid #21262d').style('padding-top','12px');
+  sep.append('span').style('font','10px monospace').style('color','#6e7681')
+    .text('direction matrix \u2014 upper triangle = row \u2192 column, lower = column \u2192 row | click cell for detail');
+
+  const names=sets.map(s=>s.name);
+  const n=names.length;
+  const cellSize=80,labelH=24,labelW=110;
+  const totalW=labelW+n*cellSize;
+  const totalH=labelH+n*cellSize;
+
+  const svg=container.append('svg').attr('width',totalW).attr('height',totalH)
+    .style('display','block').style('margin','8px 0 20px');
+
+  const pairMap={};
+  analysis.pairs.forEach(p=>{pairMap[p.a+'::'+p.b]=p});
+
+  names.forEach((name,ri)=>{
+    svg.append('text').attr('x',labelW-6).attr('y',labelH+ri*cellSize+cellSize/2+4)
+      .attr('text-anchor','end').attr('fill','#8b949e').style('font','9px monospace')
+      .text(name.length>14?name.substring(0,12)+'..':name);
+    svg.append('text').attr('x',labelW+ri*cellSize+cellSize/2).attr('y',labelH-6)
+      .attr('text-anchor','middle').attr('fill','#8b949e').style('font','9px monospace')
+      .text(name.length>14?name.substring(0,12)+'..':name);
+  });
+
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n;j++){
+      const cx=labelW+j*cellSize;
+      const cy=labelH+i*cellSize;
+
+      if(i===j){
+        svg.append('rect').attr('x',cx+2).attr('y',cy+2).attr('width',cellSize-4).attr('height',cellSize-4)
+          .attr('fill','#0d1117').attr('rx',3).attr('stroke','#21262d');
+        continue;
+      }
+
+      const a=names[i],b=names[j];
+      const pair=pairMap[a+'::'+b]||pairMap[b+'::'+a];
+
+      if(pair){
+        const isForward=names[i]===pair.a&&names[j]===pair.b;
+        const dirMethods=isForward
+          ?[pair.methods[0],pair.methods[1],pair.methods[3]]
+          :[pair.methods[0],pair.methods[2],pair.methods[4]];
+        const dirSigCount=dirMethods.filter(m=>m.signal).length;
+        const dirStrength=d3.mean(dirMethods,m=>m.value);
+        let dirTier='low';
+        if(dirSigCount>=3) dirTier='high';
+        else if(dirSigCount>=2) dirTier='medium';
+
+        const g=svg.append('g').attr('class','matrix-cell');
+        g.append('rect').attr('x',cx+2).attr('y',cy+2).attr('width',cellSize-4).attr('height',cellSize-4)
+          .attr('fill',tierBg(dirTier)).attr('rx',3).attr('stroke',tierColor(dirTier)).attr('stroke-width',1.5);
+
+        const arrow=isForward?'\u2192':'\u2190';
+        g.append('text').attr('x',cx+cellSize/2).attr('y',cy+16)
+          .attr('text-anchor','middle').attr('fill',tierColor(dirTier)).style('font','bold 10px monospace')
+          .text(dirTier+' '+arrow);
+
+        const dotY=cy+30;
+        const dotSpacing=14;
+        const dotsX=cx+cellSize/2-(dirMethods.length*dotSpacing)/2+dotSpacing/2;
+        dirMethods.forEach((m,mi)=>{
+          g.append('circle').attr('cx',dotsX+mi*dotSpacing).attr('cy',dotY).attr('r',3)
+            .attr('fill',m.signal?'#3fb950':'#30363d');
+        });
+
+        g.append('text').attr('x',cx+cellSize/2).attr('y',cy+48)
+          .attr('text-anchor','middle').attr('fill','#6e7681').style('font','8px monospace')
+          .text(dirSigCount+'/'+dirMethods.length);
+
+        g.append('text').attr('x',cx+cellSize/2).attr('y',cy+66)
+          .attr('text-anchor','middle').attr('fill','#484f58').style('font','8px monospace')
+          .text((dirStrength*100).toFixed(0)+'%');
+
+        g.on('mouseenter',function(event){
+          d3.select(this).select('rect').attr('stroke-width',2.5);
+          const from=isForward?names[i]:names[j];
+          const to=isForward?names[j]:names[i];
+          const labels=isForward?['pattern match','predictive link \u2192','info flow \u2192']:['pattern match','predictive link \u2190','info flow \u2190'];
+          let html='<div class="tt-title">does '+from+' affect '+to+'?</div>';
+          html+='<div class="tt-line">certainty: <span>'+dirTier+'</span></div>';
+          html+='<div class="tt-line">evidence: <span>'+(dirStrength*100).toFixed(0)+'%</span></div>';
+          html+='<div class="tt-line" style="margin-top:4px;color:#8b949e">tests:</div>';
+          dirMethods.forEach((m,mi)=>{
+            html+='<div class="tt-line" style="color:'+(m.signal?'#3fb950':'#6e7681')+'">'+labels[mi]+': '+(m.signal?'yes':'no')+' ('+(m.value*100).toFixed(0)+'%)</div>';
+          });
+          html+='<div class="tt-hint">click to see timeline and response delay</div>';
+          showTip(html,event.clientX,event.clientY);
+        })
+        .on('mousemove',function(event){showTip(document.getElementById('tooltip').innerHTML,event.clientX,event.clientY)})
+        .on('mouseleave',function(){
+          d3.select(this).select('rect').attr('stroke-width',1.5);
+          hideTip();
+        })
+        .on('click',()=>showPairDetail(pair,sets,0));
+      }
+    }
+  }
+}
+
+function renderTimeline(container,pair){
+  const margin={top:25,right:20,bottom:30,left:45};
+  const width=700-margin.left-margin.right;
+  const height=220-margin.top-margin.bottom;
+
+  const leg=container.append('div').attr('class','legend');
+  leg.append('span').html('<span class="swatch" style="background:'+COLORS[0]+'"></span>'+pair.a);
+  leg.append('span').html('<span class="swatch" style="background:'+COLORS[1]+'"></span>'+pair.b);
+  leg.append('span').html('<span class="swatch" style="background:rgba(248,81,73,0.15)"></span>correlated');
+  leg.append('span').text('| shaded = detrended correlation > 0.5');
+
+  const svg=container.append('svg').attr('width',width+margin.left+margin.right).attr('height',height+margin.top+margin.bottom);
+  const g=svg.append('g').attr('transform','translate('+margin.left+','+margin.top+')');
+
+  const n=Math.min(pair.qa.length,pair.qb.length);
+  const tA=pair.trialsA.slice(0,n),tB=pair.trialsB.slice(0,n);
+  const allTimes=[...tA,...tB].map(t=>t.time);
+  const x=d3.scaleLinear().domain(d3.extent(allTimes)).range([0,width]);
+  const y=d3.scaleLinear().domain([0,1]).range([height,0]);
+
+  g.append('g').attr('transform','translate(0,'+height+')').call(d3.axisBottom(x).ticks(6).tickFormat(d=>{
+    const dt=new Date(d*1000);return dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
+  })).selectAll('text').attr('fill','#6e7681').style('font','9px monospace');
+  g.selectAll('.domain').attr('stroke','#30363d');
+  g.selectAll('.tick line').attr('stroke','#30363d');
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('.0%')))
+    .selectAll('text').attr('fill','#6e7681').style('font','9px monospace');
+
+  const windowSize=Math.max(3,Math.floor(n/8));
+  for(let i=windowSize;i<n;i++){
+    const aSlice=pair.qa.slice(i-windowSize,i+1);
+    const bSlice=pair.qb.slice(i-windowSize,i+1);
+    if(aSlice.length!==bSlice.length||aSlice.length<3) continue;
+    const corr=pearsonR(aSlice,bSlice);
+    if(Math.abs(corr)>0.5){
+      g.append('rect').attr('x',x(tA[Math.max(0,i-windowSize)].time)).attr('y',0)
+        .attr('width',x(tA[i].time)-x(tA[Math.max(0,i-windowSize)].time)).attr('height',height)
+        .attr('fill',corr>0?'rgba(248,81,73,0.08)':'rgba(88,166,255,0.08)');
+    }
+  }
+
+  const qa=pair.qa.slice(0,n),qb=pair.qb.slice(0,n);
+  const lineA=d3.line().x((d,i)=>x(tA[i].time)).y(d=>y(d)).curve(d3.curveMonotoneX);
+  g.append('path').datum(qa).attr('d',lineA).attr('fill','none').attr('stroke',COLORS[0]).attr('stroke-width',1.5).attr('opacity',0.8);
+  const lineB=d3.line().x((d,i)=>x(tB[i].time)).y(d=>y(d)).curve(d3.curveMonotoneX);
+  g.append('path').datum(qb).attr('d',lineB).attr('fill','none').attr('stroke',COLORS[1]).attr('stroke-width',1.5).attr('opacity',0.8);
+
+  qa.forEach((q,i)=>{
+    g.append('circle').attr('cx',x(tA[i].time)).attr('cy',y(q)).attr('r',2.5).attr('fill',COLORS[0]).attr('opacity',0.6)
+      .style('cursor','crosshair')
+      .on('mouseenter',function(event){
+        d3.select(this).attr('r',5).attr('opacity',1);
+        const dt=new Date(tA[i].time*1000);
+        const ts=dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0')+':'+dt.getSeconds().toString().padStart(2,'0');
+        showTip('<div class="tt-title">'+pair.a+' trial #'+i+'</div><div class="tt-line">time: <span>'+ts+'</span></div><div class="tt-line">quality: <span>'+(q*100).toFixed(1)+'%</span></div>',event.clientX,event.clientY);
+      })
+      .on('mousemove',function(event){showTip(document.getElementById('tooltip').innerHTML,event.clientX,event.clientY)})
+      .on('mouseleave',function(){d3.select(this).attr('r',2.5).attr('opacity',0.6);hideTip()});
+  });
+  qb.forEach((q,i)=>{
+    g.append('circle').attr('cx',x(tB[i].time)).attr('cy',y(q)).attr('r',2.5).attr('fill',COLORS[1]).attr('opacity',0.6)
+      .style('cursor','crosshair')
+      .on('mouseenter',function(event){
+        d3.select(this).attr('r',5).attr('opacity',1);
+        const dt=new Date(tB[i].time*1000);
+        const ts=dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0')+':'+dt.getSeconds().toString().padStart(2,'0');
+        showTip('<div class="tt-title">'+pair.b+' trial #'+i+'</div><div class="tt-line">time: <span>'+ts+'</span></div><div class="tt-line">quality: <span>'+(q*100).toFixed(1)+'%</span></div>',event.clientX,event.clientY);
+      })
+      .on('mousemove',function(event){showTip(document.getElementById('tooltip').innerHTML,event.clientX,event.clientY)})
+      .on('mouseleave',function(){d3.select(this).attr('r',2.5).attr('opacity',0.6);hideTip()});
+  });
+}
+
+function renderLagScan(container,pair){
+  const margin={top:25,right:15,bottom:30,left:40};
+  const width=300-margin.left-margin.right;
+  const height=180-margin.top-margin.bottom;
+
+  container.append('div').attr('class','legend')
+    .html('<span style="color:#6e7681">correlation at different time offsets | green = strongest lag</span>');
+
+  const svg=container.append('svg').attr('width',width+margin.left+margin.right).attr('height',height+margin.top+margin.bottom);
+  const g=svg.append('g').attr('transform','translate('+margin.left+','+margin.top+')');
+
+  const cc=pair.crossCorr;
+  const x=d3.scaleBand().domain(cc.map(d=>d.lag)).range([0,width]).padding(0.15);
+  const maxAbs=d3.max(cc,d=>Math.abs(d.corr))||1;
+  const y=d3.scaleLinear().domain([-maxAbs*1.2,maxAbs*1.2]).range([height,0]);
+
+  g.append('line').attr('x1',0).attr('y1',y(0)).attr('x2',width).attr('y2',y(0))
+    .attr('stroke','#30363d').attr('stroke-width',1);
+
+  g.selectAll('.lag-bar').data(cc).join('rect')
+    .attr('x',d=>x(d.lag)).attr('width',x.bandwidth())
+    .attr('y',d=>d.corr>=0?y(d.corr):y(0))
+    .attr('height',d=>Math.abs(y(d.corr)-y(0)))
+    .attr('fill',d=>d.lag===pair.bestLag.lag?'#3fb950':Math.abs(d.corr)>0.3?'#58a6ff':'#30363d')
+    .attr('opacity',d=>d.lag===pair.bestLag.lag?1:0.7)
+    .style('cursor','crosshair')
+    .on('mouseenter',function(event,d){
+      d3.select(this).attr('opacity',1);
+      const isBest=d.lag===pair.bestLag.lag;
+      let html='<div class="tt-title">response delay: '+Math.abs(d.lag)+' trial'+(Math.abs(d.lag)!==1?'s':'')+'</div>';
+      if(d.lag===0){
+        html+='<div class="tt-line">both react simultaneously</div>';
+      } else if(d.lag>0){
+        html+='<div class="tt-line">'+pair.a+'\'s changes reach '+pair.b+' after '+d.lag+' trial'+(d.lag!==1?'s':'')+'</div>';
+      } else {
+        html+='<div class="tt-line">'+pair.b+'\'s changes reach '+pair.a+' after '+(-d.lag)+' trial'+((-d.lag)!==1?'s':'')+'</div>';
+      }
+      html+='<div class="tt-line">pattern match: <span>'+(d.corr*100).toFixed(0)+'%</span></div>';
+      if(isBest) html+='<div class="tt-line" style="color:#3fb950">strongest response delay found</div>';
+      showTip(html,event.clientX,event.clientY);
+    })
+    .on('mousemove',function(event){showTip(document.getElementById('tooltip').innerHTML,event.clientX,event.clientY)})
+    .on('mouseleave',function(event,d){
+      d3.select(this).attr('opacity',d.lag===pair.bestLag.lag?1:0.7);
+      hideTip();
+    });
+
+  g.append('g').attr('transform','translate(0,'+height+')')
+    .call(d3.axisBottom(x).tickValues(x.domain().filter((d,i)=>i%Math.max(1,Math.floor(cc.length/8))===0)))
+    .selectAll('text').attr('fill','#6e7681').style('font','8px monospace');
+  g.selectAll('.domain').attr('stroke','#30363d');
+  g.selectAll('.tick line').attr('stroke','#30363d');
+  g.append('text').attr('x',width/2).attr('y',height+25).attr('text-anchor','middle')
+    .attr('fill','#6e7681').style('font','9px monospace').text('lag (trials)');
+  g.append('text').attr('x',width/2).attr('y',-8).attr('text-anchor','middle')
+    .attr('fill','#8b949e').style('font','10px monospace')
+    .text('best lag: '+pair.bestLag.lag+' (r='+pair.bestLag.corr.toFixed(3)+')');
+}
+
+render([breederA,breederB,breederC,breederD,breederE,breederF,breederG,breederH,breederI,breederJ]);
+}catch(e){document.getElementById('content').innerHTML='<pre style="color:#f85149">'+e.stack+'</pre>'}
+</script>
+</body>
+</html>

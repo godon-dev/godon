@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>godon optimization viz prototype</title>
+<style>
+body { font-family: monospace; background: #1a1a2e; color: #e0e0e0; margin: 20px; }
+h2 { color: #e94560; }
+canvas { border: 1px solid #333; border-radius: 4px; }
+.controls { margin: 20px 0; }
+button { background: #e94560; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; margin-right: 8px; }
+button:hover { background: #c73650; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.slider-row label { min-width: 120px; }
+input[type="range"] { flex: 1; }
+.legend { display: flex; gap: 20px; margin: 10px 0; font-size: 14px; }
+.legend span { display: flex; align-items: center; gap: 4px; }
+.legend .dot { width: 12px; height: 12px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<h2>godon optimization prototype</h2>
+
+<div class="legend">
+  <span><div class="dot" style="background:#4ecca3"></div> within guardrails</span>
+  <span><div class="dot" style="background:#e94560"></div> guardrail violation</span>
+  <span><div class="dot" style="background:#555"></div> filtered out</span>
+</div>
+
+<div class="controls">
+  <button id="heatmapBtn">heatmap</button>
+  <button id="spiderBtn">spider web</button>
+  <button id="parallelBtn">parallel coordinates</button>
+  <button id="animateBtn">animate trials</button>
+  <span id="trialLabel" style="margin-left:20px; color:#e94560;"></span>
+</div>
+
+<div class="slider-row">
+  <label>show trial:</label>
+  <input type="range" id="trialSlider" min="0" max="14" value="14">
+  <span id="trialNum">15/15</span>
+</div>
+<div class="slider-row">
+  <label>growth_rate min:</label>
+  <input type="range" id="brushGrowth" min="0" max="40" value="0" step="1">
+  <span id="brushGrowthVal">0.0</span>
+</div>
+
+<canvas id="canvas" width="900" height="500"></canvas>
+
+<script>
+const metrics = ["growth_rate", "max_temp", "max_co2", "energy_kwh", "water_liters"];
+const ranges = {
+  growth_rate: [0, 0.5],
+  max_temp:    [10, 45],
+  max_co2:     [300, 900],
+  energy_kwh:  [30, 150],
+  water_liters:[5, 50]
+};
+const guardrails = {
+  max_temp:    { max: 40 },
+  max_co2:     { max: 800 },
+  energy_kwh:  { max: 120 },
+  water_liters:{ max: 45 }
+};
+
+const trials = [];
+const base_growth = [0.08,0.12,0.10,0.18,0.15,0.21,0.19,0.28,0.25,0.30,0.27,0.33,0.31,0.34,0.339];
+for (let i = 0; i < 15; i++) {
+  const g = base_growth[i] + (Math.random()-0.5)*0.02;
+  const t = 18 + g*50 + (Math.random()-0.5)*8;
+  const c = 400 + g*800 + (Math.random()-0.5)*100;
+  const e = 40 + (1-g)*80 + (Math.random()-0.5)*15;
+  const w = 8 + (1-g)*30 + (Math.random()-0.5)*5;
+  trials.push({ growth_rate: g, max_temp: t, max_co2: c, energy_kwh: e, water_liters: w });
+}
+
+let mode = 'heatmap';
+let animating = false;
+let animFrame = 0;
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const slider = document.getElementById('trialSlider');
+const trialLabel = document.getElementById('trialLabel');
+const trialNum = document.getElementById('trialNum');
+const brushGrowth = document.getElementById('brushGrowth');
+const brushGrowthVal = document.getElementById('brushGrowthVal');
+
+function violates(trial) {
+  for (const [m, rule] of Object.entries(guardrails)) {
+    if (rule.max !== undefined && trial[m] > rule.max) return true;
+  }
+  return false;
+}
+
+function valToY(val, metric, top, bottom) {
+  const [lo, hi] = ranges[metric];
+  return bottom - ((val - lo) / (hi - lo)) * (bottom - top);
+}
+
+function valToX(val, metric, left, right) {
+  const [lo, hi] = ranges[metric];
+  return left + ((val - lo) / (hi - lo)) * (right - left);
+}
+
+function drawHeatmap() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const left = 100, top = 60, right = 860, bottom = 440;
+  const rowH = (bottom - top) / metrics.length;
+  const colW = (right - left) / trials.length;
+  const maxTrial = parseInt(slider.value) + 1;
+
+  for (let mi = 0; mi < metrics.length; mi++) {
+    const m = metrics[mi];
+    const [lo, hi] = ranges[m];
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(m, left - 8, top + mi * rowH + rowH / 2 + 4);
+
+    for (let ti = 0; ti < maxTrial; ti++) {
+      const t = trials[ti];
+      const val = t[m];
+      const norm = (val - lo) / (hi - lo);
+      const v = violates(t);
+      const x = left + ti * colW;
+      const y = top + mi * rowH;
+
+      if (v) {
+        ctx.fillStyle = `rgb(${180 + 75*norm}, ${50}, ${50})`;
+      } else {
+        const g = Math.floor(80 + 150 * norm);
+        const r = Math.floor(40 + 60 * (1 - norm));
+        ctx.fillStyle = `rgb(${r}, ${g}, ${70})`;
+      }
+      ctx.fillRect(x + 1, y + 1, colW - 2, rowH - 2);
+
+      ctx.fillStyle = '#000';
+      ctx.font = '9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(val.toFixed(2), x + colW/2, y + rowH/2 + 3);
+    }
+  }
+
+  ctx.fillStyle = '#888';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  for (let ti = 0; ti < maxTrial; ti++) {
+    ctx.fillText('T' + (ti+1), left + ti * colW + colW/2, bottom + 15);
+  }
+
+  for (const [m, rule] of Object.entries(guardrails)) {
+    if (rule.max !== undefined) {
+      const mi = metrics.indexOf(m);
+      const y = valToY(rule.max, m, top + mi * rowH, top + (mi+1) * rowH);
+      ctx.strokeStyle = '#e94560';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(left, y);
+      ctx.lineTo(right, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+}
+
+function drawSpider() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  const R = 180;
+  const n = metrics.length;
+  const maxTrial = parseInt(slider.value);
+  const showTrial = trials[maxTrial];
+  const brushMin = parseFloat(brushGrowth.value) / 100;
+
+  for (let ring = 1; ring <= 4; ring++) {
+    const r = R * ring / 4;
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < n; i++) {
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const x = cx + Math.cos(angle) * R;
+    const y = cy + Math.sin(angle) * R;
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    const lx = cx + Math.cos(angle) * (R + 25);
+    const ly = cy + Math.sin(angle) * (R + 25);
+    ctx.fillText(metrics[i], lx, ly + 4);
+  }
+
+  const v = violates(showTrial);
+  const dimmed = showTrial.growth_rate < brushMin;
+
+  ctx.strokeStyle = '#e9456088';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const m = metrics[i];
+    const guard = guardrails[m];
+    let norm = 1;
+    if (guard && guard.max) norm = (guard.max - ranges[m][0]) / (ranges[m][1] - ranges[m][0]);
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const x = cx + Math.cos(angle) * R * norm;
+    const y = cy + Math.sin(angle) * R * norm;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = dimmed ? '#555' : (v ? '#e94560' : '#4ecca3');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const m = metrics[i];
+    const [lo, hi] = ranges[m];
+    const norm = Math.max(0, Math.min(1, (showTrial[m] - lo) / (hi - lo)));
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const x = cx + Math.cos(angle) * R * norm;
+    const y = cy + Math.sin(angle) * R * norm;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.fillStyle = dimmed ? '#55522' : (v ? '#e9456022' : '#4ecca322');
+  ctx.fill();
+
+  ctx.fillStyle = '#e94560';
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`trial ${maxTrial + 1}  growth_rate: ${showTrial.growth_rate.toFixed(3)}  ${v ? 'GUARDRAIL VIOLATION' : ''}`, cx, 30);
+}
+
+function drawParallel() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const left = 80, top = 60, right = 820, bottom = 420;
+  const maxTrial = parseInt(slider.value) + 1;
+  const brushMin = parseFloat(brushGrowth.value) / 100;
+  const axisSpacing = (right - left) / (metrics.length - 1);
+
+  for (let mi = 0; mi < metrics.length; mi++) {
+    const m = metrics[mi];
+    const x = left + mi * axisSpacing;
+    const [lo, hi] = ranges[m];
+
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(m, x, bottom + 20);
+    ctx.fillStyle = '#888';
+    ctx.fillText(hi.toFixed(1), x, top - 8);
+    ctx.fillText(lo.toFixed(1), x, bottom + 36);
+
+    const guard = guardrails[m];
+    if (guard && guard.max !== undefined) {
+      const gy = valToY(guard.max, m, top, bottom);
+      ctx.strokeStyle = '#e94560';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x - 15, gy);
+      ctx.lineTo(x + 15, gy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  for (let ti = 0; ti < maxTrial; ti++) {
+    const t = trials[ti];
+    const v = violates(t);
+    const dimmed = t.growth_rate < brushMin;
+
+    ctx.strokeStyle = dimmed ? '#333' : (v ? '#e9456066' : '#4ecca366');
+    ctx.lineWidth = dimmed ? 1 : 2;
+    ctx.beginPath();
+    for (let mi = 0; mi < metrics.length; mi++) {
+      const m = metrics[mi];
+      const x = left + mi * axisSpacing;
+      const y = valToY(t[m], m, top, bottom);
+      if (mi === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#888';
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`drag "growth_rate min" slider to highlight only high-performing trials`, left, bottom + 55);
+}
+
+function draw() {
+  if (mode === 'heatmap') drawHeatmap();
+  else if (mode === 'spider') drawSpider();
+  else if (mode === 'parallel') drawParallel();
+}
+
+function animate() {
+  if (!animating) return;
+  animFrame = (animFrame + 1) % trials.length;
+  slider.value = animFrame;
+  trialNum.textContent = `${animFrame + 1}/${trials.length}`;
+  draw();
+  setTimeout(() => requestAnimationFrame(animate), 500);
+}
+
+document.getElementById('heatmapBtn').onclick = () => { mode = 'heatmap'; draw(); };
+document.getElementById('spiderBtn').onclick = () => { mode = 'spider'; draw(); };
+document.getElementById('parallelBtn').onclick = () => { mode = 'parallel'; draw(); };
+document.getElementById('animateBtn').onclick = () => {
+  animating = !animating;
+  document.getElementById('animateBtn').textContent = animating ? 'stop' : 'animate trials';
+  if (animating) animate();
+};
+slider.oninput = () => { trialNum.textContent = `${parseInt(slider.value)+1}/${trials.length}`; draw(); };
+brushGrowth.oninput = () => { brushGrowthVal.textContent = (parseFloat(brushGrowth.value)/100).toFixed(1); draw(); };
+
+draw();
+</script>
+</body>
+</html>

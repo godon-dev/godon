@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>godon observer</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:#0d1117;color:#c9d1d9;font-size:13px}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:16px;color:#e6edf3}header h1 span{color:#3fb950}
+.content{padding:0;overflow-y:auto;height:calc(100vh - 50px)}
+.ov-list{list-style:none;padding:0;margin:0}
+.ov-row{display:flex;align-items:center;gap:16px;padding:10px 24px;border-bottom:1px solid #21262d;cursor:pointer;transition:background 0.15s}
+.ov-row:hover{background:#161b22}
+.ov-row:hover .ov-name{color:#e6edf3}
+.ov-row.selected{background:#1c2128;border-left:3px solid #3fb950;padding-left:21px}
+.ov-name{flex:1;font-size:13px;color:#c9d1d9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:120px}
+.ov-trials{width:60px;text-align:right;font-size:12px;color:#8b949e;flex-shrink:0}
+.ov-created{width:130px;text-align:right;font-size:11px;color:#6e7681;flex-shrink:0}
+.ov-cross-bar{display:none;align-items:center;gap:12px;padding:8px 24px;background:#161b22;border-bottom:1px solid #30363d}
+.ov-cross-bar.show{display:flex}
+.ov-cross-btn{background:#238636;color:#fff;border:none;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:12px}
+.ov-cross-btn:hover{background:#2ea043}
+.ov-cross-btn:disabled{background:#21262d;color:#484f58;cursor:default}
+.ov-cross-count{font-size:11px;color:#8b949e}
+.ov-cross-clear{background:none;border:none;color:#6e7681;cursor:pointer;font-family:inherit;font-size:11px}
+.ov-cross-clear:hover{color:#c9d1d9}
+.ov-loading{text-align:center;padding:40px;color:#6e7681;font-size:12px}
+.ov-header{display:flex;align-items:center;gap:16px;padding:8px 24px;border-bottom:1px solid #30363d;background:#0d1117}
+.ov-header button{background:none;border:none;color:#6e7681;cursor:pointer;font-family:inherit;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:0}
+.ov-header button:hover{color:#c9d1d9}
+.ov-header button .sort-arrow{margin-left:4px;font-size:9px}
+.ov-header .ov-h-name{flex:1;min-width:120px;text-align:left}
+.ov-header .ov-h-trials{width:60px;text-align:right}
+.ov-header .ov-h-created{width:130px;text-align:right}
+.detail{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;z-index:200;justify-content:center;align-items:center}
+.detail.show{display:flex}
+.detail-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:24px 28px;max-width:420px;width:90%}
+.detail-card h2{color:#e6edf3;font-size:16px;margin-bottom:14px}
+.detail-card .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px;color:#8b949e}
+.detail-card .row span:last-child{color:#c9d1d9}
+.detail-card button{margin-top:16px;background:#238636;color:#fff;border:none;padding:6px 16px;border-radius:3px;cursor:pointer;font-family:inherit;width:100%}
+.detail-card button:hover{background:#2ea043}
+.cross-view{padding:24px;text-align:center;color:#6e7681;font-size:13px}
+.cross-view h2{color:#e6edf3;margin-bottom:12px;font-size:15px}
+.cross-view .breeder-tags{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.cross-view .tag{background:#1c2128;border:1px solid #30363d;border-radius:4px;padding:4px 10px;font-size:11px;color:#3fb950}
+.cross-back{background:none;border:1px solid #30363d;color:#c9d1d9;padding:6px 16px;border-radius:3px;cursor:pointer;font-family:inherit;margin-top:12px}
+.cross-back:hover{border-color:#8b949e}
+</style>
+</head>
+<body>
+<header><h1>godon <span>observer</span></h1><span style="font-size:11px;color:#8b949e" id="count"></span></header>
+<div class="content" id="content"></div>
+<div class="detail" id="detail"><div class="detail-card" id="detailCard"></div></div>
+<script>
+const $=id=>document.getElementById(id);
+
+const DEMO_BREEDERS=[
+  {id:'b8c9d0e1-f2a3-4567-bcde-678901234567',name:'network-tuner',total_trials:156,createdAt:'2026-04-18T11:00:00Z'},
+  {id:'a1b2c3d4-e5f6-7890-abcd-ef1234567890',name:'bench-s3-gh1',total_trials:47,createdAt:'2026-04-20T08:12:00Z'},
+  {id:'b2c3d4e5-f6a7-8901-bcde-f12345678901',name:'bench-s3-gh2',total_trials:43,createdAt:'2026-04-20T08:12:30Z'},
+  {id:'c3d4e5f6-a7b8-9012-cdef-123456789012',name:'bench-s4-gh1',total_trials:31,createdAt:'2026-04-21T14:30:00Z'},
+  {id:'d4e5f6a7-b8c9-0123-defa-234567890123',name:'bench-s4-gh2',total_trials:28,createdAt:'2026-04-21T14:30:15Z'},
+  {id:'e5f6a7b8-c9d0-1234-efab-345678901234',name:'linux-perf-01',total_trials:12,createdAt:'2026-04-22T09:05:00Z'},
+  {id:'a7b8c9d0-e1f2-3456-abcd-567890123456',name:'greenhouse-beta',total_trials:5,createdAt:'2026-04-22T10:15:00Z'},
+  {id:'f6a7b8c9-d0e1-2345-fabc-456789012345',name:'greenhouse-alpha',total_trials:0,createdAt:'2026-04-22T10:00:00Z'},
+];
+
+let selectedBreeders=[];
+let lastClickedIdx=-1;
+let sortField='name';
+let sortDir=1;
+
+function sorted(breeders){
+  return [...breeders].sort((a,b)=>{
+    let va,vb;
+    if(sortField==='name'){va=a.name.toLowerCase();vb=b.name.toLowerCase();return va<vb?-sortDir:va>vb?sortDir:0}
+    if(sortField==='trials'){va=a.total_trials||0;vb=b.total_trials||0}
+    if(sortField==='created'){va=new Date(a.createdAt||0).getTime();vb=new Date(b.createdAt||0).getTime()}
+    return (va-vb)*sortDir;
+  });
+}
+
+function fmtDate(iso){
+  const d=new Date(iso);
+  return d.toLocaleDateString('en-CA')+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function updateCrossBar(){
+  const bar=$('crossBar');
+  const btn=$('crossBtn');
+  const count=$('crossCount');
+  if(selectedBreeders.length>0){
+    bar.classList.add('show');
+    btn.disabled=selectedBreeders.length<2;
+    count.textContent=selectedBreeders.length+' selected';
+  } else {
+    bar.classList.remove('show');
+  }
+  document.querySelectorAll('.ov-row').forEach(row=>{
+    const id=row.dataset.id;
+    if(selectedBreeders.includes(id)) row.classList.add('selected');
+    else row.classList.remove('selected');
+  });
+}
+
+function toggleSelect(id,idx){
+  const pos=selectedBreeders.indexOf(id);
+  if(pos>=0) selectedBreeders.splice(pos,1);
+  else selectedBreeders.push(id);
+  lastClickedIdx=idx;
+  updateCrossBar();
+}
+
+function rangeSelect(id,idx){
+  if(lastClickedIdx<0||lastClickedIdx>=DEMO_BREEDERS.length){
+    toggleSelect(id,idx);
+    return;
+  }
+  const start=Math.min(lastClickedIdx,idx);
+  const end=Math.max(lastClickedIdx,idx);
+  for(let i=start;i<=end;i++){
+    const bid=DEMO_BREEDERS[i].id;
+    if(!selectedBreeders.includes(bid)) selectedBreeders.push(bid);
+  }
+  updateCrossBar();
+}
+
+function clearSelection(){
+  selectedBreeders=[];
+  lastClickedIdx=-1;
+  updateCrossBar();
+}
+
+function showDetail(b){
+  const c=$('detailCard');
+  let html=`<h2>${b.name}</h2>`;
+  html+=`<div class="row"><span>uuid</span><span>${b.id.substring(0,8)}...</span></div>`;
+  html+=`<div class="row"><span>trials</span><span>${b.total_trials}</span></div>`;
+  html+=`<div class="row"><span>created</span><span>${fmtDate(b.createdAt)}</span></div>`;
+  html+=`<button onclick="document.getElementById('detail').classList.remove('show')">close</button>`;
+  c.innerHTML=html;
+  $('detail').classList.add('show');
+}
+$('detail').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+
+function crossBreeders(ids){
+  const el=$('content');
+  const names=ids.map(id=>DEMO_BREEDERS.find(b=>b.id===id).name);
+  let html='<div class="cross-view">';
+  html+='<h2>cross-examination</h2>';
+  html+='<div class="breeder-tags">';
+  names.forEach(n=>{html+=`<span class="tag">${n}</span>`});
+  html+='</div>';
+  html+='<p>crossing '+names.length+' breeders — coming soon</p>';
+  html+='<button class="cross-back" onclick="renderOverview(DEMO_BREEDERS);selectedBreeders=[]">&#8592; back to overview</button>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderOverview(breeders){
+  const el=d3.select('#content');
+  el.html('');
+  if(!breeders.length){
+    el.append('div').attr('class','ov-loading').text('no breeders found');
+    return;
+  }
+  $('count').textContent=breeders.length+' breeders';
+
+  const crossBar=el.append('div').attr('class','ov-cross-bar').attr('id','crossBar');
+  crossBar.append('button').attr('class','ov-cross-btn').attr('id','crossBtn')
+    .attr('disabled',true).text('cross').on('click',()=>crossBreeders(selectedBreeders));
+  crossBar.append('span').attr('class','ov-cross-count').attr('id','crossCount').text('');
+  crossBar.append('button').attr('class','ov-cross-clear').text('clear').on('click',clearSelection);
+
+  const hdr=el.append('div').attr('class','ov-header');
+  const arrow=f=>sortField===f?(sortDir===1?'\u25b2':'\u25bc'):'';
+  hdr.append('button').attr('class','ov-h-name').html('name <span class="sort-arrow">'+arrow('name')+'</span>')
+    .on('click',()=>{sortField='name';sortDir=sortField==='name'?-sortDir:1;renderOverview(breeders)});
+  hdr.append('button').attr('class','ov-h-trials').html('trials <span class="sort-arrow">'+arrow('trials')+'</span>')
+    .on('click',()=>{sortField='trials';sortDir=sortField==='trials'?-sortDir:1;renderOverview(breeders)});
+  hdr.append('button').attr('class','ov-h-created').html('created <span class="sort-arrow">'+arrow('created')+'</span>')
+    .on('click',()=>{sortField='created';sortDir=sortField==='created'?-sortDir:1;renderOverview(breeders)});
+
+  const ordered=sorted(breeders);
+  const list=el.append('ul').attr('class','ov-list');
+  ordered.forEach((b,idx)=>{
+    const li=list.append('li').attr('class','ov-row')
+      .attr('data-id',b.id).attr('data-idx',idx);
+    li.append('div').attr('class','ov-name').text(b.name);
+    li.append('div').attr('class','ov-trials').text(b.total_trials||'—');
+    li.append('div').attr('class','ov-created').text(b.createdAt?fmtDate(b.createdAt):'');
+    li.on('click',function(event){
+      event.preventDefault();
+      if(event.shiftKey){
+        rangeSelect(b.id,idx);
+      } else if(event.ctrlKey||event.metaKey){
+        toggleSelect(b.id,idx);
+      } else {
+        if(selectedBreeders.length>0){
+          clearSelection();
+          return;
+        }
+        showDetail(b);
+      }
+    });
+  });
+}
+
+renderOverview(DEMO_BREEDERS);
+</script>
+</body>
+</html>

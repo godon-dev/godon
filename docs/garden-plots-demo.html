@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>godon garden plots</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:#0d1117;color:#c9d1d9;font-size:13px}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:16px;color:#e6edf3}header h1 span{color:#3fb950}
+.content{padding:30px 40px;overflow-y:auto;height:calc(100vh - 50px);display:flex;flex-direction:column;align-items:center}
+#garden{display:flex;flex-wrap:wrap;justify-content:center;gap:36px;padding:20px;max-width:900px}
+.plot{display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform 0.2s}
+.plot:hover{transform:scale(1.08)}
+.plot:hover .plot-name{color:#e6edf3}
+.plot-name{margin-top:8px;font-size:12px;color:#8b949e;max-width:100px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plot-trials{font-size:10px;color:#6e7681;margin-top:2px}
+.plot svg{filter:drop-shadow(0 0 6px rgba(0,0,0,0.5))}
+.tooltip{position:fixed;background:#1c2128;border:1px solid #30363d;border-radius:6px;padding:8px 12px;font-size:11px;pointer-events:none;z-index:100;max-width:260px;display:none}
+.tooltip .tt-name{color:#e6edf3;font-size:13px;margin-bottom:4px}
+.tooltip .tt-row{color:#8b949e;margin:2px 0}
+.tooltip .tt-row span{color:#c9d1d9}
+.empty-state{color:#6e7681;font-size:14px;margin-top:60px;text-align:center}
+.detail{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;z-index:200;justify-content:center;align-items:center}
+.detail.show{display:flex}
+.detail-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:24px;max-width:400px;width:90%}
+.detail-card h2{color:#e6edf3;font-size:16px;margin-bottom:12px}
+.detail-card .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px;color:#8b949e}
+.detail-card .row span:last-child{color:#c9d1d9}
+.detail-card button{margin-top:16px;background:#238636;color:#fff;border:none;padding:6px 16px;border-radius:3px;cursor:pointer;font-family:inherit;width:100%}
+.detail-card button:hover{background:#2ea043}
+.mini-trials{display:flex;gap:1px;margin-top:8px;justify-content:center;flex-wrap:wrap}
+.mini-trials .t{width:4px;height:4px;border-radius:1px}
+</style>
+</head>
+<body>
+<header><h1>godon <span>garden</span></h1><span style="font-size:11px;color:#6e7681">overview</span></header>
+<div class="content">
+<div id="garden"></div>
+<div class="empty-state" id="empty" style="display:none">no breeders yet</div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+<div class="detail" id="detail">
+<div class="detail-card" id="detailCard"></div>
+</div>
+<script>
+const qualityScale=d3.scaleLinear().domain([0,0.5,1]).range(['#f85149','#8b8000','#3fb950']).interpolate(d3.interpolateRgb);
+function qColor(q){return q===null||q===undefined?'#30363d':qualityScale(q)}
+
+const DEMO_BREEDERS=[
+  {id:'a1b2c3d4-e5f6-7890-abcd-ef1234567890',name:'bench-s3-gh1',trials:47,quality:0.82,trialQualities:null,created:'2026-04-20T08:12:00Z'},
+  {id:'b2c3d4e5-f6a7-8901-bcde-f12345678901',name:'bench-s3-gh2',trials:43,quality:0.74,trialQualities:null,created:'2026-04-20T08:12:30Z'},
+  {id:'c3d4e5f6-a7b8-9012-cdef-123456789012',name:'bench-s4-gh1',trials:31,quality:0.61,trialQualities:null,created:'2026-04-21T14:30:00Z'},
+  {id:'d4e5f6a7-b8c9-0123-defa-234567890123',name:'bench-s4-gh2',trials:28,quality:0.55,trialQualities:null,created:'2026-04-21T14:30:15Z'},
+  {id:'e5f6a7b8-c9d0-1234-efab-345678901234',name:'linux-perf-01',trials:12,quality:0.38,trialQualities:null,created:'2026-04-22T09:05:00Z'},
+  {id:'f6a7b8c9-d0e1-2345-fabc-456789012345',name:'greenhouse-alpha',trials:0,quality:null,trialQualities:null,created:'2026-04-22T10:00:00Z'},
+  {id:'a7b8c9d0-e1f2-3456-abcd-567890123456',name:'greenhouse-beta',trials:5,quality:0.22,trialQualities:null,created:'2026-04-22T10:15:00Z'},
+  {id:'b8c9d0e1-f2a3-4567-bcde-678901234567',name:'network-tuner',trials:156,quality:0.93,trialQualities:null,created:'2026-04-18T11:00:00Z'},
+];
+
+DEMO_BREEDERS.forEach(b=>{
+  if(b.trials>0){
+    const qs=[];
+    const trend=b.quality;
+    for(let i=0;i<Math.min(b.trials,60);i++){
+      const noise=(Math.random()-0.5)*0.3;
+      const progress=i/Math.min(b.trials,60);
+      const base=trend*0.4+trend*0.6*progress;
+      qs.push(Math.max(0,Math.min(1,base+noise)));
+    }
+    b.trialQualities=qs;
+  }
+});
+
+const R=44;
+const RING_W=6;
+const INNER_R=R-RING_W;
+
+function drawPlot(parent,breeder){
+  const svg=d3.select(parent).append('svg')
+    .attr('width',(R+4)*2).attr('height',(R+4)*2)
+    .attr('viewBox',`${-(R+2)} ${-(R+2)} ${(R+2)*2} ${(R+2)*2}`);
+
+  const g=svg.append('g');
+
+  if(breeder.trials===0){
+    g.append('circle').attr('r',R).attr('fill','#161b22').attr('stroke','#30363d').attr('stroke-width',1.5);
+    g.append('text').attr('y',1).attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('fill','#30363d').attr('font-size','10px').text('new');
+  } else {
+    if(breeder.trialQualities&&breeder.trialQualities.length>1){
+      const n=breeder.trialQualities.length;
+      const arc=d3.arc().innerRadius(INNER_R).outerRadius(R).cornerRadius(1);
+      const angleSlice=2*Math.PI/n;
+      const pathGen=d3.path();
+      breeder.trialQualities.forEach((q,i)=>{
+        const startAngle=i*angleSlice-Math.PI/2;
+        const endAngle=(i+1)*angleSlice-Math.PI/2;
+        pathGen.arc(0,0,R,startAngle,endAngle);
+        pathGen.arc(0,0,INNER_R,endAngle,startAngle,true);
+        pathGen.closePath();
+      });
+      g.selectAll('.ring-seg').data(breeder.trialQualities).enter()
+        .append('path')
+        .attr('d',(q,i)=>{
+          const sa=i*angleSlice-Math.PI/2;
+          const ea=(i+1)*angleSlice-Math.PI/2;
+          return arc({startAngle:sa,endAngle:ea});
+        })
+        .attr('fill',q=>qColor(q))
+        .attr('opacity',0.9);
+    } else {
+      g.append('circle').attr('r',RING_W/2).attr('fill',qColor(breeder.quality));
+    }
+
+    g.append('circle').attr('r',INNER_R-1).attr('fill','#0d1117');
+
+    const glow=qColor(breeder.quality);
+    g.append('circle').attr('r',INNER_R*0.65).attr('fill',glow).attr('opacity',0.15);
+    g.append('circle').attr('r',INNER_R*0.45).attr('fill',glow).attr('opacity',0.3);
+    g.append('circle').attr('r',INNER_R*0.22).attr('fill',glow).attr('opacity',0.6);
+
+    g.append('text').attr('y',1).attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('fill','#e6edf3').attr('font-size','14px').attr('font-weight','bold')
+      .text(breeder.trials);
+  }
+
+  return svg;
+}
+
+const garden=$('garden');
+const tooltip=$('tooltip');
+
+function $(id){return document.getElementById(id)}
+
+function showTip(html,ev){
+  tooltip.innerHTML=html;
+  tooltip.style.display='block';
+  tooltip.style.left=(ev.clientX+12)+'px';
+  tooltip.style.top=(ev.clientY+12)+'px';
+}
+function hideTip(){tooltip.style.display='none'}
+
+function showDetail(b){
+  const d=$('detail');
+  const c=$('detailCard');
+  const timeAgo=Math.round((Date.now()-new Date(b.created).getTime())/3600000);
+  let html=`<h2>${b.name}</h2>`;
+  html+=`<div class="row"><span>uuid</span><span>${b.id.substring(0,8)}...</span></div>`;
+  html+=`<div class="row"><span>trials</span><span>${b.trials}</span></div>`;
+  html+=`<div class="row"><span>best quality</span><span>${b.quality!==null?(b.quality*100).toFixed(0)+'%':'—'}</span></div>`;
+  html+=`<div class="row"><span>created</span><span>${timeAgo}h ago</span></div>`;
+  if(b.trialQualities&&b.trialQualities.length>0){
+    html+=`<div style="margin-top:8px"><div style="font-size:10px;color:#6e7681;margin-bottom:4px">trial history</div><div class="mini-trials">`;
+    b.trialQualities.forEach(q=>{
+      html+=`<div class="t" style="background:${qColor(q)}"></div>`;
+    });
+    html+=`</div></div>`;
+  }
+  html+=`<button onclick="document.getElementById('detail').classList.remove('show')">close</button>`;
+  c.innerHTML=html;
+  d.classList.add('show');
+}
+
+$('detail').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('show');
+});
+
+DEMO_BREEDERS.forEach(b=>{
+  const plot=document.createElement('div');
+  plot.className='plot';
+  drawPlot(plot,b);
+
+  const nameEl=document.createElement('div');
+  nameEl.className='plot-name';
+  nameEl.textContent=b.name;
+
+  const trialsEl=document.createElement('div');
+  trialsEl.className='plot-trials';
+  trialsEl.textContent=b.trials===0?'no trials':b.trials+' trials';
+
+  plot.appendChild(nameEl);
+  plot.appendChild(trialsEl);
+
+  plot.addEventListener('mouseenter',ev=>{
+    const q=b.quality!==null?(b.quality*100).toFixed(0)+'%':'—';
+    showTip(`<div class="tt-name">${b.name}</div><div class="tt-row">trials: <span>${b.trials}</span></div><div class="tt-row">quality: <span>${q}</span></div>`,ev);
+  });
+  plot.addEventListener('mousemove',ev=>showTip(tooltip.innerHTML,ev));
+  plot.addEventListener('mouseleave',hideTip);
+  plot.addEventListener('click',()=>showDetail(b));
+
+  garden.appendChild(plot);
+});
+</script>
+</body>
+</html>

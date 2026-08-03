@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>godon causality demos</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code','Consolas',monospace;background:#0d1117;color:#c9d1d9;font-size:13px}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:16px;color:#e6edf3}header h1 span{color:#3fb950}
+.content{padding:20px 24px;overflow-y:auto;height:calc(100vh - 50px)}
+.view-tabs{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid #30363d}
+.view-tabs button{background:none;border:none;color:#6e7681;cursor:pointer;font-family:inherit;font-size:12px;padding:6px 14px;border-bottom:2px solid transparent}
+.view-tabs button:hover{color:#c9d1d9}
+.view-tabs button.active{color:#e6edf3;border-bottom-color:#3fb950}
+.legend{display:flex;gap:16px;margin-bottom:10px;font-size:10px;color:#6e7681;flex-wrap:wrap}
+.tooltip{position:fixed;background:#1c2128;border:1px solid #30363d;border-radius:6px;padding:8px 12px;font-size:11px;pointer-events:none;z-index:100;max-width:320px;display:none;line-height:1.5}
+.tooltip .tt-title{color:#e6edf3;font-size:12px;margin-bottom:4px}
+.tooltip .tt-line{color:#8b949e}
+.tooltip .tt-line span{color:#c9d1d9}
+.tree-node{cursor:pointer;padding:4px 0}
+.tree-node:hover{background:#161b22}
+.tree-children{padding-left:20px;border-left:1px solid #21262d;margin-left:8px}
+.tree-leaf{color:#484f58;padding:2px 0}
+</style>
+</head>
+<body>
+<header><h1>godon <span>causality demos</span></h1></header>
+<div class="content" id="content"></div>
+<div class="tooltip" id="tooltip"></div>
+<script>
+try{
+
+const COLORS=['#58a6ff','#f0883e','#bc8cff','#3fb950','#f85149','#d29922','#79c0ff','#ffa657','#d2a8ff','#56d364'];
+
+const edges=[
+  {from:'bench-s4-gh1',to:'bench-s4-gh2',strength:0.72,tier:'high'},
+  {from:'prod-web-01',to:'prod-db-01',strength:0.58,tier:'medium'},
+  {from:'prod-cache-01',to:'staging-02',strength:0.45,tier:'medium'},
+  {from:'staging-02',to:'bench-s4-gh2',strength:0.32,tier:'low'},
+  {from:'prod-web-01',to:'staging-02',strength:0.28,tier:'low'},
+  {from:'prod-db-01',to:'prod-web-02',strength:0.51,tier:'medium'},
+];
+
+const breeders=['bench-s3-gh1','bench-s3-gh2','bench-s4-gh1','bench-s4-gh2','prod-web-01','prod-web-02','prod-db-01','prod-cache-01','staging-01','staging-02'];
+
+const tierColor=t=>t==='high'?'#3fb950':t==='medium'?'#d29922':'#58a6ff';
+
+function showTip(html,x,y){
+  const tip=document.getElementById('tooltip');
+  tip.innerHTML=html;tip.style.display='block';
+  const rect=tip.getBoundingClientRect();
+  tip.style.left=Math.min(x+12,window.innerWidth-rect.width-12)+'px';
+  tip.style.top=Math.min(y+12,window.innerHeight-rect.height-12)+'px';
+}
+function hideTip(){document.getElementById('tooltip').style.display='none'}
+
+let currentView='sankey';
+
+function render(){
+  const el=d3.select('#content');
+  el.html('');
+
+  const tabs=el.append('div').attr('class','view-tabs');
+  tabs.append('button').classed('active',currentView==='sankey').text('sankey flow').on('click',()=>{currentView='sankey';render()});
+  tabs.append('button').classed('active',currentView==='topo').text('topological layers').on('click',()=>{currentView='topo';render()});
+  tabs.append('button').classed('active',currentView==='reach').text('reachability tree').on('click',()=>{currentView='reach';render()});
+
+  if(currentView==='sankey') renderSankey(el);
+  else if(currentView==='topo') renderTopo(el);
+  else renderReach(el);
+}
+
+function renderSankey(el){
+  el.append('div').attr('class','legend')
+    .html('<span>flow width = evidence strength | color = certainty | hover for detail</span>');
+
+  const size=Math.min(800,window.innerWidth-80);
+  const margin={top:20,right:20,bottom:20,left:20};
+  const w=size-margin.left-margin.right;
+  const h=450-margin.top-margin.bottom;
+
+  const svg=el.append('svg').attr('width',size).attr('height',450)
+    .style('display','block').style('margin','10px auto');
+
+  const nodeNames=[...new Set(edges.flatMap(e=>[e.from,e.to]))];
+  const nodeIndex={};
+  nodeNames.forEach((n,i)=>nodeIndex[n]=i);
+
+  const sankeyData={
+    nodes:nodeNames.map((name,i)=>({id:i,name,color:COLORS[i%COLORS.length]})),
+    links:edges.map(e=>({
+      source:nodeIndex[e.from],
+      target:nodeIndex[e.to],
+      value:Math.max(e.strength*100,5),
+      strength:e.strength,
+      tier:e.tier
+    }))
+  };
+
+  const sankey=d3.sankey()
+    .nodeId(d=>d.id)
+    .nodeWidth(16)
+    .nodePadding(20)
+    .extent([[margin.left,margin.top],[w+margin.left,h+margin.top]]);
+
+  const{nodes,links}=sankey(sankeyData);
+
+  svg.append('g').selectAll('path').data(links).join('path')
+    .attr('d',d3.sankeyLinkHorizontal())
+    .attr('fill','none')
+    .attr('stroke',d=>tierColor(d.tier))
+    .attr('stroke-opacity',0.4)
+    .attr('stroke-width',d=>Math.max(2,d.value/4))
+    .style('cursor','pointer')
+    .on('mouseenter',function(event,d){
+      d3.select(this).attr('stroke-opacity',0.8);
+      showTip('<div class="tt-title">'+d.source.name+' \u2192 '+d.target.name+'</div>'+
+        '<div class="tt-line">certainty: <span>'+d.tier+'</span></div>'+
+        '<div class="tt-line">evidence: <span>'+(d.strength*100).toFixed(0)+'%</span></div>',event.clientX,event.clientY);
+    })
+    .on('mousemove',function(event){showTip(document.getElementById('tooltip').innerHTML,event.clientX,event.clientY)})
+    .on('mouseleave',function(){d3.select(this).attr('stroke-opacity',0.4);hideTip()});
+
+  const nodeG=svg.append('g').selectAll('g').data(nodes).join('g');
+
+  nodeG.append('rect')
+    .attr('x',d=>d.x0).attr('y',d=>d.y0)
+    .attr('width',d=>d.x1-d.x0).attr('height',d=>Math.max(1,d.y1-d.y0))
+    .attr('fill',d=>d.color).attr('rx',3)
+    .attr('stroke','#30363d').attr('stroke-width',1);
+
+  nodeG.append('text')
+    .attr('x',d=>d.x0>size/2?d.x0-6:d.x1+6)
+    .attr('y',d=>(d.y0+d.y1)/2+4)
+    .attr('text-anchor',d=>d.x0>size/2?'end':'start')
+    .attr('fill','#c9d1d9').style('font','9px monospace')
+    .text(d=>d.name);
+}
+
+function renderTopo(el){
+  el.append('div').attr('class','legend')
+    .html('<span>top = sources (cause others, not affected) | bottom = sinks (affected, don\'t cause) | middle = intermediaries</span>');
+
+  const targets=new Set(edges.map(e=>e.to));
+  const sources=new Set(edges.map(e=>e.from));
+
+  const layer0=[];const layer1=[];const layer2=[];
+  breeders.forEach(b=>{
+    const isSource=sources.has(b);
+    const isTarget=targets.has(b);
+    if(isSource&&!isTarget) layer0.push(b);
+    else if(!isSource&&isTarget) layer2.push(b);
+    else if(isSource&&isTarget) layer1.push(b);
+    else layer2.push(b);
+  });
+
+  const layers=layer1.length>0?[layer0,layer1,layer2]:[layer0,layer2];
+  const layerLabels=layer1.length>0?['sources','intermediaries','sinks']:['sources','sinks'];
+
+  const size=Math.min(800,window.innerWidth-80);
+  const layerH=120;
+  const totalH=layers.length*layerH+40;
+  const nodeW=100,nodeH=30;
+
+  const svg=el.append('svg').attr('width',size).attr('height',totalH)
+    .style('display','block').style('margin','10px auto');
+
+  const positions={};
+  layers.forEach((layer,li)=>{
+    const y=20+li*layerH+layerH/2;
+    const gap=size/(layer.length+1);
+    layer.forEach((b,bi)=>{
+      positions[b]={x:gap*(bi+1),y};
+    });
+
+    svg.append('text').attr('x',10).attr('y',20+li*layerH+14)
+      .attr('fill','#484f58').style('font','9px monospace')
+      .text(layerLabels[li]);
+  });
+
+  const defs=svg.append('defs');
+  ['high','medium','low'].forEach(tier=>{
+    const c=tierColor(tier);
+    defs.append('marker').attr('id','topo-'+tier).attr('viewBox','0 0 10 10')
+      .attr('refX',10).attr('refY',5).attr('markerWidth',5).attr('markerHeight',5)
+      .attr('orient','auto')
+      .append('path').attr('d','M 0 1 L 10 5 L 0 9 z').attr('fill',c);
+  });
+
+  const edgeG=svg.append('g');
+  edges.forEach(e=>{
+    const from=positions[e.from];
+    const to=positions[e.to];
+    if(!from||!to) return;
+
+    const dx=to.x-from.x;
+    const dy=to.y-from.y;
+    const dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const ux=dx/dist,uy=dy/dist;
+    const sx=from.x+ux*(nodeW/2+4);
+    const sy=from.y+uy*(nodeH/2+2);
+    const tx=to.x-ux*(nodeW/2+8);
+    const ty=to.y-uy*(nodeH/2+2);
+
+    const mx=(sx+tx)/2,my=(sy+ty)/2;
+    const perpx=-dy/dist,perpy=dx/dist;
+    const cp=mx+perpx*20;
+
+    edgeG.append('path')
+      .attr('d','M '+sx+' '+sy+' Q '+cp+' '+(my-10)+' '+tx+' '+ty)
+      .attr('fill','none')
+      .attr('stroke',tierColor(e.tier))
+      .attr('stroke-width',1+e.strength*3)
+      .attr('opacity',0.5)
+      .attr('marker-end','url(#topo-'+e.tier+')')
+      .style('cursor','pointer')
+      .on('mouseenter',function(event){
+        d3.select(this).attr('opacity',1).attr('stroke-width',1+e.strength*5);
+        showTip('<div class="tt-title">'+e.from+' \u2192 '+e.to+'</div>'+
+          '<div class="tt-line">certainty: <span>'+e.tier+'</span></div>'+
+          '<div class="tt-line">evidence: <span>'+(e.strength*100).toFixed(0)+'%</span></div>',event.clientX,event.clientY);
+      })
+      .on('mousemove',function(event){showTip(document.getElementById('tooltip').innerHTML,event.clientX,event.clientY)})
+      .on('mouseleave',function(){d3.select(this).attr('opacity',0.5).attr('stroke-width',1+e.strength*3);hideTip()});
+  });
+
+  const nodeG=svg.append('g');
+  breeders.forEach((b,i)=>{
+    const p=positions[b];
+    if(!p) return;
+    const g=nodeG.append('g');
+    g.append('rect')
+      .attr('x',p.x-nodeW/2).attr('y',p.y-nodeH/2)
+      .attr('width',nodeW).attr('height',nodeH)
+      .attr('fill','#161b22').attr('stroke',COLORS[i%COLORS.length])
+      .attr('stroke-width',1.5).attr('rx',4);
+    const label=b.length>14?b.substring(0,12)+'..':b;
+    g.append('text').attr('x',p.x).attr('y',p.y+4)
+      .attr('text-anchor','middle').attr('fill','#c9d1d9')
+      .style('font','9px monospace').text(label);
+  });
+}
+
+function renderReach(el){
+  el.append('div').attr('class','legend')
+    .html('<span>click a breeder to see everything it affects downstream | arrows show causation chain</span>');
+
+  const fromMap={};
+  edges.forEach(e=>{
+    if(!fromMap[e.from]) fromMap[e.from]=[];
+    fromMap[e.from].push({to:e.to,strength:e.strength,tier:e.tier});
+  });
+
+  const hasEdge=new Set(edges.flatMap(e=>[e.from,e.to]));
+
+  function getTree(name,visited){
+    if(visited.has(name)) return null;
+    visited.add(name);
+    const children=fromMap[name]||[];
+    if(children.length===0) return{name,children:[]};
+    return{
+      name,
+      children:children.map(c=>{
+        const child=getTree(c.to,new Set(visited));
+        return child?{...child,edge:c}:null;
+      }).filter(Boolean)
+    };
+  }
+
+  const grid=el.append('div').style('display','grid').style('grid-template-columns','repeat(auto-fill,minmax(280px,1fr))').style('gap','16px').style('margin-top','12px');
+
+  breeders.forEach((b,bi)=>{
+    const tree=getTree(b,new Set());
+    const card=grid.append('div')
+      .style('border','1px solid #21262d').style('border-radius','6px')
+      .style('padding','10px 12px').style('background','#0d1117')
+      .style('cursor','pointer');
+
+    const header=card.append('div').style('display','flex').style('align-items','center').style('gap','6px').style('margin-bottom','6px');
+    header.append('span').style('width','8px').style('height','8px').style('border-radius','2px')
+      .style('background',COLORS[bi%COLORS.length]).style('flex-shrink','0');
+    header.append('span').style('font','10px monospace').style('color','#c9d1d9').text(b);
+
+    if(!hasEdge.has(b)||!fromMap[b]||fromMap[b].length===0){
+      card.append('div').style('font','9px monospace').style('color','#484f58').style('padding-left','14px')
+        .text('no downstream effects');
+      return;
+    }
+
+    function renderTree(container,node,depth){
+      if(!node||depth>5) return;
+      const hasChildren=node.children&&node.children.length>0;
+
+      const row=container.append('div').attr('class','tree-node').style('display','flex').style('align-items','center').style('gap','6px');
+
+      if(node.edge){
+        const tag=row.append('span').style('font','8px monospace').style('padding','1px 4px')
+          .style('border-radius','2px').style('flex-shrink','0')
+          .style('color',tierColor(node.edge.tier))
+          .style('background',node.edge.tier==='high'?'rgba(63,185,80,0.1)':node.edge.tier==='medium'?'rgba(210,153,34,0.08)':'rgba(88,166,255,0.06)');
+        tag.text('\u2193 '+(node.edge.strength*100).toFixed(0)+'%');
+      }
+
+      row.append('span').style('font','9px monospace')
+        .style('color',hasChildren?'#c9d1d9':'#6e7681')
+        .text(node.name);
+
+      if(hasChildren){
+        const childDiv=container.append('div').attr('class','tree-children');
+        node.children.forEach(c=>renderTree(childDiv,c,depth+1));
+      }
+    }
+
+    renderTree(card,tree,0);
+  });
+}
+
+render();
+}catch(e){document.getElementById('content').innerHTML='<pre style="color:#f85149">'+e.stack+'</pre>'}
+</script>
+</body>
+</html>
