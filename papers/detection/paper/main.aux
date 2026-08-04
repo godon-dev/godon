@@ -27,10 +27,11 @@
 \@writefile{toc}{\contentsline {paragraph}{Our approach.}{2}{paragraph*.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Coupling-shape agnosticism.}{2}{paragraph*.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Contributions.}{2}{paragraph*.5}\protected@file@percent }
+\citation{wiener1948cybernetics}
+\citation{ashby1956introduction}
 \citation{finn1968cfar}
 \citation{friston1999fmri}
 \citation{box1978statistics}
-\citation{auerbrugger1761percussion}
 \citation{pearl2009causality}
 \citation{sugihara2012ccm}
 \citation{kipf2018nri}
@@ -41,77 +42,80 @@
 \@writefile{toc}{\contentsline {paragraph}{Radar and sonar.}{3}{paragraph*.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Seismology.}{3}{paragraph*.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Functional brain imaging (fMRI).}{3}{paragraph*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Medical percussion.}{3}{paragraph*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Causal discovery.}{3}{paragraph*.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Network tomography.}{3}{paragraph*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Causal discovery.}{3}{paragraph*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Network tomography.}{3}{paragraph*.10}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Method}{4}{section.3}\protected@file@percent }
 \newlabel{sec:method}{{3}{4}{Method}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}System Model}{4}{subsection.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Agent Operation}{4}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Push/Pause/Hold Protocol}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}The Impulse Protocol}{4}{subsection.3.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Sender State Machine}{4}{subsubsection.3.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Lease and Turn-Taking}{5}{subsubsection.3.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4}CFAR Step-Change Detection}{5}{subsection.3.4}\protected@file@percent }
 \newlabel{eq:threshold}{{2}{5}{CFAR Step-Change Detection}{equation.3.2}{}}
 \newlabel{eq:rising}{{3}{5}{CFAR Step-Change Detection}{equation.3.3}{}}
 \newlabel{eq:falling}{{4}{5}{CFAR Step-Change Detection}{equation.3.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Two-agent turn-taking in the impulse protocol. Both agents start in OPTIMIZE. In Round 1, Agent A acquires the sender lease and enters the detection cycle: CALIB (hold neutral, find safe perturbation amplitude), PUSH (drive parameters to extremes), PAUSE (return to neutral), DONE (release lease). Agent B observes the active lease and enters HOLD as passive receiver throughout A's detection cycle. After cooldown, the roles reverse for Round 2. CALIB encompasses HOLD-CALIB (parameter flatness search) and IMPULSE-CALIB (adaptive perturbation with guardrail backoff). Dashed arrows show lease pairing: while one agent holds the sender lease, the partner is in HOLD.\relax }}{6}{figure.caption.11}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:state-machine}{{1}{6}{Two-agent turn-taking in the impulse protocol. Both agents start in OPTIMIZE. In Round 1, Agent A acquires the sender lease and enters the detection cycle: CALIB (hold neutral, find safe perturbation amplitude), PUSH (drive parameters to extremes), PAUSE (return to neutral), DONE (release lease). Agent B observes the active lease and enters HOLD as passive receiver throughout A's detection cycle. After cooldown, the roles reverse for Round 2. CALIB encompasses HOLD-CALIB (parameter flatness search) and IMPULSE-CALIB (adaptive perturbation with guardrail backoff). Dashed arrows show lease pairing: while one agent holds the sender lease, the partner is in HOLD.\relax }{figure.caption.11}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Observation Parameters}{6}{subsection.3.5}\protected@file@percent }
 \newlabel{sec:obs-params}{{3.5}{6}{Observation Parameters}{subsection.3.5}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Experiments}{6}{section.4}\protected@file@percent }
 \newlabel{sec:experiments}{{4}{6}{Experiments}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Synthetic Bench}{6}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Experimental Design}{6}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Group A --- Coupling strength sweep.}{6}{paragraph*.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Group B --- Noise robustness.}{6}{paragraph*.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Group C --- False positives.}{6}{paragraph*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Group D --- Nonlinear shapes.}{6}{paragraph*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Experimental Design}{7}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Group A --- Coupling strength sweep.}{7}{paragraph*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Group B --- Noise robustness.}{7}{paragraph*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Group C --- False positives.}{7}{paragraph*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Group D --- Nonlinear shapes.}{7}{paragraph*.15}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Procedure}{7}{subsection.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Prior Validation on Realistic Benches}{7}{subsection.4.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Greenhouse simulation.}{7}{paragraph*.16}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Chain-4 composition.}{7}{paragraph*.17}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{7}{section.5}\protected@file@percent }
-\newlabel{sec:results}{{5}{7}{Results}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Group A: Detection Sensitivity}{7}{subsection.5.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Linear coupling strength sweep at noise $\sigma = 0.02$.\relax }}{7}{table.caption.18}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:strength}{{1}{7}{Linear coupling strength sweep at noise $\sigma = 0.02$.\relax }{table.caption.18}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Group B: Noise Robustness}{7}{subsection.5.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Noise robustness at coupling $s = 0.5$ (expected edge $0.25$).\relax }}{7}{table.caption.19}\protected@file@percent }
-\newlabel{tab:noise}{{2}{7}{Noise robustness at coupling $s = 0.5$ (expected edge $0.25$).\relax }{table.caption.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Detection sensitivity at noise $\sigma = 0.02$ (linear coupling). Blue circles: measured rising edge with MAD error bars. Dashed line: expected edge ($s \times 0.5$). Red $\times $: not detected (below CFAR threshold). Measurement error consistently below 5\%. Detection floor lies between coupling 0.1 and 0.2.\relax }}{8}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:sensitivity}{{2}{8}{Detection sensitivity at noise $\sigma = 0.02$ (linear coupling). Blue circles: measured rising edge with MAD error bars. Dashed line: expected edge ($s \times 0.5$). Red $\times $: not detected (below CFAR threshold). Measurement error consistently below 5\%. Detection floor lies between coupling 0.1 and 0.2.\relax }{figure.caption.18}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Linear coupling strength sweep at noise $\sigma = 0.02$.\relax }}{8}{table.caption.19}\protected@file@percent }
+\newlabel{tab:strength}{{1}{8}{Linear coupling strength sweep at noise $\sigma = 0.02$.\relax }{table.caption.19}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{8}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{8}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Group A: Detection Sensitivity}{8}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Group B: Noise Robustness}{8}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Noise robustness at coupling $s = 0.5$ (expected edge $0.25$).\relax }}{8}{table.caption.20}\protected@file@percent }
+\newlabel{tab:noise}{{2}{8}{Noise robustness at coupling $s = 0.5$ (expected edge $0.25$).\relax }{table.caption.20}{}}
 \citation{finn1968cfar}
 \citation{sugihara2012ccm}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Group C: False Positives}{8}{subsection.5.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces False positive test: coupling $s = 0.0$ (no edge exists).\relax }}{8}{table.caption.20}\protected@file@percent }
-\newlabel{tab:fpr}{{3}{8}{False positive test: coupling $s = 0.0$ (no edge exists).\relax }{table.caption.20}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Group D: Nonlinear Coupling Shapes}{8}{subsection.5.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Nonlinear shape generality at noise $\sigma = 0.02$.\relax }}{8}{table.caption.21}\protected@file@percent }
-\newlabel{tab:nonlinear}{{4}{8}{Nonlinear shape generality at noise $\sigma = 0.02$.\relax }{table.caption.21}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{8}{section.6}\protected@file@percent }
-\newlabel{sec:discussion}{{6}{8}{Discussion}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}What the Protocol Contributes}{8}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Detection Boundaries Are Parameterized}{8}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Group C: False Positives}{9}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces False positive test: coupling $s = 0.0$ (no edge exists).\relax }}{9}{table.caption.21}\protected@file@percent }
+\newlabel{tab:fpr}{{3}{9}{False positive test: coupling $s = 0.0$ (no edge exists).\relax }{table.caption.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Group D: Nonlinear Coupling Shapes}{9}{subsection.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Nonlinear shape generality at noise $\sigma = 0.02$.\relax }}{9}{table.caption.22}\protected@file@percent }
+\newlabel{tab:nonlinear}{{4}{9}{Nonlinear shape generality at noise $\sigma = 0.02$.\relax }{table.caption.22}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{9}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{9}{Discussion}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}What the Protocol Contributes}{9}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Detection Boundaries Are Parameterized}{9}{subsection.6.2}\protected@file@percent }
 \citation{pearl2009causality}
 \citation{ljung1999sid}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Threshold Calibration}{9}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Nonlinear Coupling}{9}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Topology Limitation}{9}{subsection.6.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}What This Is Not}{9}{subsection.6.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Position and Future Work}{9}{section.7}\protected@file@percent }
-\newlabel{sec:position}{{7}{9}{Position and Future Work}{section.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}What This Enables}{9}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Characterization.}{9}{paragraph*.22}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Prediction.}{10}{paragraph*.23}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Maintenance.}{10}{paragraph*.24}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Cooperation.}{10}{paragraph*.25}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Limitations}{10}{subsection.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Topology.}{10}{paragraph*.26}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Threshold calibration.}{10}{paragraph*.27}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Coordination scale.}{10}{paragraph*.28}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Auto-calibration.}{10}{paragraph*.29}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{10}{section.8}\protected@file@percent }
-\newlabel{sec:conclusion}{{8}{10}{Conclusion}{section.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Threshold Calibration}{10}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Nonlinear Coupling}{10}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Topology Limitation}{10}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}What This Is Not}{10}{subsection.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Position and Future Work}{10}{section.7}\protected@file@percent }
+\newlabel{sec:position}{{7}{10}{Position and Future Work}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}What This Enables}{10}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Characterization.}{10}{paragraph*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Prediction.}{11}{paragraph*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Maintenance.}{11}{paragraph*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cooperation.}{11}{paragraph*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Limitations}{11}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Topology.}{11}{paragraph*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Threshold calibration.}{11}{paragraph*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Coordination scale.}{11}{paragraph*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Auto-calibration.}{11}{paragraph*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{11}{section.8}\protected@file@percent }
+\newlabel{sec:conclusion}{{8}{11}{Conclusion}{section.8}{}}
 \bibdata{references}
-\bibcite{auerbrugger1761percussion}{{1}{1761}{{Auenbrugger}}{{}}}
+\bibcite{ashby1956introduction}{{1}{1956}{{Ashby}}{{}}}
 \bibcite{box1978statistics}{{2}{1978}{{Box et~al.}}{{Box, Hunter, and Hunter}}}
 \bibcite{coates2002tomography}{{3}{2002}{{Coates et~al.}}{{Coates, Hero, Nowak, and Yu}}}
 \bibcite{finn1968cfar}{{4}{1968}{{Finn and Johnson}}{{}}}
@@ -122,4 +126,5 @@
 \bibcite{runge2018confounding}{{9}{2019}{{Runge et~al.}}{{Runge, Nowack, Kretschmer, Flaxman, and Sejdinovic}}}
 \bibcite{sugihara2012ccm}{{10}{2012}{{Sugihara et~al.}}{{Sugihara, May, Ye, Hsieh, Deyle, Fogarty, and Munch}}}
 \bibcite{vardi1996tomography}{{11}{1996}{{Vardi}}{{}}}
-\gdef \@abspage@last{11}
+\bibcite{wiener1948cybernetics}{{12}{1948}{{Wiener}}{{}}}
+\gdef \@abspage@last{12}
