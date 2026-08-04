@@ -46,7 +46,7 @@ detection is non-destructive. This distinguishes the approach from
 chaos engineering or fault injection, which deliberately break
 components to test resilience.
 
-\subsection{Push/Pause/Hold Protocol}
+\subsection{The Impulse Protocol}
 
 \subsubsection{Sender State Machine}
 
@@ -124,6 +124,8 @@ Only one agent may be sender at any time. A shared lease
     duration. Budget alone is insufficient because a crashed sender's
     counters stay positive forever.
 \end{description}
+
+\input{figures/state-machine}
 
 \subsection{CFAR Step-Change Detection}
 

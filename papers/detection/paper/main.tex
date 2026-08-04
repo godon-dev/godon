@@ -24,6 +24,8 @@
 \usepackage{subcaption}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.16}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, calc, fit}
 
 % ── Layout ────────────────────────────────────────────────────────
 \usepackage[margin=2cm]{geometry}
@@ -67,9 +69,10 @@
 \begin{abstract}
 Multiple autonomous agents tending a shared substrate---physical,
 computational, or mathematical---unknowingly affect each other through coupling channels
-invisible to each agent individually. We present a method by which
-such agents discover their coupling structure through a coordinated
-push/pause/hold protocol: one agent deliberately drives its parameters
+invisible to each agent individually. We present the impulse protocol,
+a method by which
+such agents discover their coupling structure through coordinated
+perturbation: one agent deliberately drives its parameters
 to extremes (push), then returns to neutral (pause), while all others
 hold fixed as passive sensors. An adaptive perturbation calibration
 phase finds a safe amplitude before each push block. A
@@ -95,6 +98,8 @@ coordinated to take turns as active perturbers and passive observers
 through a shared lease---transforming an unresolvable observational
 confound into a structured experiment.
 \end{abstract}
+
+\noindent\textbf{Keywords:} active probing, coupling discovery, autonomous agents, impulse protocol, CFAR detection, multi-agent coordination, non-destructive perturbation, cybernetics
 
 % ── Body ──────────────────────────────────────────────────────────
 \input{sections/01-introduction}
