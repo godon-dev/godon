@@ -1,0 +1,74 @@
+\begin{thebibliography}{11}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Auenbrugger(1761)]{auerbrugger1761percussion}
+L.~Auenbrugger.
+\newblock \emph{Inventum Novum Ex Percussione Thoracis Humani}.
+\newblock 1761.
+\newblock Translated: ``A New Discovery that Enables the Physician from the
+  Percussion of the Human Thorax to Detect the Diseases Hidden Within.''.
+
+\bibitem[Box et~al.(1978)Box, Hunter, and Hunter]{box1978statistics}
+G.~E.~P. Box, W.~G. Hunter, and J.~S. Hunter.
+\newblock \emph{Statistics for Experimenters: An Introduction to Design, Data
+  Analysis, and Model Building}.
+\newblock Wiley, 1978.
+
+\bibitem[Coates et~al.(2002)Coates, Hero, Nowak, and Yu]{coates2002tomography}
+M.~Coates, A.~O. Hero, R.~Nowak, and B.~Yu.
+\newblock Internet tomography.
+\newblock \emph{IEEE Signal Processing Magazine}, 19\penalty0 (3):\penalty0
+  47--65, 2002.
+
+\bibitem[Finn and Johnson(1968)]{finn1968cfar}
+H.~M. Finn and R.~S. Johnson.
+\newblock Adaptive detection mode with threshold control as a function of
+  spatially sampled clutter-level estimates.
+\newblock \emph{RCA Review}, 29:\penalty0 414--464, 1968.
+
+\bibitem[Friston et~al.(1999)Friston, Zarahn, Josephs, Henson, and
+  Dale]{friston1999fmri}
+K.~J. Friston, E.~Zarahn, O.~Josephs, R.~N.~A. Henson, and A.~M. Dale.
+\newblock Stochastic designs in event-related fmri.
+\newblock \emph{NeuroImage}, 10\penalty0 (5):\penalty0 607--619, 1999.
+
+\bibitem[Kipf et~al.(2018)Kipf, Fetaya, King, Welling, and Adams]{kipf2018nri}
+T.~Kipf, E.~Fetaya, K.-C. King, M.~Welling, and R.~Adams.
+\newblock Neural relational inference for interacting systems.
+\newblock In \emph{ICML}, 2018.
+
+\bibitem[Ljung(1999)]{ljung1999sid}
+L.~Ljung.
+\newblock \emph{System Identification: Theory for the User}.
+\newblock Prentice Hall, 2nd edition, 1999.
+
+\bibitem[Pearl(2009)]{pearl2009causality}
+J.~Pearl.
+\newblock \emph{Causality: Models, Reasoning and Inference}.
+\newblock Cambridge University Press, 2nd edition, 2009.
+
+\bibitem[Runge et~al.(2019)Runge, Nowack, Kretschmer, Flaxman, and
+  Sejdinovic]{runge2018confounding}
+J.~Runge, P.~Nowack, M.~Kretschmer, S.~Flaxman, and D.~Sejdinovic.
+\newblock Detecting and quantifying causal associations in large nonlinear time
+  series datasets.
+\newblock \emph{Science Advances}, 5\penalty0 (11), 2019.
+
+\bibitem[Sugihara et~al.(2012)Sugihara, May, Ye, Hsieh, Deyle, Fogarty, and
+  Munch]{sugihara2012ccm}
+G.~Sugihara, R.~May, H.~Ye, C.-h. Hsieh, E.~Deyle, M.~Fogarty, and S.~Munch.
+\newblock Detecting causality in complex ecosystems.
+\newblock \emph{Science}, 338\penalty0 (6106):\penalty0 496--500, 2012.
+
+\bibitem[Vardi(1996)]{vardi1996tomography}
+Y.~Vardi.
+\newblock Network tomography: estimating source-destination traffic intensities
+  from link data.
+\newblock \emph{Journal of the American Statistical Association}, 91\penalty0
+  (433):\penalty0 365--377, 1996.
+
+\end{thebibliography}

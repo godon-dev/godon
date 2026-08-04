@@ -1,0 +1,112 @@
+% Active Coupling Discovery via Coordinated Perturbation in Autonomous Optimizers
+% Detection Paper — Paper 1
+%
+% Co-authored-by: cherusk <10729954+cherusk@users.noreply.github.com>
+
+\documentclass[11pt,a4paper]{article}
+
+% ── Encoding & Fonts ──────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\usepackage[libertine]{newtxmath}
+
+% ── Math ──────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\let\Bbbk\relax
+\usepackage{amssymb}
+\let\openbox\relax
+\usepackage{amsthm}
+
+% ── Graphics & Figures ────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+
+% ── Layout ────────────────────────────────────────────────────────
+\usepackage[margin=2cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.1}
+\usepackage{microtype}
+\usepackage{titlesec}
+\usepackage{parskip}
+
+% ── Section formatting ────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.5ex plus 0.5ex minus 0.2ex}{0.8ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus 0.3ex}{0.5ex}
+
+% ── References ────────────────────────────────────────────────────
+\usepackage[numbers,sort&compress,square]{natbib}
+\bibliographystyle{abbrvnat}
+
+% ── Links ─────────────────────────────────────────────────────────
+\usepackage[hidelinks]{hyperref}
+
+% ── Listings ──────────────────────────────────────────────────────
+\usepackage{listings}
+
+% ── Title ─────────────────────────────────────────────────────────
+\title{The Impulse Protocol: Non-Destructive Coupling \\
+       Discovery in Autonomous Agents}
+\author{
+  Matthias Tafelmeier \\
+  Independent Scientist \\
+  Hof, Germany \\
+  \href{https://orcid.org/0000-0000-0000-0000}{ORCID: 0000-0000-0000-0000}
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multiple autonomous agents tending a shared substrate---physical,
+computational, or mathematical---unknowingly affect each other through coupling channels
+invisible to each agent individually. We present a method by which
+such agents discover their coupling structure through a coordinated
+push/pause/hold protocol: one agent deliberately drives its parameters
+to extremes (push), then returns to neutral (pause), while all others
+hold fixed as passive sensors. An adaptive perturbation calibration
+phase finds a safe amplitude before each push block. A
+constant-false-alarm-rate (CFAR) step-change detector then evaluates
+whether each receiver's signal exhibits a reversible shift
+correlated with the sender's perturbation.
+
+The protocol is coupling-shape-agnostic---it does not model the
+coupling function and detects linear, threshold, polynomial, and
+saturated coupling equally. We characterize the method empirically
+on a synthetic bench with planted ground truth, sweeping coupling
+strength ($0.1$--$0.9$), noise level ($\sigma = 0.01$--$0.20$), and
+coupling shape. The detection floor lies between coupling $0.1$ and
+$0.2$ at noise $\sigma = 0.02$, with measured step amplitudes within
+$5\%$ of planted ground truth. Zero false positives were observed
+across all noise levels tested.
+
+The contribution is the protocol that makes coupling
+\emph{detectable}---not a novel detector. The detection backend is
+pluggable. The key insight is that autonomous agents, unaware of each
+other and communicating only through the substrate they tend, can be
+coordinated to take turns as active perturbers and passive observers
+through a shared lease---transforming an unresolvable observational
+confound into a structured experiment.
+\end{abstract}
+
+% ── Body ──────────────────────────────────────────────────────────
+\input{sections/01-introduction}
+\input{sections/01b-related-work}
+\input{sections/02-method}
+\input{sections/03-experiments}
+\input{sections/04-results}
+\input{sections/05-discussion}
+\input{sections/05b-position}
+\input{sections/06-conclusion}
+
+% ── References ────────────────────────────────────────────────────
+\bibliography{references}
+
+\end{document}

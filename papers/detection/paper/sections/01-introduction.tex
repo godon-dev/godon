@@ -1,0 +1,108 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Complex coupled systems---data centers, microgrids, process plants,
+distributed databases, microservice architectures, compiler
+pipelines---share a fundamental problem: their internal coupling
+structure is hidden. Which subsystems affect which others,
+through which channels, at what strength? The design documentation
+specifies intended interfaces, but operational reality includes
+emergent coupling paths created by the shared substrate that no
+blueprint captures and no expert enumerates~\citep{ljung1999sid}.
+
+Three existing approaches all fail to discover this structure in live
+systems. Analytical modeling requires knowing the system's structure
+a priori. Statistical observation---cross-correlation, Granger
+causality, transfer entropy---cannot separate causal coupling from
+co-movement when both subsystems are actively adjusting, because the
+dominant noise source is the agents' own
+exploration~\citep{sugihara2012ccm, runge2018confounding}. Expert
+systems capture design intent, not operational reality, and go stale
+as the system drifts.
+
+\paragraph{The confounding problem.}
+Consider multiple autonomous agents, each independently tending a
+portion of a shared substrate. Each agent adjusts its own parameters
+toward its own objective. The agents are unaware of each other.
+Yet they communicate involuntarily through the substrate: when one
+agent changes its parameters, the system responds in ways
+that shift other agents' readings.
+
+When all agents are actively tending, their objective readings move
+for two confounded reasons: their own parameter changes and the other
+agents' influence. No passive observer can separate these
+contributions. The confounding is structural, not statistical---no
+amount of observational data resolves it without intervention. This
+is why cross-correlation, Granger causality, and transfer entropy all
+fail on actively explored systems. They cannot distinguish ``shifting
+together because coupled'' from ``shifting together because each is
+independently adjusting.''
+
+\paragraph{The key insight.}
+The confound disappears if one agent stops exploring and holds still
+while another perturbs. With the receiver frozen, any change in its
+signal is attributable to the sender's perturbation---not to its own
+adjustments. The agent ceases to be an explorer and becomes a
+sensor. The sender ceases to explore and becomes a stimulus.
+
+This is the active probing paradigm, borrowed from radar and
+seismology: inject a known signal into the medium and observe the
+response. The system describes itself through its response to
+perturbation, rather than through passive observation of its
+behavior. The coupling graph is not inferred from correlations---it
+is measured as a set of impulse responses.
+
+\paragraph{Our approach.}
+We embed this paradigm inside the agents' normal operation through a
+coordinated push/pause/hold protocol. The protocol directs the agents
+to take turns: one agent (the sender) drives its parameters to
+extremes, then returns to neutral, while all others hold fixed as
+passive sensors. An adaptive calibration phase finds a safe
+perturbation amplitude before each push block, backing off
+exponentially if the system destabilizes. A constant-false-alarm-rate
+(CFAR) step-change detector evaluates whether each receiver's signal
+exhibits a reversible shift---rising during push, recovering during
+pause. The ABA block design eliminates drift confounds: a monotonic
+trend produces a rising edge but not a falling edge.
+
+The protocol requires no information exchange beyond scheduling
+(``whose turn is it''), enforced through a shared lease with fencing
+tokens. Agents do not share objectives, results, or detected edges.
+Each discovers coupling purely by watching its own signal shift when
+another agent perturbs the substrate.
+
+\paragraph{Coupling-shape agnosticism.}
+Because the protocol measures step response---not frequency response,
+not correlation structure---it is agnostic to the coupling function's
+shape. Linear coupling produces a proportional step. Threshold
+coupling produces a discontinuous jump. Saturation coupling produces
+a compressed or inverted step. Polynomial coupling produces a
+quadratic step. The detector asks only: did the signal change and
+recover? The shape of the response determines the step amplitude but
+not whether coupling exists.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+  \item A coordination protocol---push, pause, hold, with adaptive
+    perturbation calibration and turn-taking through a fencing-token
+    lease---that enables autonomous agents to discover coupling
+    structure through their shared substrate without exchanging
+    information beyond scheduling.
+  \item Empirical characterization on a synthetic bench with planted
+    ground truth across four coupling shapes (linear, threshold,
+    saturation, polynomial), five noise levels, and six coupling
+    strengths. Detection floor, noise boundary, and false positive
+    rate are measured and reported honestly.
+  \item Step amplitude measurements within 5\% of ground truth across
+    the detectable range, with zero false positives across all noise
+    levels tested.
+\end{enumerate}
+
+The contribution is the protocol that makes coupling
+\emph{detectable}---not a novel detector. CFAR is established
+technology from radar signal processing~\citep{finn1968cfar}. What
+is new is the choreography: autonomous agents, unaware of each other
+and communicating only through the substrate they tend, taking turns
+as active perturbers and passive observers. The agent that was
+exploring blindly becomes a measurement instrument. The probe
+\emph{is} the experiment.
