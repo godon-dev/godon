@@ -1,0 +1,92 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{What the Protocol Contributes}
+
+The push/pause/hold protocol is the contribution---not the CFAR
+detector. CFAR is a well-established technique from radar signal
+processing~\citep{finn1968cfar}. What is new is the choreography:
+autonomous agents, each with their own objectives and unaware of
+each other, take turns as active perturbers and passive observers.
+The coordination is minimal---a scheduling constraint (one sender at
+a time), not information exchange. Agents do not share objectives,
+results, or detected edges.
+
+Without the protocol, there is no signal for CFAR to detect. Two
+independently adjusting agents produce confounded objective
+trajectories that passive methods cannot separate~\citep{sugihara2012ccm}.
+The protocol converts the live system into a sequence of structured
+experiments.
+
+\subsection{Detection Boundaries Are Parameterized}
+
+The detection boundaries presented in
+Tables~\ref{tab:strength}--\ref{tab:noise} are specific to the
+observation parameters listed in Section~\ref{sec:obs-params}. The
+method has no fundamental sensitivity limit---the boundary is a
+function of observation budget (block sizes, number of rounds) and
+detector configuration ($P_{\text{fa}}$, minimum sample counts).
+The CFAR scale factor $k$ decreases with more reference cells;
+the MAD estimate stabilizes with more samples.
+
+We present results at one operating point ($B = 15$, $P_{\text{fa}} =
+0.05$) with one budget contrast ($B = 30$ at noise $0.10$). This
+characterizes where the method works and where it stops under
+reasonable observation costs. The noise failure at $\sigma = 0.10$
+represents an SNR of approximately 2.5:1---an aggressive operating
+point for live systems.
+
+\subsection{Threshold Calibration}
+
+The CFAR threshold (\ref{eq:threshold}) is computed from per-sample
+noise (MAD of individual objective values), but the detection test
+compares block medians. The actual false alarm rate is therefore
+lower than the nominal $P_{\text{fa}} = 0.05$---the threshold is
+conservative. This is confirmed empirically: zero false positives
+were observed across all noise levels (Table~\ref{tab:fpr}). A
+median-aware threshold would improve sensitivity at high noise but
+requires re-deriving the false alarm rate for median statistics.
+We leave this to future work and report results with the conservative
+threshold.
+
+\subsection{Nonlinear Coupling}
+
+The protocol is coupling-shape-agnostic by design. The sender pushes
+to extreme parameters and returns to neutral; the detector asks
+whether the receiver's signal changed and recovered. The shape of
+the coupling function determines the step amplitude but not whether
+a step exists. All four tested shapes (linear, threshold, saturation,
+polynomial) were detected at adequate coupling strength
+(Table~\ref{tab:nonlinear}).
+
+At low coupling ($0.3$), nonlinear shapes that compress the step
+(saturation, polynomial) fall below the detection floor, while
+threshold---which produces a large discontinuous jump---is detected.
+This is not a limitation of the protocol but a property of the
+specific coupling function's step response at the operating point.
+
+\subsection{Topology Limitation}
+
+The scanner discovers step-change coupling between node pairs. It
+does not distinguish direct edges from transitive paths. In a
+branching topology (e.g., $A \to B \to D$ and $A \to C \to D$),
+node $D$ responds to $A$'s perturbation through transitive paths,
+and the scanner would report a step change for the pair $(A, D)$
+even though no direct edge exists. Distinguishing direct from
+transitive coupling requires either known edge weights to subtract
+expected contributions or graph-theoretic analysis on the discovered
+step-change graph. This is an open problem for future work.
+
+\subsection{What This Is Not}
+
+This is not causal discovery in the Pearl sense~\citep{pearl2009causality}.
+Pearl's framework discovers Boolean causal arrows from interventions
+designed by a central researcher. Our agents are not researchers;
+they are agents with their own objectives who sacrifice
+exploration time to cooperate for measurement. The coordination
+is scheduling, not experimental design.
+
+This is also not system identification~\citep{ljung1999sid}, which
+requires a specified model structure and estimates parameters within
+it. Our method discovers whether coupling exists and measures its
+step amplitude, without assuming a model.

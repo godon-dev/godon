@@ -1,0 +1,86 @@
+\section{Experiments}
+\label{sec:experiments}
+
+\subsection{Synthetic Bench}
+
+We validate on a configurable synthetic bench
+(\texttt{bench-generic}) with planted ground-truth coupling. The
+bench hosts multiple virtual nodes in a single container, each
+exposed via HTTP. A topology file specifies:
+
+\begin{itemize}
+  \item Node parameters (count, bounds, objective weights)
+  \item Directed edges with coupling strength and channel
+  \item Coupling shape (linear, threshold, saturation, polynomial)
+  \item Noise model (Gaussian, colored, drift)
+\end{itemize}
+
+The bench computes objectives as
+$g(\mathbf{w}, \mathbf{n}) = \sum_k w_k \cdot h(n_k)$ where $h$ is the
+shape function, then adds coupling from source nodes:
+$f_i = g_i + \sum_{j \to i} s_{ji} \cdot g_j^{\text{channel}}$.
+Noise is additive Gaussian per sample.
+
+This provides exact ground truth: we know the planted coupling
+strength, shape, and topology, and compare against the detector's
+measured rising edge.
+
+\subsection{Experimental Design}
+
+\paragraph{Group A --- Coupling strength sweep.}
+Pair topology (2 nodes, 1 edge), linear shape, noise $\sigma = 0.02$.
+Coupling strength swept: $\{0.1, 0.2, 0.3, 0.5, 0.7, 0.9\}$.
+For linear coupling, the expected step amplitude at neutral hold
+($n_k = 0.5$) pushed to extreme ($n_k = 1.0$) is
+$\Delta = s \times \sum_k w_k \times 0.5$.
+
+\paragraph{Group B --- Noise robustness.}
+Pair topology, linear shape, coupling $s = 0.5$.
+Noise swept: $\sigma \in \{0.01, 0.02, 0.05, 0.10, 0.20\}$.
+Additional cells at block size 30 for noise $= 0.10$ to assess the
+observation budget tradeoff.
+
+\paragraph{Group C --- False positives.}
+Pair topology, linear shape, coupling $s = 0.0$ (no edge).
+Noise: $\sigma \in \{0.02, 0.10, 0.20\}$.
+The protocol runs normally; the detector should find no coupling.
+
+\paragraph{Group D --- Nonlinear shapes.}
+Pair topology, noise $\sigma = 0.02$.
+Shapes: saturation, threshold, polynomial.
+Each shape tested at coupling $\{0.7, 0.3\}$ to assess
+shape-dependence of the detection boundary.
+
+\subsection{Procedure}
+
+Each cell follows: dispatch the bench with planted topology, create
+two agents, let the coordinator cycle through push/pause/hold
+rounds until $\geq 200$ trials, then query the CFAR detector endpoint
+for each ordered pair.
+
+\subsection{Prior Validation on Realistic Benches}
+
+Before the systematic sweep, the protocol was validated on two
+additional bench targets that model real-world complexity:
+
+\paragraph{Greenhouse simulation.}
+Two agents on coupled greenhouse controllers with 6+ cascaded
+non-linear transforms (thermal, CO2, humidity, crop-phase), crop
+model drift through growth phases, and per-sample SNR of
+approximately $0.67$. At coupling $0.9$, bidirectional coupling was
+detected across multiple objective channels. At coupling $0.0$, zero
+false positives. All passive methods (FFT, Granger, mutual
+information, transfer entropy) failed on the same data at equivalent
+trial budgets. This is the hard case: deeply non-linear,
+non-stationary, noisy. Detection succeeds because active probing
+eliminates the dominant noise source (receiver self-exploration) and
+the block design creates a sustained step that survives the
+substrate's low-pass filtering.
+
+\paragraph{Chain-4 composition.}
+Four agents on a 4-node linear chain with edges at coupling $0.7$,
+$0.5$, and $0.3$. All 3 edges detected with measured step amplitudes
+matching planted ground truth. Zero false positives across 12
+evaluated pairs. This validates multi-agent turn-taking (4 agents
+sharing one lease sequentially) and confirms detection generalizes
+beyond pair topology.
