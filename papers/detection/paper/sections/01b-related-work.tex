@@ -4,7 +4,13 @@
 The push/pause/hold protocol draws on active-probing paradigms from
 several fields where injecting a known signal into a medium and
 observing the response is the standard approach to discovering
-hidden structure.
+hidden structure. At its root, this is cybernetics---the study of
+control and communication in coupled
+systems~\citep{wiener1948cybernetics}. Ashby's law of requisite
+variety~\citep{ashby1956introduction} established that a controller
+must model its environment's complexity to act effectively; our
+protocol is a mechanism for discovering that complexity empirically
+when it cannot be specified analytically.
 
 \paragraph{Radar and sonar.}
 Constant-false-alarm-rate detection was developed for radar signal
@@ -43,15 +49,6 @@ substrate's thermal mass or response latency, followed by a pause
 block that captures recovery. The ABA structure (stimulus, rest,
 stimulus) is standard practice in experimental psychology and
 neuroscience~\citep{box1978statistics}.
-
-\paragraph{Medical percussion.}
-The oldest active-probing diagnostic: a physician taps the body and
-listens to the resonance. Solid tissue, fluid-filled cavities, and
-air-filled spaces produce different sounds. The technique dates to
-the 18th century~\citep{auerbrugger1761percussion}. The principle---
-perturb the system, listen to the response, infer internal
-structure---is exactly ours, applied to coupling channels between
-autonomous agents.
 
 \paragraph{Causal discovery.}
 Pearl's do-calculus~\citep{pearl2009causality} provides the
