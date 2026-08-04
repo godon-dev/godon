@@ -1,0 +1,33 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented a push/pause/hold coordination protocol that enables
+autonomous agents---unaware of each other, communicating only through
+their shared substrate---to discover coupling structure. The protocol
+is coupling-shape-agnostic and produces a reversible step signal that
+a CFAR detector evaluates against a noise-adaptive threshold.
+
+Empirical validation on a synthetic bench with planted ground truth
+shows detection between coupling $0.1$ and $0.2$ at noise $\sigma =
+0.02$, with step amplitude measurements within $5\%$ of ground truth.
+Zero false positives were observed across all noise levels tested.
+All tested nonlinear shapes (saturation, threshold, polynomial) were
+detected at adequate coupling.
+
+The coupling scan produced by this protocol is the foundation for a
+larger program: characterized connectomes, forward prediction from
+composed edges, drift detection through prediction error, and
+cooperative agent behavior informed by discovered structure.
+
+\section*{Reproducibility}
+
+All 21 experiment cells (raw detection JSON, observation parameters,
+and summary table) and the synthetic bench used to generate them are
+available at \url{https://github.com/godon-dev/godon} under
+\texttt{papers/detection/}. The coordination protocol
+(\texttt{godon-breeders}), CFAR detector (\texttt{godon-causal}), and
+bench target (\texttt{godon-bench-generic}) are in separate
+repositories within the same organization. All code is open-source
+under AGPLv3. Experiments are reproducible via GitHub Actions
+workflows that deploy the bench, create agents, run detection rounds,
+and query the detector endpoint.
