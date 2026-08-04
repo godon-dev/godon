@@ -1,0 +1,76 @@
+\section{Position and Future Work}
+\label{sec:position}
+
+\subsection{What This Enables}
+
+Coupling detection is the foundation step of a larger program: building
+an empirically-discovered, maintainable coupling model of a live system.
+The push/pause/hold protocol produces a coupling scan---a directed graph
+of measured step responses between subsystems, valid for the moment it
+was taken. This scan is not an end in itself but the basis for:
+
+\paragraph{Characterization.}
+The probe data collected during detection already contains more
+information than the binary ``coupling detected.'' Each edge carries a
+measured step amplitude, a baseline noise level, and a reversibility
+fraction. Extracting propagation delay, settling time, and response
+curve shape from the same data requires only signal processing---no
+additional probing. The scan becomes a characterized connectome:
+weighted, directional, per-channel.
+
+\paragraph{Prediction.}
+If measured edges compose along graph paths, the coupling graph
+becomes a forward model: ``if node $A$ changes by $\Delta$, what is
+the predicted response at distant node $D$ through the chain $A \to B
+\to C \to D$?'' Whether edges compose linearly or require a learned
+composition function is the open question. Chain4 validation (4-node
+linear topology, 3 edges) showed measured edges match planted ground
+truth---but predicting a distant node's response from composed edges
+is not yet tested.
+
+\paragraph{Maintenance.}
+A frozen coupling scan serves as a reference model. The system drifts;
+the scan ages. Prediction error---comparing the model's expected
+response against actual behavior---localizes where structure changed.
+This triggers targeted rescanning of the affected neighborhood rather
+than a full system rescan. The ratio of scanning to operating adapts
+to structural volatility: stable systems need infrequent rescans,
+volatile systems need frequent ones.
+
+\paragraph{Cooperation.}
+Once agents understand their coupling, they can act on it. Two agents
+connected by a coupling edge currently find individually optimal but
+jointly suboptimal configurations. The coupling graph reveals
+tradeoffs invisible to independent agents. This requires no change to
+the detection protocol---only a consumer of the graph it produces.
+
+\subsection{Limitations}
+
+\paragraph{Topology.}
+The scanner discovers step-change coupling between node pairs. It does
+not distinguish direct edges from transitive paths. In a branching
+topology ($A \to B \to D$ and $A \to C \to D$), node $D$ responds to
+$A$'s perturbation through transitive paths. The scanner reports a
+step change for $(A, D)$ even though no direct edge exists.
+Distinguishing direct from transitive coupling is an open problem.
+
+\paragraph{Threshold calibration.}
+The CFAR threshold uses per-sample noise (MAD of individual values)
+but the detection test compares block medians. The actual false alarm
+rate is lower than the nominal $P_{\text{fa}}$---the threshold is
+conservative, confirmed empirically by zero false positives across all
+noise levels. A median-aware threshold would improve sensitivity but
+requires re-deriving the false alarm statistics.
+
+\paragraph{Coordination scale.}
+The lease-based turn-taking supports a small number of agents (tested
+with 2--4). Scaling to many agents requires group-based coordination
+(scoping lease tables by experiment tag) to avoid global contention.
+The current global coordination table is a prototype limitation, not
+a fundamental constraint.
+
+\paragraph{Auto-calibration.}
+Detection parameters---block sizes, push amplitude, cadence,
+$P_{\text{fa}}$---are currently fixed. Metaheuristic search could
+calibrate these per system, adapting the observation protocol to
+each substrate's characteristics. This is future work.

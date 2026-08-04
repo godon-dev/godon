@@ -1,0 +1,76 @@
+\section{Related Work}
+\label{sec:related}
+
+The push/pause/hold protocol draws on active-probing paradigms from
+several fields where injecting a known signal into a medium and
+observing the response is the standard approach to discovering
+hidden structure.
+
+\paragraph{Radar and sonar.}
+Constant-false-alarm-rate detection was developed for radar signal
+processing~\citep{finn1968cfar}. A transmitter emits a known waveform;
+a receiver listens for echoes. The CFAR threshold adapts to local
+noise conditions, maintaining a constant false-alarm probability
+regardless of background noise level. Active sonar applies the same
+principle underwater: a sound pulse propagates through the medium, and
+the return signal reveals structure (seafloor, submarines, fish
+schools) that passive listening cannot detect. Our protocol applies
+this paradigm to coupled systems: the push is the transmitted pulse,
+the receiver's objective is the return signal, and CFAR discriminates
+the coupling step from intrinsic noise.
+
+\paragraph{Seismology.}
+Controlled-source seismology detonates explosives or vibrates the
+ground at known locations, then measures ground motion at distant
+sensors. The subsurface structure---rock layers, fault lines, fluid
+reservoirs---is inferred from how the seismic waves propagate and
+reflect. The structure cannot be observed passively; it must be
+excited. Our method follows the same logic: coupling structure is
+inferred from how a perturbation propagates from one agent to
+another through the substrate.
+
+\paragraph{Functional brain imaging (fMRI).}
+In functional MRI, researchers study brain activity by presenting
+controlled stimuli and measuring the hemodynamic response---the
+slow, sustained blood-oxygen change that follows neural activation.
+The hemodynamic response function (HRF) is a low-pass filter that
+smears brief neural events into sustained signal changes. This led
+to the \emph{block design} paradigm~\citep{friston1999fmri}:
+sustained stimulation blocks of 20--30 seconds alternating with rest
+periods, rather than single brief events. Our push/pause blocks are
+the same design: a sustained perturbation block that survives the
+substrate's thermal mass or response latency, followed by a pause
+block that captures recovery. The ABA structure (stimulus, rest,
+stimulus) is standard practice in experimental psychology and
+neuroscience~\citep{box1978statistics}.
+
+\paragraph{Medical percussion.}
+The oldest active-probing diagnostic: a physician taps the body and
+listens to the resonance. Solid tissue, fluid-filled cavities, and
+air-filled spaces produce different sounds. The technique dates to
+the 18th century~\citep{auerbrugger1761percussion}. The principle---
+perturb the system, listen to the response, infer internal
+structure---is exactly ours, applied to coupling channels between
+autonomous agents.
+
+\paragraph{Causal discovery.}
+Pearl's do-calculus~\citep{pearl2009causality} provides the
+theoretical framework for causal inference from interventions.
+Convergent cross-mapping~\citep{sugihara2012ccm} infers coupling
+from time series but fails when systems are actively exploring.
+Neural relational inference~\citep{kipf2018nri} learns interaction
+graphs from trajectories but operates passively. Our method differs
+in that the interventions are performed by autonomous agents on
+themselves, coordinated through a shared lease, rather than by a
+central researcher.
+
+\paragraph{Network tomography.}
+Network tomography~\citep{vardi1996tomography} infers internal
+network properties from end-to-end measurements using active probe
+packets. Active topology inference~\citep{coates2002tomography}
+selects measurement paths adaptively to reduce uncertainty about
+network structure. These approaches share our active-probing
+philosophy but assume a single centralized prober with an explicit
+identification objective. Our agents are autonomous---each with its
+own objective---and the probing is a cooperative side effect of
+coordination, not the agents' primary goal.
