@@ -77,16 +77,27 @@ transitive coupling requires either known edge weights to subtract
 expected contributions or graph-theoretic analysis on the discovered
 step-change graph. This is an open problem for future work.
 
-\subsection{What This Is Not}
+\subsection{Positioning: Empirical Coupling Discovery}
 
-This is not causal discovery in the Pearl sense~\citep{pearl2009causality}.
-Pearl's framework discovers Boolean causal arrows from interventions
-designed by a central researcher. Our agents are not researchers;
-they are agents with their own objectives who sacrifice
-exploration time to cooperate for measurement. The coordination
-is scheduling, not experimental design.
+The method occupies a space parallel to existing causal frameworks.
+Pearl's causal hierarchy~\citep{pearl2009causality} formalizes
+inference from interventions designed by a central researcher who
+controls the experimental apparatus. System
+identification~\citep{ljung1999sid} estimates parameters within a
+model structure that is specified a priori.
 
-This is also not system identification~\citep{ljung1999sid}, which
-requires a specified model structure and estimates parameters within
-it. Our method discovers whether coupling exists and measures its
-step amplitude, without assuming a model.
+Our approach runs parallel to Pearl's ladder rather than directly
+on it. Pearl's experimenter is centralized and human. Ours is
+distributed and autonomous. Pearl discovers Boolean causal arrows.
+We discover weighted, continuous, reversible step-changes. Pearl
+requires an external agent who intervenes. We have the agents
+themselves serving as both perturbers and sensors, coordinated
+through a shared lease. The coupling graph emerges from their
+through-operation---as a byproduct of tending a live system.
+
+Pearl's framework is the special case where the experimenter is
+centralized and the model structure is hypothesized. System
+identification is the special case where the structure is known
+and only parameters are estimated. We are the case where the
+experimenter is distributed, autonomous, and the structure is
+discovered empirically, without specification.
