@@ -31,6 +31,7 @@ cooperation:
   active: false
 
 interference_detection:
+  group: bench-chain4
   mode: active
   min_optimize_trials: 15
   hold_calib_trials: 5
