@@ -50,6 +50,7 @@ cooperation:
   active: false
 
 interference_detection:
+  group: bench-greenhouse-uncoupled
   mode: active
   min_optimize_trials: 15
   hold_calib_trials: 5

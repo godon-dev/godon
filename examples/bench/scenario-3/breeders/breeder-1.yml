@@ -50,6 +50,7 @@ cooperation:
   active: false
 
 interference_detection:
+  group: bench-greenhouse-pair
   mode: active
 
 reconnaissance:
