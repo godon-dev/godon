@@ -33,6 +33,7 @@ cooperation:
   active: false
 
 interference_detection:
+  group: bench-microgrid-6
   mode: active
 
 reconnaissance:
