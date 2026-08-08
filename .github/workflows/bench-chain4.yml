@@ -196,6 +196,15 @@ jobs:
             for ATTEMPT in 1 2 3 4 5; do
               echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
 
+              # Check for existing breeder by name BEFORE attempting create.
+              # If a previous attempt created it but the response was lost
+              # (port-forward flakiness), this prevents duplicate creation.
+              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              if [ -n "${UUID}" ]; then
+                echo "Breeder ${NAME} already exists: ${UUID}" >&2
+                break
+              fi
+
               CREATE_OUTPUT=$(docker run --rm --network host \
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
@@ -203,13 +212,6 @@ jobs:
               echo "${CREATE_OUTPUT}" >&2
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
-              if [ -z "${UUID}" ]; then
-                # Check if it was actually created despite no UUID in output
-                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
-                if [ -n "${UUID}" ]; then
-                  echo "Breeder ${NAME} found via API lookup (created on previous attempt)" >&2
-                fi
-              fi
               if [ -n "${UUID}" ]; then
                 break
               fi
