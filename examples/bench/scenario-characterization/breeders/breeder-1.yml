@@ -24,7 +24,7 @@ run:
       min: 10
       max: 500
     timing:
-      end: "30m"
+      end: "75m"
     quality_achieved: true
 
 cooperation:
