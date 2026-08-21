@@ -353,6 +353,31 @@ jobs:
           echo "--- All Pods ---"
           kubectl get pods -n godon -o wide 2>/dev/null || true
 
+      - name: Export Curves and Coordinator Trace
+        if: always()
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "=== Response Curves (pre-cleanup export) ==="
+          CAUSAL_POD=$(kubectl get pods -n godon -l component=causal -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          if [ -n "${CAUSAL_POD}" ]; then
+            CURVES=$(kubectl exec -n godon "${CAUSAL_POD}" -- wget -qO- 'http://localhost:8091/curves' 2>/dev/null || echo "")
+            if [ -n "${CURVES}" ]; then
+              echo "${CURVES}" | jq -e '.' && echo "=== /curves export OK ===" || { echo "${CURVES}"; echo "=== /curves not valid JSON ==="; }
+            else
+              echo "No curves available"
+            fi
+          else
+            echo "No causal pod found"
+          fi
+
+          echo ""
+          echo "=== Coordinator Trace (full history, all breeder pods) ==="
+          for WORKER_POD in $(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            echo "--- ${WORKER_POD} ---"
+            kubectl logs -n godon "${WORKER_POD}" --tail=-1 2>/dev/null | grep -i "COORD\|PROBE\|CHAR\|CONVERG\|REFINE\|CAUSAL\|SHIFT" || echo "No coordinator lines"
+          done
+
       - name: Cleanup
         if: always()
         run: |
