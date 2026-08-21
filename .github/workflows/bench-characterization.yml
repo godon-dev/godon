@@ -1,8 +1,12 @@
-name: "Bench Characterization — Threshold, Single Carrier Param"
+name: "Bench Characterization — Single Carrier Param"
 
 on:
   workflow_dispatch:
     inputs:
+      scenario:
+        description: "Scenario dir under examples/bench/ (characterization | characterization-saturation)"
+        required: false
+        default: "characterization"
       min_trials:
         description: "Minimum trials per breeder for success"
         required: false
@@ -14,7 +18,7 @@ on:
 
 jobs:
   bench-characterization:
-    name: "Characterization: 2 breeders -> threshold coupling on param_1"
+    name: "Characterization: 2 breeders -> coupling on param_1"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
@@ -44,7 +48,9 @@ jobs:
 
       - name: Start Characterization Bench Target
         run: |
-          cp examples/bench/scenario-characterization/topology.yaml /tmp/topology.yaml
+          SCENARIO_DIR="examples/bench/scenario-${{ inputs.scenario }}"
+          echo "Scenario: ${SCENARIO_DIR}"
+          cp ${SCENARIO_DIR}/topology.yaml /tmp/topology.yaml
 
           echo "=== Topology (ground truth) ==="
           cat /tmp/topology.yaml
@@ -147,9 +153,9 @@ jobs:
           }
 
           create_target "bench-char-node-1" "node-1" \
-            examples/bench/scenario-characterization/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
+            examples/bench/scenario-${{ inputs.scenario }}/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
           create_target "bench-char-node-2" "node-2" \
-            examples/bench/scenario-characterization/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
+            examples/bench/scenario-${{ inputs.scenario }}/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
 
       - name: Create Breeders
         env:
@@ -181,7 +187,7 @@ jobs:
                 -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
                 -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
                 -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
-                examples/bench/scenario-characterization/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
+                examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
             chmod 644 breeder-config-${NODE_NUM}.yaml
 
             local UUID=""
@@ -413,8 +419,9 @@ jobs:
         if: always()
         run: |
           echo "Bench Characterization Summary"
-          echo "Topology: threshold base, param_1 carrier (weight 0.5), params 0+2 dead"
-          echo "Expected: param_1 shows threshold curve, params 0+2 flat"
+          echo "Scenario: ${{ inputs.scenario }}"
+          echo "Topology: scenario-${{ inputs.scenario }} (param_1 carrier, params 0+2 dead)"
+          echo "Expected: param_1 carrier curve (base function per scenario), params 0+2 flat"
           echo "Min trials per breeder: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Status: ${{ job.status }}"
