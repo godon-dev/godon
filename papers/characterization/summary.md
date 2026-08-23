@@ -84,6 +84,29 @@ Not yet collected. Planned grid: carrier amplitude × noise σ × edge
 strength × shape {threshold, saturation} × channel count. This file's
 rows are all at amplitude 1.0, σ=0.02, edge 0.7 — one point of the grid.
 
+## The composition gate (Aug 23 — first firing, all green)
+
+Chain node-1 —0.7→ node-3 —0.5→ node-2, saturation carriers, 3
+breeders (first 3-breeder run; multi-receiver curves merged the same
+day). Node-1's single walk measured both the one-hop and two-hop
+curves at 9 shared levels; of 36 curves exactly the 3 planted paths
+are non-flat.
+
+- **Identity (in-sample):** measured curve(A→B) vs 0.5 × curve(A→C):
+  9/9 within 2σ, median deviation 0.18σ.
+- **Prediction (out-of-sample, quiet bench, committed first):**
+  L=56 → 0.13σ; L=68 → 0.35σ. Both hold.
+- **Steering precursor (first ACT):** target −0.100 at node-2, map
+  inverted itself to A=32.42, executed, landed −0.1038 → 0.10σ.
+  PROBE→MODEL→PREDICT→ACT→COMPARE fired for the first time.
+
+Scope, honestly: quiet bench (no live agents resisting); additive-
+linear coupling physics — the METHOD is proven (discovered curves
+compose, bars propagate, inversion works); nonlinear composition and
+the live-B rung remain open. Evidence: composition-gate-*.json/.py in
+this dir; CI run 32637299365 (permanent); verification star runs
+32633729366 / 32631063923 / 32630439204.
+
 ## Raw data
 
 - run24_curves.json, run25_final_curves.json, run26_final_curves.json,
