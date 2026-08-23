@@ -18,7 +18,7 @@ on:
 
 jobs:
   bench-characterization:
-    name: "Characterization: 2 breeders -> coupling on param_1"
+    name: "Characterization: scenario breeders -> coupling curves"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
@@ -130,6 +130,7 @@ jobs:
 
             sed -e "s|http://bench-generic:8090/node-1|${BENCH_URL}/${NODE_PATH}|" \
                 -e "s|http://bench-generic:8090/node-2|${BENCH_URL}/${NODE_PATH}|" \
+                -e "s|http://bench-generic:8090/node-3|${BENCH_URL}/${NODE_PATH}|" \
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
@@ -152,10 +153,11 @@ jobs:
             echo "${ID}" > "${OUTFILE}"
           }
 
-          create_target "bench-char-node-1" "node-1" \
-            examples/bench/scenario-${{ inputs.scenario }}/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
-          create_target "bench-char-node-2" "node-2" \
-            examples/bench/scenario-${{ inputs.scenario }}/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
+          for TCFG in $(ls examples/bench/scenario-${{ inputs.scenario }}/targets/node-*.yaml | sort); do
+            NODE_NUM=$(basename "${TCFG}" .yaml | sed 's/node-//')
+            create_target "bench-char-node-${NODE_NUM}" "node-${NODE_NUM}" \
+              "${TCFG}" "target-node-${NODE_NUM}.yaml" "/tmp/target_${NODE_NUM}_id"
+          done
 
       - name: Create Breeders
         env:
@@ -163,8 +165,6 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
-          TARGET_1_ID=$(cat /tmp/target_1_id)
-          TARGET_2_ID=$(cat /tmp/target_2_id)
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
           # Purge any existing bench-char breeders first
@@ -185,8 +185,10 @@ jobs:
 
             sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
                 -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
+                -e "s/\"generic-node-3\"/\"${TARGET_ID}\"/" \
                 -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
                 -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
+                -e "s|http://bench-generic:8090/node-3|${RECON_URL}|" \
                 examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
             chmod 644 breeder-config-${NODE_NUM}.yaml
 
@@ -221,41 +223,50 @@ jobs:
             echo "${UUID}" > "${OUTFILE}"
           }
 
-          create_breeder "bench-char-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/breeder_1_uuid
-          create_breeder "bench-char-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/breeder_2_uuid
+          for BCFG in $(ls examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-*.yml | sort); do
+            NODE_NUM=$(basename "${BCFG}" .yml | sed 's/breeder-//')
+            create_breeder "bench-char-${NODE_NUM}" "$(cat /tmp/target_${NODE_NUM}_id)" \
+              "${BENCH_URL}/node-${NODE_NUM}" "${NODE_NUM}" "/tmp/breeder_${NODE_NUM}_uuid"
+          done
 
       - name: Poll Characterization Progress
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
           MIN_TRIALS=${{ inputs.min_trials }}
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
-          echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
+          BREEDER_UUIDS=""
+          for UF in $(ls /tmp/breeder_*_uuid | sort); do
+            BREEDER_UUIDS="${BREEDER_UUIDS} $(cat ${UF})"
+          done
+
+          echo "Waiting for ${MIN_TRIALS} trials per breeder (${BREEDER_UUIDS}), timeout: ${MAX_WAIT}s"
 
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
-            STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
-            STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            ALL_OK=1
+            SUMMARY=""
+            for BID in ${BREEDER_UUIDS}; do
+              STATE=$(curl -s "${API_URL}/breeders/${BID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+              METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+              TRIAL=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+              SUMMARY="${SUMMARY} B${BID:0:8}:state=${STATE},trials=${TRIAL}"
 
-            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
-            TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
-            TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+              if [ "${STATE}" = "failed" ] || [ "${STATE}" = "error" ]; then
+                echo "Breeder ${BID} entered error state"
+                exit 1
+              fi
+              if [ "${TRIAL}" -lt "${MIN_TRIALS}" ] 2>/dev/null; then
+                ALL_OK=0
+              fi
+            done
 
-            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
+            echo "${SUMMARY} (${ELAPSED}s)"
 
-            if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
-               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
-              echo "A breeder entered error state"
-              exit 1
-            fi
-
-            if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
-               [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
-              echo "Both breeders reached trial target"
+            if [ "${ALL_OK}" = "1" ]; then
+              echo "All breeders reached trial target"
               break
             fi
 
@@ -271,15 +282,13 @@ jobs:
       - name: Verify Results
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
 
-          echo "=== Breeder 1 Final State ==="
-          curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq '.' 2>/dev/null || true
-
-          echo ""
-          echo "=== Breeder 2 Final State ==="
-          curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq '.' 2>/dev/null || true
+          for UF in $(ls /tmp/breeder_*_uuid | sort); do
+            BID=$(cat ${UF})
+            echo "=== Breeder ${BID} Final State ==="
+            curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
+            echo ""
+          done
 
           echo ""
           echo "=== Bench Config (Ground Truth) ==="
@@ -296,15 +305,13 @@ jobs:
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
-
           fuser -k 9099/tcp 2>/dev/null || true
           sleep 1
           kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
           sleep 3
 
-          for BID in ${BREEDER_1_UUID} ${BREEDER_2_UUID}; do
+          for UF in $(ls /tmp/breeder_*_uuid | sort); do
+            BID=$(cat ${UF})
             echo "=== Trials for breeder ${BID} ==="
             curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | jq -r '
               if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
@@ -338,7 +345,7 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
 
-          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+          for UUID_FILE in $(ls /tmp/breeder_*_uuid 2>/dev/null | sort); do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
               echo "--- Breeder ${BID} ---"
@@ -411,7 +418,7 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
-          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+          for UUID_FILE in $(ls /tmp/breeder_*_uuid 2>/dev/null | sort); do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
               docker run --rm --network host "${CLI_IMAGE}" \
@@ -420,7 +427,7 @@ jobs:
             fi
           done
 
-          for TID_FILE in /tmp/target_1_id /tmp/target_2_id; do
+          for TID_FILE in $(ls /tmp/target_*_id 2>/dev/null | sort); do
             TID=$(cat ${TID_FILE} 2>/dev/null || echo "")
             if [ -n "${TID}" ]; then
               docker run --rm --network host "${CLI_IMAGE}" \
@@ -441,8 +448,8 @@ jobs:
         run: |
           echo "Bench Characterization Summary"
           echo "Scenario: ${{ inputs.scenario }}"
-          echo "Topology: scenario-${{ inputs.scenario }} (param_1 carrier, params 0+2 dead)"
-          echo "Expected: param_1 carrier curve (base function per scenario), params 0+2 flat"
+          echo "Topology: scenario-${{ inputs.scenario }}"
+          echo "Breeders: $(ls /tmp/breeder_*_uuid 2>/dev/null | wc -l)"
           echo "Min trials per breeder: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Status: ${{ job.status }}"
