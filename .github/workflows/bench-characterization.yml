@@ -7,14 +7,18 @@ on:
         description: "Scenario dir under examples/bench/ (characterization | characterization-saturation)"
         required: false
         default: "characterization"
-      min_trials:
-        description: "Minimum trials per breeder for success"
+      iterations_max:
+        description: "Override breeder conf iterations.max (empty = conf value stands)"
         required: false
-        default: "10"
+        default: ""
+      seed:
+        description: "GENERIC_SEED for the bench container"
+        required: false
+        default: "42"
       max_wait_minutes:
-        description: "Max wait time in minutes"
+        description: "Watchdog timeout in minutes (must exceed the breeder timing budget)"
         required: false
-        default: "30"
+        default: "90"
 
 jobs:
   bench-characterization:
@@ -64,7 +68,7 @@ jobs:
             -p 8090:8090 \
             -e CONFIG_PATH=/topology.yaml \
             -e PORT=8090 \
-            -e GENERIC_SEED=42 \
+            -e GENERIC_SEED=${{ inputs.seed }} \
             -e RUST_LOG=info \
             ghcr.io/godon-dev/godon-bench-generic:0.2.1
 
@@ -189,7 +193,18 @@ jobs:
                 -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
                 -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
                 -e "s|http://bench-generic:8090/node-3|${RECON_URL}|" \
-                examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
+              examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
+
+            if [ -n "${{ inputs.iterations_max }}" ]; then
+              MAX_LINES=$(grep -cE '^[[:space:]]*max: [0-9]+' "breeder-config-${NODE_NUM}.yaml" || true)
+              if [ "${MAX_LINES}" != "1" ]; then
+                echo "Expected exactly one iterations.max line in breeder-config-${NODE_NUM}.yaml, found ${MAX_LINES}" >&2
+                exit 1
+              fi
+              sed -i -E "s/^([[:space:]]*max: )[0-9]+/\1${{ inputs.iterations_max }}/" "breeder-config-${NODE_NUM}.yaml"
+              echo "Overrode iterations.max -> ${{ inputs.iterations_max }} for ${NAME}" >&2
+            fi
+
             chmod 644 breeder-config-${NODE_NUM}.yaml
 
             local UUID=""
@@ -229,12 +244,10 @@ jobs:
               "${BENCH_URL}/node-${NODE_NUM}" "${NODE_NUM}" "/tmp/breeder_${NODE_NUM}_uuid"
           done
 
-      - name: Poll Characterization Progress
+      - name: Poll Walk Completion
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          MIN_TRIALS=${{ inputs.min_trials }}
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
@@ -243,39 +256,41 @@ jobs:
             BREEDER_UUIDS="${BREEDER_UUIDS} $(cat ${UF})"
           done
 
-          echo "Waiting for ${MIN_TRIALS} trials per breeder (${BREEDER_UUIDS}), timeout: ${MAX_WAIT}s"
+          echo "Waiting for all breeders to reach terminal state (walk retired or iteration-capped), watchdog: ${MAX_WAIT}s"
 
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
-            ALL_OK=1
+            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+            ALL_DONE=1
             SUMMARY=""
             for BID in ${BREEDER_UUIDS}; do
-              STATE=$(curl -s "${API_URL}/breeders/${BID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
-              METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
-              TRIAL=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
-              SUMMARY="${SUMMARY} B${BID:0:8}:state=${STATE},trials=${TRIAL}"
+              RUNNING=$(echo "${METRICS}" | grep "godon_breeder_worker_status{.*breeder_id=\"${BID}\".*status=\"running\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
+              RUNNING=${RUNNING:-0}
+              STOPPED=$(echo "${METRICS}" | grep "godon_breeder_worker_status{.*breeder_id=\"${BID}\".*status=\"stopped\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
+              STOPPED=${STOPPED:-0}
 
-              if [ "${STATE}" = "failed" ] || [ "${STATE}" = "error" ]; then
-                echo "Breeder ${BID} entered error state"
-                exit 1
+              if [ "${STOPPED}" -ge 1 ] 2>/dev/null && [ "${RUNNING}" -eq 0 ] 2>/dev/null; then
+                STATE=terminal
+              else
+                STATE=walking
+                ALL_DONE=0
               fi
-              if [ "${TRIAL}" -lt "${MIN_TRIALS}" ] 2>/dev/null; then
-                ALL_OK=0
-              fi
+              SUMMARY="${SUMMARY} B${BID:0:8}:${STATE}"
             done
 
             echo "${SUMMARY} (${ELAPSED}s)"
 
-            if [ "${ALL_OK}" = "1" ]; then
-              echo "All breeders reached trial target"
+            if [ "${ALL_DONE}" = "1" ]; then
+              echo "All breeders reached terminal state"
               break
             fi
 
-            sleep 10
-            ELAPSED=$((ELAPSED + 10))
+            sleep 30
+            ELAPSED=$((ELAPSED + 30))
           done
 
           if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "Timed out waiting for trials"
+            echo "Watchdog timeout: breeders did not reach terminal state within ${MAX_WAIT}s"
+            echo "Budget verdict, not a walk verdict - the curves export below carries per-curve state (converged flags, gaps)"
             exit 1
           fi
 
@@ -450,6 +465,7 @@ jobs:
           echo "Scenario: ${{ inputs.scenario }}"
           echo "Topology: scenario-${{ inputs.scenario }}"
           echo "Breeders: $(ls /tmp/breeder_*_uuid 2>/dev/null | wc -l)"
-          echo "Min trials per breeder: ${{ inputs.min_trials }}"
-          echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
+          echo "Iterations override: ${{ inputs.iterations_max == '' && 'none (conf value stands)' || inputs.iterations_max }}"
+          echo "Bench seed: ${{ inputs.seed }}"
+          echo "Watchdog: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Status: ${{ job.status }}"
