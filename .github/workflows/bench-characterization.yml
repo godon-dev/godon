@@ -7,6 +7,30 @@ on:
         description: "Scenario dir under examples/bench/ (characterization | characterization-saturation)"
         required: false
         default: "characterization"
+      strength:
+        description: "Override edge strength in topology (all edges; empty = conf value stands)"
+        required: false
+        default: ""
+      base:
+        description: "Override sender node base (first base line: linear | saturation | threshold | polynomial)"
+        required: false
+        default: ""
+      gaussian_sigma:
+        description: "Override noise.gaussian_sigma"
+        required: false
+        default: ""
+      colored_sigma:
+        description: "Override noise.colored_sigma"
+        required: false
+        default: ""
+      noise_drift_rate:
+        description: "Override noise.drift_rate (growing noise)"
+        required: false
+        default: ""
+      edge_drift_rate:
+        description: "Override edge drift_rate (drifting strength; needs a scenario with the field present)"
+        required: false
+        default: ""
       iterations_max:
         description: "Override breeder conf iterations.max (empty = conf value stands)"
         required: false
@@ -56,7 +80,31 @@ jobs:
           echo "Scenario: ${SCENARIO_DIR}"
           cp ${SCENARIO_DIR}/topology.yaml /tmp/topology.yaml
 
-          echo "=== Topology (ground truth) ==="
+          apply_override() {
+            local LABEL=$1 VALUE=$2 GUARD_RE=$3 SED_EXPR=$4 EXPECT=$5
+            [ -z "${VALUE}" ] && return 0
+            case "${VALUE}" in ''|*[!0-9.A-Za-z_-]*)
+              echo "Override ${LABEL}: illegal value '${VALUE}'" >&2; exit 1;;
+            esac
+            local N=$(grep -cE "${GUARD_RE}" /tmp/topology.yaml || true)
+            if [ "${EXPECT}" = "one" ] && [ "${N}" != "1" ]; then
+              echo "Override ${LABEL}: expected exactly 1 matching line, found ${N}" >&2; exit 1
+            fi
+            if [ "${EXPECT}" = "any" ] && [ "${N}" -lt 1 ] 2>/dev/null; then
+              echo "Override ${LABEL}: no matching lines found" >&2; exit 1
+            fi
+            sed -i -E "${SED_EXPR}" /tmp/topology.yaml
+            echo "Overrode ${LABEL} -> ${VALUE} (${N} line(s))"
+          }
+
+          apply_override "strength"        "${{ inputs.strength }}"        '^    strength: [0-9.]+'       "s/^(    strength: )[0-9.]+/\1${{ inputs.strength }}/"       "any"
+          apply_override "base"            "${{ inputs.base }}"            '^[[:space:]]*base: [a-z]+$'  "0,/^([[:space:]]*base: )[a-z]+$/s##\1${{ inputs.base }}#"        "any"
+          apply_override "gaussian_sigma"  "${{ inputs.gaussian_sigma }}"  '^  gaussian_sigma: [0-9.]+'   "s/^(  gaussian_sigma: )[0-9.]+/\1${{ inputs.gaussian_sigma }}/"   "one"
+          apply_override "colored_sigma"   "${{ inputs.colored_sigma }}"   '^  colored_sigma: [0-9.]+'    "s/^(  colored_sigma: )[0-9.]+/\1${{ inputs.colored_sigma }}/"    "one"
+          apply_override "noise_drift_rate" "${{ inputs.noise_drift_rate }}" '^  drift_rate: [0-9.]+'     "s/^(  drift_rate: )[0-9.]+/\1${{ inputs.noise_drift_rate }}/"     "one"
+          apply_override "edge_drift_rate" "${{ inputs.edge_drift_rate }}" '^    drift_rate: [0-9.]+'    "s/^(    drift_rate: )[0-9.]+/\1${{ inputs.edge_drift_rate }}/"    "one"
+
+          echo "=== Topology (ground truth, post-overrides) ==="
           cat /tmp/topology.yaml
 
           echo "Removing any existing bench container..."
@@ -132,9 +180,8 @@ jobs:
               curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
             fi
 
-            sed -e "s|http://bench-generic:8090/node-1|${BENCH_URL}/${NODE_PATH}|" \
-                -e "s|http://bench-generic:8090/node-2|${BENCH_URL}/${NODE_PATH}|" \
-                -e "s|http://bench-generic:8090/node-3|${BENCH_URL}/${NODE_PATH}|" \
+            sed -E -e "s|http://bench-generic:8090/node-[0-9]+|${BENCH_URL}/${NODE_PATH}|g" \
+                   -e "s/\"generic-node-[0-9]+\"/\"${TARGET_ID}\"/g" \
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
@@ -187,12 +234,8 @@ jobs:
             local NODE_NUM=$4
             local OUTFILE=$5
 
-            sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
-                -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
-                -e "s/\"generic-node-3\"/\"${TARGET_ID}\"/" \
-                -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
-                -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
-                -e "s|http://bench-generic:8090/node-3|${RECON_URL}|" \
+            sed -E -e "s|http://bench-generic:8090/node-[0-9]+|${RECON_URL}|g" \
+                   -e "s/\"generic-node-[0-9]+\"/\"${TARGET_ID}\"/g" \
               examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
 
             if [ -n "${{ inputs.iterations_max }}" ]; then
