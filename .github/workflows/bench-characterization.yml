@@ -167,6 +167,8 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
+          rm -f /tmp/breeder_*_uuid /tmp/target_*_id
+
           create_target() {
             local NAME=$1
             local NODE_PATH=$2
@@ -181,7 +183,6 @@ jobs:
             fi
 
             sed -E -e "s|http://bench-generic:8090/node-[0-9]+|${BENCH_URL}/${NODE_PATH}|g" \
-                   -e "s/\"generic-node-[0-9]+\"/\"${TARGET_ID}\"/g" \
               ${TEMPLATE} > ${FILE}
             chmod 644 ${FILE}
 
