@@ -1,0 +1,92 @@
+meta:
+  configVersion: "0.3"
+  strict_validation: false
+
+breeder:
+  type: "bench_generic"
+
+settings:
+  generic:
+    param_0:
+      constraints:
+        - {step: 20.0, lower: 0.0, upper: 100.0}
+    param_1:
+      constraints:
+        - {step: 20.0, lower: 0.0, upper: 100.0}
+    param_2:
+      constraints:
+        - {step: 20.0, lower: 0.0, upper: 100.0}
+
+run:
+  parallel: 1
+  completion_criteria:
+    iterations:
+      min: 10
+      max: 500
+    timing:
+      end: "75m"
+    quality_achieved: true
+
+cooperation:
+  active: false
+
+interference_detection:
+  group: bench-characterization
+  mode: active
+  convergence_threshold: 0.02
+  refinement_depth: 3
+  min_optimize_trials: 15
+  push_block_size: 10
+  pause_block_size: 10
+  cooldown_trials: 5
+  hold_params:
+    param_0: 50.0
+    param_1: 50.0
+    param_2: 50.0
+
+reconnaissance:
+  type: http
+  http:
+    url: "http://bench-generic:8090/node-4"
+
+objectives:
+  - name: "objective_0"
+    direction: maximize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: objective_0
+      stabilization_seconds: 0
+      samples: 3
+      interval: 0
+      aggregation: median
+
+observations:
+  - name: "objective_1"
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: objective_1
+      stabilization_seconds: 0
+      samples: 3
+      interval: 0
+      aggregation: median
+
+rollback_strategies:
+  standard:
+    consecutive_failures: 10
+    target_state: "previous"
+    max_attempts: 3
+    on_failure: "continue"
+    timeout_seconds: 60
+    after:
+      action: continue
+
+effectuation:
+  type: http
+  targetRefs:
+    - "generic-node-4"
+  endpoint_config:
+    method: POST
+    path: /apply
+    timeout_seconds: 30
