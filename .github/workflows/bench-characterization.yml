@@ -455,12 +455,13 @@ jobs:
           if curl -s --connect-timeout 3 http://127.0.0.1:3100/ready >/dev/null 2>&1; then
             END=$(date +%s)
             START=$((END - ${{ fromJSON(inputs.max_wait_minutes) }} * 60 - 900))
-            curl -s -G "http://127.0.0.1:3100/loki/api/v1/query_range" \
+            curl -s -G --retry 2 --max-time 30 "http://127.0.0.1:3100/loki/api/v1/query_range" \
               --data-urlencode 'query={service_name="godon-breeders"}' \
               --data-urlencode "start=${START}" \
               --data-urlencode "end=${END}" \
               --data-urlencode 'direction=forward' \
-              --data-urlencode 'limit=5000' > /tmp/loki_breeders.json
+              --data-urlencode 'limit=5000' > /tmp/loki_breeders.json \
+              || echo '{"data":{"result":[]}}' > /tmp/loki_breeders.json
             echo "--- flattened trace (ts_ns line) ---"
             jq -r '.data.result[].values[] | "\(.[0]) \(.[1])"' /tmp/loki_breeders.json 2>/dev/null \
               | grep -i "COORD\|PROBE\|CHAR\|CONVERG\|REFINE\|CAUSAL\|SHIFT\|ERROR\|WARN\|Traceback" \
@@ -469,6 +470,7 @@ jobs:
           else
             echo "Loki not reachable via port-forward"
           fi
+          true
           kill ${LOKI_PF_PID} 2>/dev/null || true
 
       - name: Cleanup
