@@ -1,0 +1,23 @@
+{
+ "cell_id": "e1",
+ "kind": "p2",
+ "scenario": "characterization-ch1",
+ "overrides": {},
+ "seed": 42,
+ "run_id": 32963238952,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32963238952",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 8,
+  "max_dev_sig": 0.72,
+  "med_dev_sig": 0.3,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 0.91,
+  "ch1_flat": 1.52,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "cross-channel: carrier on objective_1; initial FLAG was scorer's ch0 hardcode \u2014 walk data was clean",
+ "banked_at": "2026-08-26T12:26:23.993154"
+}

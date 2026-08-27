@@ -1,0 +1,608 @@
+{
+ "curves": [
+  {
+   "channel": "objective_0",
+   "param": "param_0",
+   "receiver_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "sender_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.03724446780238757,
+      "from_level": 0.0,
+      "ignorance": 0.005727449921703404,
+      "jump": 0.011454899843406807,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.027496744180163776,
+      "from_level": 50.0,
+      "ignorance": 0.0008016163153165834,
+      "jump": 0.0016032326306331668,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0028779723487166366,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      -0.006496368961909332,
+      0.0255378429305861
+     ],
+     [
+      50.0,
+      0.004958530881497475,
+      0.01170662487180147
+     ],
+     [
+      100.0,
+      0.006561763512130642,
+      0.015790119308362306
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_1",
+   "param": "param_0",
+   "receiver_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "sender_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.028944601843496516,
+      "from_level": 0.0,
+      "ignorance": 0.001075140923849749,
+      "jump": 0.002150281847699498,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.021973368951909253,
+      "from_level": 50.0,
+      "ignorance": 0.003344512711484393,
+      "jump": 0.006689025422968786,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0005402449418349484,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      0.0010666406901180814,
+      0.024579744004351322
+     ],
+     [
+      50.0,
+      0.003216922537817579,
+      0.004364857839145196
+     ],
+     [
+      100.0,
+      -0.003472102885151207,
+      0.017608511112764055
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_0",
+   "param": "param_1",
+   "receiver_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "sender_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.0364111171462312,
+      "from_level": 0.0,
+      "ignorance": 0.002175379474631825,
+      "jump": 0.00435075894926365,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.03466219100697111,
+      "from_level": 50.0,
+      "ignorance": 0.015431170957322993,
+      "jump": 0.030862341914645985,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0010931011290438526,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      -0.015433013324541056,
+      0.02079287429296871
+     ],
+     [
+      50.0,
+      -0.019783772273804706,
+      0.015618242853262486
+     ],
+     [
+      100.0,
+      0.01107856964084128,
+      0.01904394815370863
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_1",
+   "param": "param_1",
+   "receiver_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "sender_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.03157979857062498,
+      "from_level": 0.0,
+      "ignorance": 0.006344674955942042,
+      "jump": 0.012689349911884085,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.029292575203958244,
+      "from_level": 50.0,
+      "ignorance": 0.010889503599798622,
+      "jump": 0.021779007199597245,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.003188120251493264,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      0.00167064199226441,
+      0.017852904336439688
+     ],
+     [
+      50.0,
+      0.014359991904148495,
+      0.013726894234185287
+     ],
+     [
+      100.0,
+      -0.00741901529544875,
+      0.015565680969772957
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_0",
+   "param": "param_2",
+   "receiver_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "sender_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.03522213748679965,
+      "from_level": 0.0,
+      "ignorance": 0.002786466032057705,
+      "jump": 0.00557293206411541,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.0360010571957235,
+      "from_level": 50.0,
+      "ignorance": 0.0011640225790906927,
+      "jump": 0.0023280451581813855,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.001400164523571285,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      0.009700707801446384,
+      0.02003570653491306
+     ],
+     [
+      50.0,
+      0.004127775737330974,
+      0.015186430951886591
+     ],
+     [
+      100.0,
+      0.0017997305791495888,
+      0.02081462624383691
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_1",
+   "param": "param_2",
+   "receiver_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "sender_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.033987770874241686,
+      "from_level": 0.0,
+      "ignorance": 0.0020001336958481997,
+      "jump": 0.004000267391696399,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.028023714001805197,
+      "from_level": 50.0,
+      "ignorance": 0.005453369967397675,
+      "jump": 0.01090673993479535,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0010050423048789466,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      0.011253278874884198,
+      0.0156376659691694
+     ],
+     [
+      50.0,
+      0.007253011483187799,
+      0.018350104905072287
+     ],
+     [
+      100.0,
+      -0.003653728451607552,
+      0.00967360909673291
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_0",
+   "param": "param_0",
+   "receiver_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "sender_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.04786141363664815,
+      "from_level": 0.0,
+      "ignorance": 0.002655747326209712,
+      "jump": 0.005311494652419424,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.04938008821584837,
+      "from_level": 50.0,
+      "ignorance": 0.0012871927985560472,
+      "jump": 0.0025743855971120944,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0013344799997372192,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      0.009097526099094755,
+      0.015163870616517297
+     ],
+     [
+      50.0,
+      0.003786031446675331,
+      0.03269754302013085
+     ],
+     [
+      100.0,
+      0.0012116458495632365,
+      0.016682545195717522
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_1",
+   "param": "param_0",
+   "receiver_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "sender_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.03560625726206948,
+      "from_level": 0.0,
+      "ignorance": 0.00545088253313844,
+      "jump": 0.01090176506627688,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.03324097129499075,
+      "from_level": 50.0,
+      "ignorance": 0.0035052347203643752,
+      "jump": 0.0070104694407287504,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.002739000675855635,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      -0.007933660694564193,
+      0.018557604321320868
+     ],
+     [
+      50.0,
+      0.0029681043717126876,
+      0.01704865294074861
+     ],
+     [
+      100.0,
+      -0.004042365069016063,
+      0.01619231835424214
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_0",
+   "param": "param_1",
+   "receiver_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "sender_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.028108578996984462,
+      "from_level": 0.0,
+      "ignorance": 0.01965378328050363,
+      "jump": 0.03930756656100726,
+      "to_level": 50.0,
+      "unresolved": true,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.03276941149752914,
+      "from_level": 50.0,
+      "ignorance": 0.0031975600861844644,
+      "jump": 0.012790240344737858,
+      "to_level": 75.0,
+      "unresolved": false,
+      "width": 25.0
+     },
+     {
+      "bars_sum": 0.033542935220129855,
+      "from_level": 75.0,
+      "ignorance": 0.005253786392221738,
+      "jump": 0.02101514556888695,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 25.0
+     }
+    ],
+    "last_delta": 0.0010229981622075987,
+    "num_points": 4,
+    "points": [
+     [
+      0.0,
+      -0.03643831571990758,
+      0.016203337577275392
+     ],
+     [
+      50.0,
+      0.0028692508410996798,
+      0.011905241419709072
+     ],
+     [
+      75.0,
+      0.015659491185837537,
+      0.020864170077820068
+     ],
+     [
+      100.0,
+      0.03667463675472449,
+      0.012678765142309789
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_1",
+   "param": "param_1",
+   "receiver_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "sender_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.041745979428476604,
+      "from_level": 0.0,
+      "ignorance": 0.0004711817289179132,
+      "jump": 0.0009423634578358264,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.041919749239892196,
+      "from_level": 50.0,
+      "ignorance": 0.001987049844394101,
+      "jump": 0.007948199377576404,
+      "to_level": 75.0,
+      "unresolved": false,
+      "width": 25.0
+     },
+     {
+      "bars_sum": 0.0368903082712604,
+      "from_level": 75.0,
+      "ignorance": 0.002283106448090544,
+      "jump": 0.009132425792362175,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 25.0
+     }
+    ],
+    "last_delta": 0.0021244558669077833,
+    "num_points": 4,
+    "points": [
+     [
+      0.0,
+      0.003299117629672055,
+      0.02143818173403052
+     ],
+     [
+      50.0,
+      0.0023567541718362284,
+      0.020307797694446083
+     ],
+     [
+      75.0,
+      0.010304953549412632,
+      0.021611951545446116
+     ],
+     [
+      100.0,
+      0.0011725277570504566,
+      0.015278356725814285
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_0",
+   "param": "param_2",
+   "receiver_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "sender_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.035284133585375826,
+      "from_level": 0.0,
+      "ignorance": 0.0023337177862625125,
+      "jump": 0.004667435572525025,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.036887628470215955,
+      "from_level": 50.0,
+      "ignorance": 0.007196515003385917,
+      "jump": 0.014393030006771834,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0011726641612562873,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      0.004338506897208716,
+      0.016465375928791014
+     ],
+     [
+      50.0,
+      -0.000328928675316309,
+      0.01881875765658481
+     ],
+     [
+      100.0,
+      -0.014721958682088143,
+      0.018068870813631142
+     ]
+    ]
+   }
+  },
+  {
+   "channel": "objective_1",
+   "param": "param_2",
+   "receiver_id": "414cc8b2-ddca-4c14-a4b2-6d4d934a863b",
+   "sender_id": "cf16afaa-b83d-46bc-b614-5a5c66dd5fb5",
+   "state": {
+    "converged": true,
+    "gaps": [
+     {
+      "bars_sum": 0.04216883222912812,
+      "from_level": 0.0,
+      "ignorance": 0.0036235608150280985,
+      "jump": 0.007247121630056197,
+      "to_level": 50.0,
+      "unresolved": false,
+      "width": 50.0
+     },
+     {
+      "bars_sum": 0.04128003707381572,
+      "from_level": 50.0,
+      "ignorance": 0.009990244040280594,
+      "jump": 0.019980488080561187,
+      "to_level": 100.0,
+      "unresolved": false,
+      "width": 50.0
+     }
+    ],
+    "last_delta": 0.0018207942403872532,
+    "num_points": 3,
+    "points": [
+     [
+      0.0,
+      -0.010785750517740278,
+      0.02149836744084778
+     ],
+     [
+      50.0,
+      -0.018032872147796475,
+      0.020670464788280347
+     ],
+     [
+      100.0,
+      0.0019476159327647125,
+      0.020609572285535373
+     ]
+    ]
+   }
+  }
+ ]
+}

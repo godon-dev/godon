@@ -1,0 +1,26 @@
+{
+ "cell_id": "b5",
+ "kind": "p2",
+ "scenario": "characterization",
+ "overrides": {
+  "base": "linear",
+  "strength": "0.9"
+ },
+ "seed": 42,
+ "run_id": 32916419972,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32916419972",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 9,
+  "max_dev_sig": 0.85,
+  "med_dev_sig": 0.45,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.02,
+  "ch1_flat": 1.0,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "",
+ "banked_at": "2026-08-26T01:27:24.681531"
+}

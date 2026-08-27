@@ -1,0 +1,25 @@
+{
+ "cell_id": "n2",
+ "kind": "p2",
+ "scenario": "characterization-saturation",
+ "overrides": {
+  "gaussian_sigma": "0.10"
+ },
+ "seed": 42,
+ "run_id": 32921791917,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32921791917",
+ "conclusion": "failure",
+ "metrics": {
+  "levels": 7,
+  "max_dev_sig": 0.85,
+  "med_dev_sig": 0.22,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.31,
+  "ch1_flat": 2.16,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "run failed at Loki-trace step (curl 52) AFTER curves exported OK \u2014 walk completed 45min; verdict from data not badge",
+ "banked_at": "2026-08-26T06:07:35.651739"
+}

@@ -1,0 +1,33 @@
+cell,kind,scenario,overrides,seed,run_id,conclusion,levels,max_dev_sig,med_dev_sig,converged,reverse_flat,dead_flat,ch1_flat,verdict,note
+a1,p2,characterization-saturation,{},42,32884630848,success,8,0.69,0.38,True,,0.99,1.02,within-bars,attempt-1 (32880886488) raced an in-flight restack — hollow; real walk = this run
+a2,p2,characterization-saturation,{},43,32888417987,success,7,1.76,0.16,True,,1.44,1.51,within-bars,
+a3,p2,characterization,"{""base"": ""linear""}",42,32893966768,success,9,0.81,0.13,True,,1.12,0.67,within-bars,
+a4,p2,characterization-saturation,"{""strength"": ""0.0""}",42,32897744222,success,0,,,,,1.04,2.29,flat-sentinels-clean,
+b1,p2,characterization,"{""base"": ""linear"", ""strength"": ""0.1""}",42,32901783390,success,3,0.64,0.31,True,,1.33,0.89,within-bars,
+b2,p2,characterization,"{""base"": ""linear"", ""strength"": ""0.2""}",42,32905563342,success,4,1.05,0.84,True,,0.81,1.05,within-bars,
+b3,p2,characterization,"{""base"": ""linear"", ""strength"": ""0.3""}",42,32909177528,success,3,1.03,0.72,True,,1.18,1.31,within-bars,
+b4,p2,characterization,"{""base"": ""linear"", ""strength"": ""0.5""}",42,32913179678,success,6,1.41,0.33,True,,1.79,0.92,within-bars,
+b5,p2,characterization,"{""base"": ""linear"", ""strength"": ""0.9""}",42,32916419972,success,9,0.85,0.45,True,,1.02,1.0,within-bars,
+n1,p2,characterization-saturation,"{""gaussian_sigma"": ""0.05""}",42,32919037624,success,7,1.03,0.48,True,,0.59,0.93,within-bars,
+n2,p2,characterization-saturation,"{""gaussian_sigma"": ""0.10""}",42,32921791917,failure,7,0.85,0.22,True,,1.31,2.16,within-bars,run failed at Loki-trace step (curl 52) AFTER curves exported OK — walk completed 45min; verdict from data not badge
+n3,p2,characterization-saturation,"{""gaussian_sigma"": ""0.10"", ""strength"": ""0.9""}",42,32924897788,success,5,0.62,0.17,True,,1.43,1.06,within-bars,re-queued run (first attempt's log blob vanished on requeue)
+n4,p2,characterization-saturation,"{""gaussian_sigma"": ""0.05"", ""strength"": ""0.35""}",42,32933475275,success,5,1.29,0.49,True,,1.78,0.78,within-bars,
+s1,p2,characterization,"{""base"": ""threshold"", ""strength"": ""0.35""}",42,32940719122,success,8,1.63,0.62,True,,0.82,0.99,within-bars,
+s2,p2,characterization,"{""base"": ""threshold"", ""strength"": ""0.7""}",42,32944035609,success,15,1.28,0.51,True,,2.76,1.15,within-bars,
+s3,p2,characterization,"{""base"": ""polynomial"", ""strength"": ""0.35""}",42,32947375849,success,8,1.29,0.42,True,,1.27,0.9,within-bars,
+s4,p2,characterization,"{""base"": ""polynomial"", ""strength"": ""0.7""}",42,32950740705,success,8,0.84,0.29,True,,1.42,1.08,within-bars,
+s5,p2,characterization-saturation,"{""strength"": ""0.35""}",42,32954910370,success,5,0.65,0.32,True,,1.5,1.38,within-bars,
+r3,p2,characterization-saturation,"{""gaussian_sigma"": ""0.10"", ""strength"": ""0.5""}",42,32959157591,success,5,0.62,0.23,True,,1.87,0.94,within-bars,
+e1,p2,characterization-ch1,{},42,32963238952,success,8,0.72,0.3,True,,0.91,1.52,within-bars,cross-channel: carrier on objective_1; initial FLAG was scorer's ch0 hardcode — walk data was clean
+e2,bridge,characterization-bidir,{},42,32976537248,success,0,,,,,1.17,1.02,bridge-parked,"P3 data, not a P2 row"
+e4,bridge,characterization-diamond,{},42,32981902292,success,0,,,,,77.03,34.62,bridge-parked,"P3 data, not a P2 row"
+e6,bridge,composition-gate,{},42,32991220022,success,0,,,,,549.27,111.98,bridge-parked,"P3 data, not a P2 row"
+ns1,p2,characterization-saturation,"{""colored_sigma"": ""0.05""}",42,32996984554,success,7,1.12,0.15,True,,1.89,1.04,within-bars,
+ns2,p2,characterization-saturation,"{""noise_drift_rate"": ""0.001""}",42,33001802870,success,8,1.24,0.49,True,,1.29,1.15,within-bars,
+ns3,p2,characterization-saturation,"{""noise_drift_rate"": ""0.01""}",42,33005732737,success,6,0.7,0.29,True,,0.64,1.87,within-bars,
+e3,p2,characterization-superpos,{},42,32966791067,success,3,,,,,,,structure-banked,"per-edge structural: 1 sender(s) with structure; peaks [(1.024, 21), (0.506, 21), (0.184, 7)]"
+e5,p2,verification-star,{},42,32970938402,success,5,,,,,,,structure-banked,"per-edge structural: 2 sender(s) with structure; peaks [(0.508, 19), (0.51, 19), (0.121, 2), (0.517, 2), (0.514, 2)]"
+ns5,p2,characterization-edgedrift,"{""edge_drift_rate"": ""0.004""}",42,33043306629,success,0,,,,,1.92,1.06,structure-banked,
+r1,p2,characterization,"{""base"": ""linear"", ""strength"": ""0.2""}",43,33046567813,success,3,0.15,0.12,True,,1.26,1.34,within-bars,
+r2,p2,characterization-saturation,"{""gaussian_sigma"": ""0.10""}",43,33049482242,success,6,1.07,0.3,True,,0.9,1.83,within-bars,
+ns4,p2,characterization-edgedrift,"{""edge_drift_rate"": ""0.001""}",42,33009953651,success,0,,,,,1.51,0.91,structure-banked,recovered post-run (runner 401 on stale token during fetch; run itself clean)

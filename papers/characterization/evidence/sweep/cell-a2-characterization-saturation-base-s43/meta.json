@@ -1,0 +1,23 @@
+{
+ "cell_id": "a2",
+ "kind": "p2",
+ "scenario": "characterization-saturation",
+ "overrides": {},
+ "seed": 43,
+ "run_id": 32888417987,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32888417987",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 7,
+  "max_dev_sig": 1.76,
+  "med_dev_sig": 0.16,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.44,
+  "ch1_flat": 1.51,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "",
+ "banked_at": "2026-08-25T20:16:32.641378"
+}

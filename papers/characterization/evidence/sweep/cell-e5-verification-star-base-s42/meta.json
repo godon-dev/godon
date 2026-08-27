@@ -1,0 +1,19 @@
+{
+ "cell_id": "e5",
+ "kind": "p2",
+ "scenario": "verification-star",
+ "overrides": {},
+ "seed": 42,
+ "run_id": 32970938402,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32970938402",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 5,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "converged": null
+ },
+ "verdict": "structure-banked",
+ "note": "per-edge structural: 2 sender(s) with structure; peaks [(0.508, 19), (0.51, 19), (0.121, 2), (0.517, 2), (0.514, 2)]",
+ "banked_at": "2026-08-27T05:42:39.748456"
+}
