@@ -1,0 +1,23 @@
+{
+ "cell_id": "a1",
+ "kind": "p2",
+ "scenario": "characterization-saturation",
+ "overrides": {},
+ "seed": 42,
+ "run_id": 32884630848,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32884630848",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 8,
+  "max_dev_sig": 0.69,
+  "med_dev_sig": 0.38,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 0.99,
+  "ch1_flat": 1.02,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "attempt-1 (32880886488) raced an in-flight restack \u2014 hollow; real walk = this run",
+ "banked_at": "2026-08-25T20:10:54.576588"
+}

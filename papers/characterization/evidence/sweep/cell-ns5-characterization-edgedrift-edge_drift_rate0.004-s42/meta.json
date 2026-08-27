@@ -1,0 +1,25 @@
+{
+ "cell_id": "ns5",
+ "kind": "p2",
+ "scenario": "characterization-edgedrift",
+ "overrides": {
+  "edge_drift_rate": "0.004"
+ },
+ "seed": 42,
+ "run_id": 33043306629,
+ "url": "https://github.com/godon-dev/godon/actions/runs/33043306629",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 0,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "n_curves": 6,
+  "reverse_flat": null,
+  "dead_flat": 1.92,
+  "ch1_flat": 1.06,
+  "converged": null
+ },
+ "verdict": "structure-banked",
+ "note": "",
+ "banked_at": "2026-08-27T06:37:50.778949"
+}
