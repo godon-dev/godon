@@ -1,0 +1,25 @@
+{
+ "cell_id": "ns4",
+ "kind": "p2",
+ "scenario": "characterization-edgedrift",
+ "overrides": {
+  "edge_drift_rate": "0.001"
+ },
+ "seed": 42,
+ "run_id": 33009953651,
+ "url": "https://github.com/godon-dev/godon/actions/runs/33009953651",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 0,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.51,
+  "ch1_flat": 0.91,
+  "converged": null
+ },
+ "verdict": "structure-banked",
+ "note": "recovered post-run (runner 401 on stale token during fetch; run itself clean)",
+ "banked_at": "2026-08-27T08:08:10.541276"
+}

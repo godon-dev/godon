@@ -1,0 +1,26 @@
+{
+ "cell_id": "n3",
+ "kind": "p2",
+ "scenario": "characterization-saturation",
+ "overrides": {
+  "gaussian_sigma": "0.10",
+  "strength": "0.9"
+ },
+ "seed": 42,
+ "run_id": 32924897788,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32924897788",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 5,
+  "max_dev_sig": 0.62,
+  "med_dev_sig": 0.17,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.43,
+  "ch1_flat": 1.06,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "re-queued run (first attempt's log blob vanished on requeue)",
+ "banked_at": "2026-08-26T06:07:37.245597"
+}

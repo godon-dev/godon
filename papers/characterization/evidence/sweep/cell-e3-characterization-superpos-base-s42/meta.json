@@ -1,0 +1,19 @@
+{
+ "cell_id": "e3",
+ "kind": "p2",
+ "scenario": "characterization-superpos",
+ "overrides": {},
+ "seed": 42,
+ "run_id": 32966791067,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32966791067",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 3,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "converged": null
+ },
+ "verdict": "structure-banked",
+ "note": "per-edge structural: 1 sender(s) with structure; peaks [(1.024, 21), (0.506, 21), (0.184, 7)]",
+ "banked_at": "2026-08-27T05:42:39.743326"
+}

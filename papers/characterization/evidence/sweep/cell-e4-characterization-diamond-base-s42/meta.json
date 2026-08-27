@@ -1,0 +1,23 @@
+{
+ "cell_id": "e4",
+ "kind": "bridge",
+ "scenario": "characterization-diamond",
+ "overrides": {},
+ "seed": 42,
+ "run_id": 32981902292,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32981902292",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 0,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "n_curves": 36,
+  "reverse_flat": null,
+  "dead_flat": 77.03,
+  "ch1_flat": 34.62,
+  "converged": null
+ },
+ "verdict": "bridge-parked",
+ "note": "P3 data, not a P2 row",
+ "banked_at": "2026-08-26T15:36:11.881891"
+}

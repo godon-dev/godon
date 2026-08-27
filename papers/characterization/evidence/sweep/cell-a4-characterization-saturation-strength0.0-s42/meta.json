@@ -1,0 +1,25 @@
+{
+ "cell_id": "a4",
+ "kind": "p2",
+ "scenario": "characterization-saturation",
+ "overrides": {
+  "strength": "0.0"
+ },
+ "seed": 42,
+ "run_id": 32897744222,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32897744222",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 0,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.04,
+  "ch1_flat": 2.29,
+  "converged": null
+ },
+ "verdict": "flat-sentinels-clean",
+ "note": "",
+ "banked_at": "2026-08-25T21:29:13.704546"
+}
