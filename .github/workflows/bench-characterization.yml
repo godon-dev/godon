@@ -258,16 +258,23 @@ jobs:
             chmod 644 breeder-config-${NODE_NUM}.yaml
 
             local UUID=""
+            local STEP_START_ISO
+            STEP_START_ISO=$(date -u +%Y-%m-%dT%H:%M:%S)
             for ATTEMPT in 1 2 3 4 5; do
               echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
 
               UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               if [ -n "${UUID}" ]; then
+                CREATED_AT=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .createdAt[0:19]" 2>/dev/null | head -1 || echo "")
+                if [[ "${CREATED_AT}" > "${STEP_START_ISO}" || "${CREATED_AT}" == "${STEP_START_ISO}" ]]; then
+                  echo "Breeder ${NAME} was created by this step (${UUID}) — using it" >&2
+                  break
+                fi
                 if [ "${ATTEMPT}" -gt 1 ]; then
-                  echo "Breeder ${NAME} still exists after purge (${UUID}) — refusing to adopt a stale breeder" >&2
+                  echo "Breeder ${NAME} still exists after purge (${UUID}, createdAt ${CREATED_AT}) — refusing to adopt a stale breeder" >&2
                   exit 1
                 fi
-                echo "Breeder ${NAME} survived pre-purge (${UUID}) — purging now, then retrying" >&2
+                echo "Breeder ${NAME} survived pre-purge (${UUID}, createdAt ${CREATED_AT}) — purging now, then retrying" >&2
                 docker run --rm --network host "${CLI_IMAGE}" \
                   --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
                   breeder purge --force --id="${UUID}" 2>&1 | tail -1
