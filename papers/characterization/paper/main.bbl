@@ -1,0 +1,31 @@
+\begin{thebibliography}{1}
+
+\bibitem{box1951rsm}
+G.~E.~P. Box and K.~B. Wilson.
+\newblock On the experimental attainment of optimum conditions.
+\newblock {\em Journal of the Royal Statistical Society, Series B},
+  13(1):1--45, 1951.
+
+\bibitem{jones1998ego}
+Donald~R. Jones, Matthias Schonlau, and William~J. Welch.
+\newblock Efficient global optimization of expensive black-box functions.
+\newblock {\em Journal of Global Optimization}, 13:455--492, 1998.
+
+\bibitem{ljung1999sid}
+Lennart Ljung.
+\newblock {\em System Identification: Theory for the User}.
+\newblock Prentice Hall, 2nd edition, 1999.
+
+\bibitem{sugihara2012ccm}
+George Sugihara, Robert May, Hao Ye, Chih-hao Hsieh, Ethan Deyle, Michael
+  Fogarty, and Stephan Munch.
+\newblock Detecting causality in complex ecosystems.
+\newblock {\em Science}, 338(6106):496--500, 2012.
+
+\bibitem{p1}
+Matthias Tafelmeier.
+\newblock The impulse protocol: Non-destructive coupling discovery in
+  autonomous agents, 2026.
+\newblock Zenodo.
+
+\end{thebibliography}
