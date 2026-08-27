@@ -1,0 +1,25 @@
+{
+ "cell_id": "ns2",
+ "kind": "p2",
+ "scenario": "characterization-saturation",
+ "overrides": {
+  "noise_drift_rate": "0.001"
+ },
+ "seed": 42,
+ "run_id": 33001802870,
+ "url": "https://github.com/godon-dev/godon/actions/runs/33001802870",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 8,
+  "max_dev_sig": 1.24,
+  "med_dev_sig": 0.49,
+  "n_curves": 12,
+  "reverse_flat": null,
+  "dead_flat": 1.29,
+  "ch1_flat": 1.15,
+  "converged": true
+ },
+ "verdict": "within-bars",
+ "note": "",
+ "banked_at": "2026-08-26T19:32:54.544919"
+}

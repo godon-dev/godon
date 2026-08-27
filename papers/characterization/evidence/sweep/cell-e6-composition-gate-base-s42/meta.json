@@ -1,0 +1,23 @@
+{
+ "cell_id": "e6",
+ "kind": "bridge",
+ "scenario": "composition-gate",
+ "overrides": {},
+ "seed": 42,
+ "run_id": 32991220022,
+ "url": "https://github.com/godon-dev/godon/actions/runs/32991220022",
+ "conclusion": "success",
+ "metrics": {
+  "levels": 0,
+  "max_dev_sig": null,
+  "med_dev_sig": null,
+  "n_curves": 18,
+  "reverse_flat": null,
+  "dead_flat": 549.27,
+  "ch1_flat": 111.98,
+  "converged": null
+ },
+ "verdict": "bridge-parked",
+ "note": "P3 data, not a P2 row",
+ "banked_at": "2026-08-26T17:57:05.611951"
+}

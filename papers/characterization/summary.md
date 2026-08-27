@@ -78,11 +78,35 @@ Claim for the paper: honest bars are necessary, not sufficient — bars
 quantify repeatability, not attribution. Validity comes from planted
 sentinels; each new claim must re-validate its own measurement chain.
 
-## Boundary map (OWED — the sweep)
+## Boundary map (the sweep — COMPLETE, Aug 27)
 
-Not yet collected. Planned grid: carrier amplitude × noise σ × edge
-strength × shape {threshold, saturation} × channel count. This file's
-rows are all at amplitude 1.0, σ=0.02, edge 0.7 — one point of the grid.
+32 cells across the full grid; master table in `evidence/sweep/sweep.csv`,
+per-cell curves + run IDs in `evidence/sweep/cell-*/`. Verdicts: 24
+within-bars (max 1.76σ, median 1.03σ), 4 structure-banked, 3
+bridge-parked (P3), 1 flat-sentinels-clean. Every sentinel flat.
+
+- **Floor:** 0.1 characterized (3 honest levels); repeatability corner
+  re-certified at 0.15σ (r1, seed 43).
+- **Noise wall:** σ0.10 certified at 0.5/0.7/0.9 (r3/n2/n3); r3 is the
+  same-cell inversion — P1's detection failed 0.5@σ0.10, the walk
+  certified it at 0.62σ max.
+- **Shapes:** linear/saturation/threshold/polynomial all within bars;
+  threshold 0.7 self-allocated 15 levels around the jump (densest
+  campaign curve).
+- **Structure:** cross-channel (e1, carrier on objective_1, 0.72σ),
+  fan-in (e3), fan-out (e5), bidir (e2), diamond (e4), chain (e6) —
+  last three banked as P3 bridge data.
+- **Non-stationarity:** growing noise within honestly-fattening bars
+  (ns1-3, worst point 0.70σ); slow edge-drift structure captured
+  (ns4, 13 levels, peak tracks the moving edge); fast edge-drift →
+  non-convergence by design, 22-level probe, boundary in data (ns5).
+- **Repeatability:** anchor pair (a1/a2) + both boundary corners
+  (r1/r2), two seeds each, all within bars.
+
+Incident log (harness-layer only): #318, #320, wedge run #60,
+overnight token expiry + queue stall — data unaffected throughout.
+Stack: 30+ runs on one installation, no restack needed.
+
 
 ## The composition gate (Aug 23 — first firing, all green)
 
