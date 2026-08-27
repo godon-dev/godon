@@ -118,7 +118,7 @@ jobs:
             -e PORT=8090 \
             -e GENERIC_SEED=${{ inputs.seed }} \
             -e RUST_LOG=info \
-            ghcr.io/godon-dev/godon-bench-generic:0.2.1
+            ghcr.io/godon-dev/godon-bench-generic:0.3.0
 
           docker cp /tmp/topology.yaml bench-generic:/topology.yaml
           docker start bench-generic

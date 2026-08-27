@@ -1,0 +1,49 @@
+nodes:
+  - id: node-1
+    params: 3
+    objectives: 2
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.4, 0.3, 0.3]
+      - [0.2, 0.5, 0.3]
+
+  - id: node-3
+    params: 3
+    objectives: 2
+    base: saturation
+    intake: through
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.0, 1.0, 0.0]
+      - [0.3, 0.2, 0.5]
+
+  - id: node-2
+    params: 3
+    objectives: 2
+    base: saturation
+    intake: through
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.0, 0.0, 0.0]
+      - [0.3, 0.2, 0.5]
+
+edges:
+  - from: node-1
+    from_channel: 0
+    to: node-3
+    to_channel: 0
+    strength: 0.7
+  - from: node-3
+    from_channel: 0
+    to: node-2
+    to_channel: 0
+    strength: 0.5
+
+noise:
+  gaussian_sigma: 0.02
+  colored_sigma: 0.0
+  drift_rate: 0.0
