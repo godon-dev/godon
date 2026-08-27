@@ -10,12 +10,6 @@ settings:
     param_0:
       constraints:
         - {step: 20.0, lower: 0.0, upper: 100.0}
-    param_1:
-      constraints:
-        - {step: 20.0, lower: 0.0, upper: 100.0}
-    param_2:
-      constraints:
-        - {step: 20.0, lower: 0.0, upper: 100.0}
 
 run:
   parallel: 1
@@ -41,10 +35,6 @@ interference_detection:
   cooldown_trials: 5
   hold_params:
     param_0: 50.0
-    param_1: 50.0
-    param_2: 50.0
-
-reconnaissance:
   type: http
   http:
     url: "http://bench-generic:8090/node-2"
