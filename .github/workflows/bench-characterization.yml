@@ -260,10 +260,20 @@ jobs:
             local UUID=""
             local STEP_START_ISO
             STEP_START_ISO=$(date -u +%Y-%m-%dT%H:%M:%S)
-            for ATTEMPT in 1 2 3 4 5; do
+            for ATTEMPT in 1 2 3 4 5 6 7 8; do
               echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
 
-              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              LOOKUP=$(curl -s --max-time 8 ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1)
+              if [ -z "${LOOKUP}" ] && ! curl -s --max-time 8 ${API_URL}/breeders >/dev/null 2>&1; then
+                echo "API tunnel unhealthy — re-establishing port-forward (attempt ${ATTEMPT})" >&2
+                fuser -k 9090/tcp 2>/dev/null || true
+                sleep 1
+                API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+                kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
+                sleep 5
+                continue
+              fi
+              UUID="${LOOKUP}"
               if [ -n "${UUID}" ]; then
                 CREATED_AT=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .createdAt[0:19]" 2>/dev/null | head -1 || echo "")
                 if [[ "${CREATED_AT}" > "${STEP_START_ISO}" || "${CREATED_AT}" == "${STEP_START_ISO}" ]]; then
