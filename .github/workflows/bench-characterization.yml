@@ -219,13 +219,19 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
-          # Purge any existing bench-char breeders first
-          EXISTING_BREEDERS=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name | startswith(\"bench-char\")) | .id" 2>/dev/null || echo "")
-          for BID in ${EXISTING_BREEDERS}; do
-            echo "Purging existing bench-char breeder: ${BID}" >&2
-            docker run --rm --network host "${CLI_IMAGE}" \
-              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              breeder purge --force --id="${BID}" 2>/dev/null || true
+          # Purge any existing bench-char breeders first. Fresh walks
+          # need fresh breeders; breeder purge cascades curve-store
+          # deletion (DELETE /curves/{sender}), so this also clears
+          # stale curves from earlier runs.
+          for NODE_FILE in $(ls examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-*.yml | sort); do
+            PNAME="bench-char-$(basename "${NODE_FILE}" .yml | sed 's/breeder-//')"
+            PID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${PNAME}\") | .id" 2>/dev/null | head -1)
+            if [ -n "${PID}" ]; then
+              echo "Purging existing ${PNAME}: ${PID}" >&2
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                breeder purge --force --id="${PID}" 2>&1 | tail -1
+            fi
           done
 
           create_breeder() {
@@ -257,8 +263,17 @@ jobs:
 
               UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               if [ -n "${UUID}" ]; then
-                echo "Breeder ${NAME} already exists: ${UUID}" >&2
-                break
+                if [ "${ATTEMPT}" -gt 1 ]; then
+                  echo "Breeder ${NAME} still exists after purge (${UUID}) — refusing to adopt a stale breeder" >&2
+                  exit 1
+                fi
+                echo "Breeder ${NAME} survived pre-purge (${UUID}) — purging now, then retrying" >&2
+                docker run --rm --network host "${CLI_IMAGE}" \
+                  --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                  breeder purge --force --id="${UUID}" 2>&1 | tail -1
+                UUID=""
+                sleep 5
+                continue
               fi
 
               CREATE_OUTPUT=$(docker run --rm --network host \
