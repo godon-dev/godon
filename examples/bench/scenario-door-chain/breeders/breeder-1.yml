@@ -35,6 +35,8 @@ interference_detection:
   cooldown_trials: 5
   hold_params:
     param_0: 50.0
+
+reconnaissance:
   type: http
   http:
     url: "http://bench-generic:8090/node-1"
