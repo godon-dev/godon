@@ -27,7 +27,7 @@ cooperation:
 interference_detection:
   group: bench-characterization
   mode: active
-  convergence_threshold: 0.02
+  convergence_threshold: 0.005
   refinement_depth: 3
   min_optimize_trials: 15
   push_block_size: 10
