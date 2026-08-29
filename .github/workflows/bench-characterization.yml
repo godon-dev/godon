@@ -404,11 +404,12 @@ jobs:
           for UF in $(ls /tmp/breeder_*_uuid | sort); do
             BID=$(cat ${UF})
             echo "=== Trials for breeder ${BID} ==="
-            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | jq -r '
+            curl -s -m 60 "http://127.0.0.3:9099/api/breeders/${BID}/trials?limit=1000" | jq -c '
               if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
               | {complete: (map(select(.state == "COMPLETE")) | length),
                  fail: (map(select(.state == "FAIL")) | length),
-                 total: length}
+                 total: length,
+                 trials: .}
             ' 2>/dev/null || echo "Failed to fetch trials"
           done
 
