@@ -1,0 +1,5 @@
+name: "generic-node-5"
+targetType: "http"
+spec:
+  url: "http://bench-generic:8090/node-5"
+  auth_type: "none"
