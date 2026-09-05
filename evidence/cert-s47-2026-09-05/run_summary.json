@@ -1,0 +1,63 @@
+{
+ "run_id": "33968683471",
+ "repo": "godon-dev/godon",
+ "workflow": "Bench Characterization - Single Carrier Param",
+ "scenario": "cliff (examples/bench/scenario-cliff)",
+ "seed": 47,
+ "iterations_max": 2500,
+ "watchdog_minutes": 300,
+ "breeder_version": "0.163.3",
+ "dispatched_utc": "2026-09-05T13:21:55+00:00",
+ "completed_utc": "2026-09-05T15:26:35+00:00",
+ "duration": "2h04m40s",
+ "conclusion": "success",
+ "counts": {
+  "char_init_breeders": 4,
+  "note": "8 CHAR INIT lines = 4 breeders x 2 lines (13:23:32, 13:27:52 x2, 13:32:54)",
+  "lease_acquires": 13,
+  "quantum_yields": 10,
+  "denials": 22,
+  "walks_done": 4,
+  "walks_done_note": "3 DONE lines 14:11-14:17Z; 4th breeder (bc12e3ee) retired earlier - map frozen & converged from first snapshot"
+ },
+ "walks_done_utc": [
+  "2026-09-05T14:11:15.964971+00:00",
+  "2026-09-05T14:14:49.148455+00:00",
+  "2026-09-05T14:17:55.378515+00:00"
+ ],
+ "maps": {
+  "436d392f-9a30-43e1-8463-f779a8ec05b1": {
+   "points_per_curve": [
+    8
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  },
+  "6ccfaac7-f126-48cc-817a-a20ebc3632c6": {
+   "points_per_curve": [
+    11
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  },
+  "bc12e3ee-37ad-45ea-98dc-da8acd66638d": {
+   "points_per_curve": [
+    6
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  },
+  "f7b4b880-8885-4b97-b10d-71f8733fea81": {
+   "points_per_curve": [
+    11
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  }
+ },
+ "idle_tail": {
+  "last_walk_done_utc": "2026-09-05T14:17:55.378515+00:00",
+  "run_closed_utc": "2026-09-05T15:26:35+00:00",
+  "note": "all maps converged and all walks retired by 14:17:55Z; run closed 15:26:35Z on the bench timing budget"
+ }
+}
