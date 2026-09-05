@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="380" viewBox="0 0 960 380">
+<rect width="960" height="380" fill="#2D3A40"/>
+<text x="936" y="32" text-anchor="end" font-family="sans-serif" font-size="15" fill="#DDE2E4">map depth per walker - every curve converged (8/8)</text>
+<rect x="120" y="173.33333333333334" width="120" height="126.66666666666666" fill="#B6BDBF" fill-opacity="0.9"/>
+<text x="180.0" y="163.33333333333334" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#DDE2E4">8 pts</text>
+<text x="180.0" y="322" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#BCC5C8">436d392f</text>
+<text x="180.0" y="340" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8C989E">converged 8/8</text>
+<rect x="300" y="125.83333333333334" width="120" height="174.16666666666666" fill="#B6BDBF" fill-opacity="0.9"/>
+<text x="360.0" y="115.83333333333334" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#DDE2E4">11 pts</text>
+<text x="360.0" y="322" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#BCC5C8">6ccfaac7</text>
+<text x="360.0" y="340" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8C989E">converged 8/8</text>
+<rect x="480" y="205.0" width="120" height="95.0" fill="#B6BDBF" fill-opacity="0.9"/>
+<text x="540.0" y="195.0" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#DDE2E4">6 pts</text>
+<text x="540.0" y="322" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#BCC5C8">bc12e3ee</text>
+<text x="540.0" y="340" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8C989E">converged 8/8</text>
+<rect x="660" y="125.83333333333334" width="120" height="174.16666666666666" fill="#B6BDBF" fill-opacity="0.9"/>
+<text x="720.0" y="115.83333333333334" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#DDE2E4">11 pts</text>
+<text x="720.0" y="322" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#BCC5C8">f7b4b880</text>
+<text x="720.0" y="340" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#8C989E">converged 8/8</text>
+<line x1="100" y1="300" x2="900" y2="300" stroke="#8C989E" stroke-opacity="0.4"/>
+</svg>
