@@ -1,0 +1,527 @@
+[
+ {
+  "t": "2026-09-05T13:23:32.582817+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: notebook walk (causal reachable)"
+ },
+ {
+  "t": "2026-09-05T13:23:32.689366+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+ },
+ {
+  "t": "2026-09-05T13:23:33.096810+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:24:55.841855+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:26:12.147523+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:27:47.782306+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:27:48.080606+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:27:52.304145+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: notebook walk (causal reachable)"
+ },
+ {
+  "t": "2026-09-05T13:27:52.308213+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: notebook walk (causal reachable)"
+ },
+ {
+  "t": "2026-09-05T13:27:52.395739+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+ },
+ {
+  "t": "2026-09-05T13:27:52.408286+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+ },
+ {
+  "t": "2026-09-05T13:27:52.777835+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:27:52.804478+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 436d392f-9a30-43e1-8463-f779a8ec05b1 (phase=probe_push): holder=bc12e3ee-37ad-45ea-98dc-da8acd66638d heartbeat_age=0.057039 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:28:05.624931+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 6ccfaac7-f126-48cc-817a-a20ebc3632c6 (phase=probe_push): holder=bc12e3ee-37ad-45ea-98dc-da8acd66638d heartbeat_age=2.143526 walk_pending_peers=[('436d392f-9a30-43e1-8463-f779a"
+ },
+ {
+  "t": "2026-09-05T13:29:19.956667+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:30:39.659029+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:32:50.140971+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:32:50.421393+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:32:54.010026+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: notebook walk (causal reachable)"
+ },
+ {
+  "t": "2026-09-05T13:32:54.117915+00:00",
+  "kind": "init",
+  "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+ },
+ {
+  "t": "2026-09-05T13:32:54.425608+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:32:54.549348+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 436d392f-9a30-43e1-8463-f779a8ec05b1 (phase=probe_push): holder=f7b4b880-8885-4b97-b10d-71f8733fea81 heartbeat_age=0.175213 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:33:06.338631+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for bc12e3ee-37ad-45ea-98dc-da8acd66638d (phase=probe_push): holder=f7b4b880-8885-4b97-b10d-71f8733fea81 heartbeat_age=3.118392 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:34:15.095284+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:35:37.514877+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:37:14.060153+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:37:14.380222+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:37:19.108377+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 6ccfaac7-f126-48cc-817a-a20ebc3632c6 (phase=probe_push): holder=None heartbeat_age=6.327717 walk_pending_peers=[('436d392f-9a30-43e1-8463-f779a8ec05b1', 0, Decimal('1.504688')"
+ },
+ {
+  "t": "2026-09-05T13:37:20.711786+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for bc12e3ee-37ad-45ea-98dc-da8acd66638d (phase=probe_push): holder=None heartbeat_age=7.932427 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20ebc3632c6', 1, Decimal('1.694230')"
+ },
+ {
+  "t": "2026-09-05T13:37:22.159518+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:37:33.224491+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=436d392f-9a30-43e1-8463-f779a8ec05b1 heartbeat_age=2.686244 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:38:35.183498+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:39:52.101840+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:41:02.464503+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:41:02.759214+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:41:11.725242+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:41:11.732372+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=6ccfaac7-f126-48cc-817a-a20ebc3632c6 heartbeat_age=0.035217 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:41:32.041482+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 436d392f-9a30-43e1-8463-f779a8ec05b1 (phase=probe_push): holder=6ccfaac7-f126-48cc-817a-a20ebc3632c6 heartbeat_age=4.026122 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:42:33.635764+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:44:01.690046+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:45:31.565399+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:45:31.970428+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:45:40.728888+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:45:40.743546+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 436d392f-9a30-43e1-8463-f779a8ec05b1 (phase=probe_push): holder=f7b4b880-8885-4b97-b10d-71f8733fea81 heartbeat_age=0.033673 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:45:40.964004+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for bc12e3ee-37ad-45ea-98dc-da8acd66638d (phase=probe_push): holder=f7b4b880-8885-4b97-b10d-71f8733fea81 heartbeat_age=0.255058 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:45:52.218467+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 6ccfaac7-f126-48cc-817a-a20ebc3632c6 (phase=probe_push): holder=f7b4b880-8885-4b97-b10d-71f8733fea81 heartbeat_age=3.104958 walk_pending_peers=[('436d392f-9a30-43e1-8463-f779a"
+ },
+ {
+  "t": "2026-09-05T13:46:52.052626+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:48:19.217345+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T13:48:19.319139+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:49:54.282814+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:49:54.571585+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:49:58.744003+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 6ccfaac7-f126-48cc-817a-a20ebc3632c6 (phase=probe_push): holder=None heartbeat_age=5.933910 walk_pending_peers=[('436d392f-9a30-43e1-8463-f779a8ec05b1', 1, Decimal('2.196517')"
+ },
+ {
+  "t": "2026-09-05T13:49:58.939386+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:50:10.890781+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=bc12e3ee-37ad-45ea-98dc-da8acd66638d heartbeat_age=2.520008 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T13:51:31.638518+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T13:51:31.768868+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:53:01.910739+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T13:53:02.070198+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:54:22.448072+00:00",
+  "kind": "priced",
+  "detail": "priced out: 5)"
+ },
+ {
+  "t": "2026-09-05T13:54:22.676317+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:54:27.887646+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=None heartbeat_age=6.804418 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20ebc3632c6', 2, Decimal('3.676554')"
+ },
+ {
+  "t": "2026-09-05T13:54:30.540313+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 6ccfaac7-f126-48cc-817a-a20ebc3632c6 (phase=probe_push): holder=None heartbeat_age=9.453498 walk_pending_peers=[('436d392f-9a30-43e1-8463-f779a8ec05b1', 1, Decimal('0.533640')"
+ },
+ {
+  "t": "2026-09-05T13:54:31.345260+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:55:37.825648+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:56:54.343553+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T13:56:54.435269+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:58:47.578228+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T13:58:47.718882+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T13:58:48.108499+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T13:58:52.269638+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T13:59:16.141529+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 436d392f-9a30-43e1-8463-f779a8ec05b1 (phase=probe_push): holder=f7b4b880-8885-4b97-b10d-71f8733fea81 heartbeat_age=5.358611 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T14:00:31.060763+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:00:31.170047+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=7/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:02:02.222740+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:02:02.332052+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=8/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:03:47.439811+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:03:47.605494+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=9/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:03:47.933203+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T14:03:53.517292+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T14:03:53.565746+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 436d392f-9a30-43e1-8463-f779a8ec05b1 (phase=probe_push): holder=6ccfaac7-f126-48cc-817a-a20ebc3632c6 heartbeat_age=0.067190 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T14:04:04.170485+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=6ccfaac7-f126-48cc-817a-a20ebc3632c6 heartbeat_age=1.382789 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T14:05:19.052926+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=7/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:06:44.432510+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:06:44.538055+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=8/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:08:12.021877+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:08:12.139604+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=9/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:08:12.498075+00:00",
+  "kind": "yield",
+  "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+ },
+ {
+  "t": "2026-09-05T14:08:26.314730+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=None heartbeat_age=15.635098 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20ebc3632c6', 3, Decimal('4.601354'"
+ },
+ {
+  "t": "2026-09-05T14:08:30.745829+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T14:08:40.903480+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for 6ccfaac7-f126-48cc-817a-a20ebc3632c6 (phase=probe_push): holder=436d392f-9a30-43e1-8463-f779a8ec05b1 heartbeat_age=1.771414 walk_pending_peers=[('436d392f-9a30-43e1-8463-f779a"
+ },
+ {
+  "t": "2026-09-05T14:09:43.716291+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:09:43.836846+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=7/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:11:11.901446+00:00",
+  "kind": "priced",
+  "detail": "priced out: 19)"
+ },
+ {
+  "t": "2026-09-05T14:11:15.964971+00:00",
+  "kind": "done",
+  "detail": "DONE: released lease. Converged 1/1 params."
+ },
+ {
+  "t": "2026-09-05T14:11:22.353354+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T14:11:22.730060+00:00",
+  "kind": "deny",
+  "detail": "Lease acquire denied for f7b4b880-8885-4b97-b10d-71f8733fea81 (phase=probe_push): holder=6ccfaac7-f126-48cc-817a-a20ebc3632c6 heartbeat_age=0.420644 walk_pending_peers=[('6ccfaac7-f126-48cc-817a-a20eb"
+ },
+ {
+  "t": "2026-09-05T14:13:08.750446+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:13:08.868481+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=10/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:14:44.890506+00:00",
+  "kind": "priced",
+  "detail": "priced out: 9)"
+ },
+ {
+  "t": "2026-09-05T14:14:49.148455+00:00",
+  "kind": "done",
+  "detail": "DONE: released lease. Converged 1/1 params."
+ },
+ {
+  "t": "2026-09-05T14:14:54.899855+00:00",
+  "kind": "acquire",
+  "detail": "Acquired lease \u2014 starting characterization"
+ },
+ {
+  "t": "2026-09-05T14:16:34.942099+00:00",
+  "kind": "priced",
+  "detail": "priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+ },
+ {
+  "t": "2026-09-05T14:16:35.059862+00:00",
+  "kind": "progress",
+  "detail": "CHAR PROGRESS: param_0=10/101 levels, 0/1 params converged"
+ },
+ {
+  "t": "2026-09-05T14:17:52.212578+00:00",
+  "kind": "priced",
+  "detail": "priced out: 19)"
+ },
+ {
+  "t": "2026-09-05T14:17:55.378515+00:00",
+  "kind": "done",
+  "detail": "DONE: released lease. Converged 1/1 params."
+ }
+]
