@@ -497,7 +497,7 @@ jobs:
               || echo '{"data":{"result":[]}}' > /tmp/loki_breeders.json
             echo "--- flattened trace (ts_ns line) ---"
             jq -r '.data.result[].values[] | "\(.[0]) \(.[1])"' /tmp/loki_breeders.json 2>/dev/null \
-              | grep -i "COORD\|PROBE\|CHAR\|CONVERG\|REFINE\|CAUSAL\|SHIFT\|ERROR\|WARN\|Traceback" \
+              | grep -i "COORD\|PROBE\|CHAR\|CONVERG\|REFINE\|CAUSAL\|SHIFT\|ERROR\|WARN\|Traceback\|QUANTUM\|ACQUIRE\|denied\|COOLDOWN\|Acquired" \
               || echo "No coordinator lines in Loki window"
             echo "--- trace line count (all levels): $(jq -r '.data.result[].values[] | .[1]' /tmp/loki_breeders.json 2>/dev/null | wc -l) (raw remains in Loki) ---"
           else
