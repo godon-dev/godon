@@ -1,0 +1,9 @@
+{
+ "source": "job log bench-char-N assignment",
+ "nodes": {
+  "node-1": "d15cf102-247a-47db-850c-1272a5b56735",
+  "node-2": "f520354e-8d4c-40dd-9e26-4557261a088d",
+  "node-3": "8e1c842e-c0d4-4ab9-a03d-dfd91999e27b",
+  "node-4": "5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6"
+ }
+}
