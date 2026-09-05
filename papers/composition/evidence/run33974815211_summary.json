@@ -1,0 +1,59 @@
+{
+ "run_id": "33974815211",
+ "repo": "godon-dev/godon",
+ "workflow": "Bench Characterization - Single Carrier Param",
+ "scenario": "cliff (examples/bench/scenario-cliff)",
+ "seed": 48,
+ "iterations_max": 2500,
+ "watchdog_minutes": 300,
+ "breeder_version": "0.163.3",
+ "dispatched_utc": "2026-09-05T15:26:37+00:00",
+ "completed_utc": "2026-09-05T17:29:59+00:00",
+ "duration": "2h03m31s",
+ "conclusion": "success",
+ "counts": {
+  "char_init_lines": 8,
+  "lease_acquires": 14,
+  "quantum_yields": 12,
+  "denials": 19,
+  "cooldowns": 24,
+  "walks_done": 4,
+  "done_lines_in_filtered_trail": 2,
+  "note": "2 DONE lines in keyword-filtered trail; the other walks retired earlier (map frozen+converged) -- maps confirm 4/4"
+ },
+ "maps": {
+  "5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6": {
+   "points_per_curve": [
+    7
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  },
+  "8e1c842e-c0d4-4ab9-a03d-dfd91999e27b": {
+   "points_per_curve": [
+    8
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  },
+  "d15cf102-247a-47db-850c-1272a5b56735": {
+   "points_per_curve": [
+    12
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  },
+  "f520354e-8d4c-40dd-9e26-4557261a088d": {
+   "points_per_curve": [
+    12
+   ],
+   "all_converged": true,
+   "num_curves": 8
+  }
+ },
+ "idle_tail": {
+  "last_filtered_event_utc": "2026-09-05T16:24:52.569897+00:00",
+  "run_closed_utc": "2026-09-05T17:29:59+00:00",
+  "note": "all maps converged before close; run closed on the bench timing budget, not on convergence"
+ }
+}
