@@ -1,0 +1,680 @@
+{
+ "source": "direct Loki pull, window 2026-09-05T15:26:00Z-17:31:30Z (narrow window; job-log trace unreliable, see Loki-window bug)",
+ "events": [
+  {
+   "t": "2026-09-05T15:28:08.819314+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: notebook walk (causal reachable)"
+  },
+  {
+   "t": "2026-09-05T15:28:08.931876+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+  },
+  {
+   "t": "2026-09-05T15:28:09.186102+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: notebook walk (causal reachable)"
+  },
+  {
+   "t": "2026-09-05T15:28:09.258433+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:28:09.278106+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+  },
+  {
+   "t": "2026-09-05T15:28:09.592815+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for d15cf102-247a-47db-850c-1272a5b56735 (phase=probe_push): holder=f520354e-8d4c-40dd-9e26-4557261a088d heartbeat_age=0.352982 walk_pending_peers=[('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('0.413274'))]"
+  },
+  {
+   "t": "2026-09-05T15:29:31.027066+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:30:58.538415+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:32:06.059399+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:32:06.381430+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:32:11.076764+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: notebook walk (causal reachable)"
+  },
+  {
+   "t": "2026-09-05T15:32:11.196933+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+  },
+  {
+   "t": "2026-09-05T15:32:11.512845+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:32:11.682555+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: notebook walk (causal reachable)"
+  },
+  {
+   "t": "2026-09-05T15:32:12.028484+00:00",
+   "kind": "init",
+   "detail": "CHAR INIT: 1 params, floors: param_0=1.0, threshold=0.005"
+  },
+  {
+   "t": "2026-09-05T15:32:12.338856+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 (phase=probe_push): holder=8e1c842e-c0d4-4ab9-a03d-dfd91999e27b heartbeat_age=0.858452 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 1, Decimal('0.914401')), ('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('2.923666')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('0.318545'))]"
+  },
+  {
+   "t": "2026-09-05T15:32:20.933458+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:32:21.111904+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for f520354e-8d4c-40dd-9e26-4557261a088d (phase=probe_push): holder=8e1c842e-c0d4-4ab9-a03d-dfd91999e27b heartbeat_age=2.378656 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 1, Decimal('2.680971')), ('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('2.530224')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 0, Decimal('1.744495'))]"
+  },
+  {
+   "t": "2026-09-05T15:32:21.114014+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:33:18.065464+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:34:33.548037+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:35:46.956769+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:35:47.301485+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:35:52.629772+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for f520354e-8d4c-40dd-9e26-4557261a088d (phase=probe_push): holder=None heartbeat_age=6.911867 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 1, Decimal('2.620193')), ('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('2.761535')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 0, Decimal('0.214005'))]"
+  },
+  {
+   "t": "2026-09-05T15:35:53.468905+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:36:04.881263+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:36:05.134844+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 8e1c842e-c0d4-4ab9-a03d-dfd91999e27b (phase=probe_push): holder=5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 heartbeat_age=0.101306 walk_pending_peers=[('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('0.561144')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('0.579364')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('0.398862'))]"
+  },
+  {
+   "t": "2026-09-05T15:36:05.137361+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:37:08.095763+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:38:48.535770+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:40:04.768567+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:40:05.079263+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:40:08.645021+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 8e1c842e-c0d4-4ab9-a03d-dfd91999e27b (phase=probe_push): holder=None heartbeat_age=5.218451 walk_pending_peers=[('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('0.434243')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('2.638906')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('0.342849'))]"
+  },
+  {
+   "t": "2026-09-05T15:40:09.961484+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for f520354e-8d4c-40dd-9e26-4557261a088d (phase=probe_push): holder=None heartbeat_age=6.534686 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 1, Decimal('1.409629')), ('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('1.750647')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('1.659253'))]"
+  },
+  {
+   "t": "2026-09-05T15:40:12.189878+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 8e1c842e-c0d4-4ab9-a03d-dfd91999e27b (phase=probe_push): holder=None heartbeat_age=8.764050 walk_pending_peers=[('d15cf102-247a-47db-850c-1272a5b56735', 0, Decimal('0.362204')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('2.337946')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('0.868752'))]"
+  },
+  {
+   "t": "2026-09-05T15:40:12.544741+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:40:30.718794+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:40:30.919951+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 (phase=probe_push): holder=d15cf102-247a-47db-850c-1272a5b56735 heartbeat_age=2.172388 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 1, Decimal('2.898058')), ('d15cf102-247a-47db-850c-1272a5b56735', 1, Decimal('2.471184')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('2.471362'))]"
+  },
+  {
+   "t": "2026-09-05T15:40:30.922341+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:41:28.589821+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=1/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:42:40.205115+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=2/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:43:57.954180+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=3/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:43:58.330496+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:44:03.936379+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:44:14.385822+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:44:14.644907+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for d15cf102-247a-47db-850c-1272a5b56735 (phase=probe_push): holder=8e1c842e-c0d4-4ab9-a03d-dfd91999e27b heartbeat_age=3.566920 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('0.129450')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 1, Decimal('1.902947')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('2.336328'))]"
+  },
+  {
+   "t": "2026-09-05T15:44:14.648699+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:45:19.735008+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 6 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T15:45:19.859601+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:47:00.330406+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 5 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T15:47:00.434837+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:48:27.551429+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 4 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T15:48:27.665410+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:48:27.977298+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:48:33.304654+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:48:33.442840+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for d15cf102-247a-47db-850c-1272a5b56735 (phase=probe_push): holder=f520354e-8d4c-40dd-9e26-4557261a088d heartbeat_age=0.161515 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('2.209871')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 2, Decimal('0.233197')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('0.209788'))]"
+  },
+  {
+   "t": "2026-09-05T15:48:48.264650+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:48:48.486281+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 8e1c842e-c0d4-4ab9-a03d-dfd91999e27b (phase=probe_push): holder=f520354e-8d4c-40dd-9e26-4557261a088d heartbeat_age=0.541196 walk_pending_peers=[('d15cf102-247a-47db-850c-1272a5b56735', 1, Decimal('2.786059')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 2, Decimal('0.860551')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('0.371519'))]"
+  },
+  {
+   "t": "2026-09-05T15:48:48.488464+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:49:51.166306+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:51:25.325738+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:53:01.095103+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:53:01.394534+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:53:07.746743+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 8e1c842e-c0d4-4ab9-a03d-dfd91999e27b (phase=probe_push): holder=None heartbeat_age=7.937353 walk_pending_peers=[('d15cf102-247a-47db-850c-1272a5b56735', 1, Decimal('0.263788')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 2, Decimal('3.132105')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 1, Decimal('0.264137'))]"
+  },
+  {
+   "t": "2026-09-05T15:53:08.454776+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:53:08.462690+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for d15cf102-247a-47db-850c-1272a5b56735 (phase=probe_push): holder=5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 heartbeat_age=0.025544 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('0.803306')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 2, Decimal('0.173144')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 2, Decimal('0.101697'))]"
+  },
+  {
+   "t": "2026-09-05T15:53:18.277883+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:53:18.527210+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for f520354e-8d4c-40dd-9e26-4557261a088d (phase=probe_push): holder=5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 heartbeat_age=2.497122 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('0.120359')), ('d15cf102-247a-47db-850c-1272a5b56735', 1, Decimal('2.858478')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 2, Decimal('2.813659'))]"
+  },
+  {
+   "t": "2026-09-05T15:53:18.529921+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:54:16.645482+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 2 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T15:54:16.749632+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:55:46.763725+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 1 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T15:55:46.863448+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:57:16.230310+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 1 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T15:57:16.342121+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T15:57:16.661487+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T15:57:21.551608+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T15:57:34.455533+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T15:57:34.666988+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for 5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 (phase=probe_push): holder=d15cf102-247a-47db-850c-1272a5b56735 heartbeat_age=1.760183 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('3.375105')), ('d15cf102-247a-47db-850c-1272a5b56735', 2, Decimal('2.209612')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 2, Decimal('1.924271'))]"
+  },
+  {
+   "t": "2026-09-05T15:57:34.669327+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T15:58:57.028203+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=4/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:00:22.300854+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=5/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:01:44.453279+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 7 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:01:44.562791+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=6/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:01:44.880455+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T16:01:48.197027+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T16:02:03.139248+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T16:02:03.367301+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for d15cf102-247a-47db-850c-1272a5b56735 (phase=probe_push): holder=f520354e-8d4c-40dd-9e26-4557261a088d heartbeat_age=1.977476 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('2.720105')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 3, Decimal('2.315857')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 2, Decimal('0.393540'))]"
+  },
+  {
+   "t": "2026-09-05T16:02:03.369608+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T16:02:59.766707+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=7/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:04:49.146542+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 8 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:04:49.271514+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=8/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:06:07.378278+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 7 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:06:07.501268+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=9/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:06:07.883154+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T16:06:13.294897+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T16:06:24.554363+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T16:06:24.854386+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for f520354e-8d4c-40dd-9e26-4557261a088d (phase=probe_push): holder=5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6 heartbeat_age=0.566603 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 2, Decimal('0.981935')), ('d15cf102-247a-47db-850c-1272a5b56735', 2, Decimal('3.219715')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 3, Decimal('1.001642'))]"
+  },
+  {
+   "t": "2026-09-05T16:06:24.856655+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T16:07:22.353920+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED: param_0 (unresolved gaps priced out: 5)"
+  },
+  {
+   "t": "2026-09-05T16:07:27.331652+00:00",
+   "kind": "done",
+   "detail": "DONE: released lease. Converged 1/1 params."
+  },
+  {
+   "t": "2026-09-05T16:07:32.716093+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T16:07:46.379867+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T16:08:46.375774+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 7 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:08:46.481149+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=7/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:10:11.138646+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 5 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:10:11.243466+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=8/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:11:42.274839+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 3 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:11:42.371716+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=9/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:11:42.662145+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T16:11:46.857296+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T16:12:00.420580+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 re-acquiring for more probes"
+  },
+  {
+   "t": "2026-09-05T16:12:00.658733+00:00",
+   "kind": "denied",
+   "detail": "Lease acquire denied for d15cf102-247a-47db-850c-1272a5b56735 (phase=probe_push): holder=8e1c842e-c0d4-4ab9-a03d-dfd91999e27b heartbeat_age=2.044059 walk_pending_peers=[('8e1c842e-c0d4-4ab9-a03d-dfd91999e27b', 3, Decimal('2.525433')), ('f520354e-8d4c-40dd-9e26-4557261a088d', 3, Decimal('0.987204')), ('5a566b9e-e2c1-42ab-8705-a37e9ff9dcc6', 3, Decimal('2.516741'))]"
+  },
+  {
+   "t": "2026-09-05T16:12:00.660948+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T16:13:23.325049+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 2 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:13:23.453714+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=7/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:14:51.499959+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED: param_0 (unresolved gaps priced out: 20)"
+  },
+  {
+   "t": "2026-09-05T16:14:55.965714+00:00",
+   "kind": "done",
+   "detail": "DONE: released lease. Converged 1/1 params."
+  },
+  {
+   "t": "2026-09-05T16:15:02.025509+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T16:15:12.015917+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T16:16:18.603086+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 1 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:16:18.718660+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=10/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:18:07.835793+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 1 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:18:07.947757+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=11/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:19:42.615782+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED: param_0 (unresolved gaps priced out: 19)"
+  },
+  {
+   "t": "2026-09-05T16:19:42.819622+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T16:19:49.773740+00:00",
+   "kind": "acquire",
+   "detail": "Acquired lease \u2014 starting characterization"
+  },
+  {
+   "t": "2026-09-05T16:19:58.793009+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  },
+  {
+   "t": "2026-09-05T16:21:23.912284+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 4 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:21:24.017988+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=10/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:22:53.613066+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED but 1 gap(s) still priced above the bar \u2014 param_0 stays in rotation (walk bisects the gaps)"
+  },
+  {
+   "t": "2026-09-05T16:22:53.696346+00:00",
+   "kind": "progress",
+   "detail": "CHAR PROGRESS: param_0=11/101 levels, 0/1 params converged"
+  },
+  {
+   "t": "2026-09-05T16:24:11.327784+00:00",
+   "kind": "converged",
+   "detail": "CONVERGED: param_0 (unresolved gaps priced out: 9)"
+  },
+  {
+   "t": "2026-09-05T16:24:11.531359+00:00",
+   "kind": "quantum",
+   "detail": "QUANTUM: 3 cycles served \u2014 yielding lease (peer walk-pending); walk resumes from notebook"
+  },
+  {
+   "t": "2026-09-05T16:24:52.569897+00:00",
+   "kind": "cooldown",
+   "detail": "COOLDOWN: done \u2014 back to OPTIMIZE"
+  }
+ ]
+}
