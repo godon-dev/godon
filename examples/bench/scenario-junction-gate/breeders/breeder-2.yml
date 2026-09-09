@@ -2,7 +2,7 @@ meta:
   configVersion: "0.3"
   strict_validation: false
 
-breeder:
+systemtender:
   type: "bench_generic"
 
 settings:

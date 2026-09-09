@@ -5,7 +5,7 @@ multi-target optimization. Each step adds exactly one variable.
 
 ## Overview
 
-| Scenario | Breeders | Targets | Coupling | Purpose |
+| Scenario | Systemtenders | Targets | Coupling | Purpose |
 |----------|----------|---------|----------|---------|
 | 1 | 1 | 1 | none | Baseline — single optimizer, single target |
 | 2 | 1 | 2 | none | Multi-target — same params applied to both targets |
@@ -17,10 +17,10 @@ multi-target optimization. Each step adds exactly one variable.
 Scenarios 1-4 form a progressive series:
 
 - **1 -> 2**: Adds multi-target (does a single optimizer generalize?)
-- **2 -> 3**: Adds multi-breeder (do independent optimizers produce spurious correlation?)
+- **2 -> 3**: Adds multi-systemtender (do independent optimizers produce spurious correlation?)
 - **3 -> 4**: Adds hidden coupling (can coupling be detected above baseline correlation?)
 
-The critical comparison is **scenario 3 vs 4** — identical breeder configs,
+The critical comparison is **scenario 3 vs 4** — identical systemtender configs,
 identical objectives, identical search space. The only difference is whether
 the targets physically interact via the coupling channels. A coupling
 detector should find signal in 4 but not in 3.
@@ -43,7 +43,7 @@ endpoint on every `/apply` call and adjusts 4 hidden environmental variables:
 | Power sag | energy usage | effective light | Neighbor draws power, dims local lights |
 | Humidity drift | avg humidity | outside_humidity | Neighbor humidity shifts local humidity |
 
-Neither breeder is aware of these channels. The coupling is invisible to
+Neither systemtender is aware of these channels. The coupling is invisible to
 the optimization process — it only manifests as non-stationarity and
 unexplained variance in trial outcomes.
 
@@ -51,7 +51,7 @@ unexplained variance in trial outcomes.
 
 Each scenario contains:
 - `docker-compose.yml` — Target deployment (greenhouse bench containers)
-- `breeders/` — Breeder configuration YAML files (submit to godon-api)
+- `systemtenders/` — Systemtender configuration YAML files (submit to godon-api)
 
 ## Running
 
@@ -64,17 +64,17 @@ docker compose up -d
 curl http://localhost:8090/health
 curl http://localhost:8091/health  # scenarios 2-4 only
 
-# Submit breeder config(s) via godon-api
+# Submit systemtender config(s) via godon-api
 # (mechanism depends on deployment: Windmill, CLI, or API)
 ```
 
 ## Post-Hoc Analysis
 
-After running scenarios 3 and 4, export trial histories from both breeders
+After running scenarios 3 and 4, export trial histories from both systemtenders
 and apply causal detection methods:
 
-- **Granger causality**: Does past of breeder-1's outcomes predict
-  breeder-2's outcomes beyond breeder-2's own history?
+- **Granger causality**: Does past of systemtender-1's outcomes predict
+  systemtender-2's outcomes beyond systemtender-2's own history?
 - **Cross-correlation of residuals**: After removing each optimizer's
   autoregressive component, do residual time series correlate?
 - **Transfer entropy**: Non-linear information flow between optimizer traces.
