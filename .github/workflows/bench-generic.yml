@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       min_trials:
-        description: "Minimum trials per breeder for success"
+        description: "Minimum trials per systemtender for success"
         required: false
         default: "10"
       max_wait_minutes:
@@ -38,7 +38,7 @@ on:
 
 jobs:
   bench-generic:
-    name: "Generic: 2 breeders -> 2 coupled nodes"
+    name: "Generic: 2 systemtenders -> 2 coupled nodes"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
@@ -181,7 +181,7 @@ jobs:
           create_target "bench-generic-node-2" "node-2" \
             examples/bench/scenario-generic-pair/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
 
-      - name: Create Breeders
+      - name: Create Systemtenders
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
@@ -191,16 +191,16 @@ jobs:
           TARGET_2_ID=$(cat /tmp/target_2_id)
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
-          # Purge any existing bench-generic breeders first
-          EXISTING_BREEDERS=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name | startswith(\"bench-generic\")) | .id" 2>/dev/null || echo "")
-          for BID in ${EXISTING_BREEDERS}; do
-            echo "Purging existing bench-generic breeder: ${BID}" >&2
+          # Purge any existing bench-generic systemtenders first
+          EXISTING_SYSTEMTENDERS=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name | startswith(\"bench-generic\")) | .id" 2>/dev/null || echo "")
+          for BID in ${EXISTING_SYSTEMTENDERS}; do
+            echo "Purging existing bench-generic systemtender: ${BID}" >&2
             docker run --rm --network host "${CLI_IMAGE}" \
               --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              breeder purge --force --id="${BID}" 2>/dev/null || true
+              systemtender purge --force --id="${BID}" 2>/dev/null || true
           done
 
-          create_breeder() {
+          create_systemtender() {
             local NAME=$1
             local TARGET_ID=$2
             local RECON_URL=$3
@@ -212,28 +212,28 @@ jobs:
                 -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
                 -e "s|http://bench-generic:8090/node-1|${RECON_URL}|" \
                 -e "s|http://bench-generic:8090/node-2|${RECON_URL}|" \
-                examples/bench/scenario-generic-pair/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
-            chmod 644 breeder-config-${NODE_NUM}.yaml
+                examples/bench/scenario-generic-pair/systemtenders/systemtender-${NODE_NUM}.yml > systemtender-config-${NODE_NUM}.yaml
+            chmod 644 systemtender-config-${NODE_NUM}.yaml
 
             # Override detection block sizes
-            sed -i "s/push_block_size: .*/push_block_size: ${{ inputs.push_block_size }}/" breeder-config-${NODE_NUM}.yaml
-            sed -i "s/pause_block_size: .*/pause_block_size: ${{ inputs.pause_block_size }}/" breeder-config-${NODE_NUM}.yaml
+            sed -i "s/push_block_size: .*/push_block_size: ${{ inputs.push_block_size }}/" systemtender-config-${NODE_NUM}.yaml
+            sed -i "s/pause_block_size: .*/pause_block_size: ${{ inputs.pause_block_size }}/" systemtender-config-${NODE_NUM}.yaml
 
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
-              echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
+              echo "Creating systemtender ${NAME} (attempt ${ATTEMPT})..." >&2
 
-              # Check for existing breeder by name BEFORE attempting create.
-              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              # Check for existing systemtender by name BEFORE attempting create.
+              UUID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               if [ -n "${UUID}" ]; then
-                echo "Breeder ${NAME} already exists: ${UUID}" >&2
+                echo "Systemtender ${NAME} already exists: ${UUID}" >&2
                 break
               fi
 
               CREATE_OUTPUT=$(docker run --rm --network host \
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder create --name="${NAME}" --file=breeder-config-${NODE_NUM}.yaml 2>&1 || true)
+                systemtender create --name="${NAME}" --file=systemtender-config-${NODE_NUM}.yaml 2>&1 || true)
               echo "${CREATE_OUTPUT}" >&2
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
@@ -244,48 +244,48 @@ jobs:
             done
 
             if [ -z "${UUID}" ]; then
-              echo "Failed to create breeder ${NAME}" >&2
+              echo "Failed to create systemtender ${NAME}" >&2
               exit 1
             fi
-            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "Systemtender ${NAME}: ${UUID}" >&2
             echo "${UUID}" > "${OUTFILE}"
           }
 
-          create_breeder "bench-generic-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/breeder_1_uuid
-          create_breeder "bench-generic-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/breeder_2_uuid
+          create_systemtender "bench-generic-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/systemtender_1_uuid
+          create_systemtender "bench-generic-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/systemtender_2_uuid
 
       - name: Poll Optimization Progress
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+          SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
+          SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
           MIN_TRIALS=${{ inputs.min_trials }}
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
-          echo "Waiting for ${MIN_TRIALS} trials per breeder (timeout: ${MAX_WAIT}s)"
+          echo "Waiting for ${MIN_TRIALS} trials per systemtender (timeout: ${MAX_WAIT}s)"
 
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
-            STATE_1=$(curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
-            STATE_2=$(curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            STATE_1=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            STATE_2=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
 
             METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
-            TRIAL_1=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
-            TRIAL_2=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BREEDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_1=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_2=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
 
             echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
 
             if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
                [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
-              echo "A breeder entered error state"
+              echo "A systemtender entered error state"
               exit 1
             fi
 
             if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
                [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
-              echo "Both breeders reached trial target"
+              echo "Both systemtenders reached trial target"
               break
             fi
 
@@ -301,15 +301,15 @@ jobs:
       - name: Verify Results
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+          SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
+          SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
 
-          echo "=== Breeder 1 Final State ==="
-          curl -s "${API_URL}/breeders/${BREEDER_1_UUID}" | jq '.' 2>/dev/null || true
+          echo "=== Systemtender 1 Final State ==="
+          curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_1_UUID}" | jq '.' 2>/dev/null || true
 
           echo ""
-          echo "=== Breeder 2 Final State ==="
-          curl -s "${API_URL}/breeders/${BREEDER_2_UUID}" | jq '.' 2>/dev/null || true
+          echo "=== Systemtender 2 Final State ==="
+          curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_2_UUID}" | jq '.' 2>/dev/null || true
 
           echo ""
           echo "=== Bench Node Status ==="
@@ -324,17 +324,17 @@ jobs:
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          BREEDER_1_UUID=$(cat /tmp/breeder_1_uuid)
-          BREEDER_2_UUID=$(cat /tmp/breeder_2_uuid)
+          SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
+          SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
 
           fuser -k 9099/tcp 2>/dev/null || true
           sleep 1
           kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
           sleep 3
 
-          for BID in ${BREEDER_1_UUID} ${BREEDER_2_UUID}; do
-            echo "=== Trials for breeder ${BID} ==="
-            curl -s -m 30 "http://127.0.0.3:9099/api/breeders/${BID}/trials" | jq -r '
+          for BID in ${SYSTEMTENDER_1_UUID} ${SYSTEMTENDER_2_UUID}; do
+            echo "=== Trials for systemtender ${BID} ==="
+            curl -s -m 30 "http://127.0.0.3:9099/api/systemtenders/${BID}/trials" | jq -r '
               if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
               | {complete: (map(select(.state == "COMPLETE")) | length),
                  fail: (map(select(.state == "FAIL")) | length),
@@ -349,17 +349,17 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
 
-          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid; do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
-              echo "--- Breeder ${BID} ---"
-              curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
+              echo "--- Systemtender ${BID} ---"
+              curl -s "${API_URL}/systemtenders/${BID}" | jq '.' 2>/dev/null || true
             fi
           done
 
           echo ""
           echo "--- Worker Logs (last 100 lines) ---"
-          WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          WORKER_POD=$(kubectl get pods -n godon -l component=systemtender -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
           [ -z "${WORKER_POD}" ] && WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
           [ -n "${WORKER_POD}" ] && kubectl logs -n godon "${WORKER_POD}" --tail=100 2>/dev/null || true
 
@@ -377,12 +377,12 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
-          for UUID_FILE in /tmp/breeder_1_uuid /tmp/breeder_2_uuid; do
+          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid; do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
               docker run --rm --network host "${CLI_IMAGE}" \
                 --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder purge --force --id="${BID}" 2>/dev/null || true
+                systemtender purge --force --id="${BID}" 2>/dev/null || true
             fi
           done
 
@@ -410,7 +410,7 @@ jobs:
           echo "Base function: ${{ inputs.base_function }}"
           echo "Noise gaussian: ${{ inputs.noise_gaussian }}"
           echo "Noise colored: ${{ inputs.noise_colored }}"
-          echo "Min trials per breeder: ${{ inputs.min_trials }}"
+          echo "Min trials per systemtender: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
-          echo "Layout: 2 breeders -> 2 coupled generic nodes (single container)"
+          echo "Layout: 2 systemtenders -> 2 coupled generic nodes (single container)"
           echo "Status: ${{ job.status }}"
