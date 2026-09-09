@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       min_trials:
-        description: "Minimum trials per breeder for success"
+        description: "Minimum trials per systemtender for success"
         required: false
         default: "20"
       max_wait_minutes:
@@ -17,8 +17,8 @@ on:
         default: "0.1"
 
 jobs:
-  bench-scenario-microgrid-6breeder:
-    name: "Microgrid: 6 breeders → 6 fully-coupled consumers"
+  bench-scenario-microgrid-6systemtender:
+    name: "Microgrid: 6 systemtenders → 6 fully-coupled consumers"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
@@ -49,7 +49,7 @@ jobs:
       - name: Start Coupled Microgrid Targets
         run: |
           export COUPLING_FACTOR="${{ inputs.coupling_factor }}"
-          docker compose -f examples/bench/scenario-microgrid-6breeder/docker-compose.yml -p bench-mg6 up -d
+          docker compose -f examples/bench/scenario-microgrid-6systemtender/docker-compose.yml -p bench-mg6 up -d
 
           for port in 8090 8091 8092 8093 8094 8095; do
             echo "Waiting for microgrid on port ${port}..."
@@ -63,7 +63,7 @@ jobs:
           done
 
           for N in 1 2 3 4 5 6; do
-            CID=$(docker compose -f examples/bench/scenario-microgrid-6breeder/docker-compose.yml -p bench-mg6 ps -q microgrid-${N})
+            CID=$(docker compose -f examples/bench/scenario-microgrid-6systemtender/docker-compose.yml -p bench-mg6 ps -q microgrid-${N})
             docker network connect kind $CID 2>/dev/null || true
             IP=$(docker inspect $CID -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
             echo "MG${N} KIND IP: ${IP}"
@@ -140,18 +140,18 @@ jobs:
             MG_IP_VAR="MG${N}_IP"
             MG_IP="${!MG_IP_VAR}"
             create_target "bench-mg6-${N}" "http://${MG_IP}:8090" \
-              examples/bench/scenario-microgrid-6breeder/targets/microgrid-${N}.yaml \
+              examples/bench/scenario-microgrid-6systemtender/targets/microgrid-${N}.yaml \
               target-mg6-${N}.yaml /tmp/target_${N}_id
           done
 
-      - name: Create Breeders
+      - name: Create Systemtenders
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
-          create_breeder() {
+          create_systemtender() {
             local NAME=$1
             local TARGET_ID=$2
             local RECON_URL=$3
@@ -160,11 +160,11 @@ jobs:
             local DST=$6
             local OUTFILE=$7
 
-            EXISTING=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            EXISTING=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             if [ -n "${EXISTING}" ]; then
-              echo "Deleting existing breeder(s): ${EXISTING}" >&2
+              echo "Deleting existing systemtender(s): ${EXISTING}" >&2
               for EID in ${EXISTING}; do
-                curl -s -X DELETE "${API_URL}/breeders/${EID}?force=true" >/dev/null 2>&1 || true
+                curl -s -X DELETE "${API_URL}/systemtenders/${EID}?force=true" >/dev/null 2>&1 || true
               done
               sleep 10
             fi
@@ -176,22 +176,22 @@ jobs:
 
             local UUID=""
             for ATTEMPT in 1 2 3 4 5; do
-              # Always check API first — breeder may already exist from a prior attempt
-              UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              # Always check API first — systemtender may already exist from a prior attempt
+              UUID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               if [ -n "${UUID}" ]; then
-                echo "Breeder ${NAME} already exists: ${UUID}" >&2
+                echo "Systemtender ${NAME} already exists: ${UUID}" >&2
                 break
               fi
 
               CREATE_OUTPUT=$(docker run --rm --network host \
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder create --name="${NAME}" --file=${DST} 2>&1 || true)
+                systemtender create --name="${NAME}" --file=${DST} 2>&1 || true)
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
               if [ -z "${UUID}" ]; then
                 sleep 5
-                UUID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+                UUID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               fi
               if [ -n "${UUID}" ]; then
                 break
@@ -201,10 +201,10 @@ jobs:
             done
 
             if [ -z "${UUID}" ]; then
-              echo "Failed to create breeder ${NAME}" >&2
+              echo "Failed to create systemtender ${NAME}" >&2
               exit 1
             fi
-            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "Systemtender ${NAME}: ${UUID}" >&2
             echo "${UUID}" > "${OUTFILE}"
           }
 
@@ -212,10 +212,10 @@ jobs:
             TARGET_ID=$(cat /tmp/target_${N}_id)
             MG_IP_VAR="MG${N}_IP"
             MG_IP="${!MG_IP_VAR}"
-            create_breeder "bench-mg6-${N}" "${TARGET_ID}" "http://${MG_IP}:8090" \
+            create_systemtender "bench-mg6-${N}" "${TARGET_ID}" "http://${MG_IP}:8090" \
               "microgrid-${N}" \
-              examples/bench/scenario-microgrid-6breeder/breeders/breeder-${N}.yml \
-              breeder-mg6-${N}-config.yaml /tmp/breeder_${N}_uuid
+              examples/bench/scenario-microgrid-6systemtender/systemtenders/systemtender-${N}.yml \
+              systemtender-mg6-${N}-config.yaml /tmp/systemtender_${N}_uuid
           done
 
       - name: Poll Optimization Progress
@@ -227,10 +227,10 @@ jobs:
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
-          # Build list of breeder UUIDs
-          BREEDER_UUIDS=()
+          # Build list of systemtender UUIDs
+          SYSTEMTENDER_UUIDS=()
           for N in 1 2 3 4 5 6; do
-            BREEDER_UUIDS+=("$(cat /tmp/breeder_${N}_uuid)")
+            SYSTEMTENDER_UUIDS+=("$(cat /tmp/systemtender_${N}_uuid)")
           done
 
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
@@ -239,8 +239,8 @@ jobs:
             ALL_MET=true
             TRIAL_SUMMARY=""
             for N in 1 2 3 4 5 6; do
-              BID="${BREEDER_UUIDS[$((N-1))]}"
-              TRIAL=$(echo "${METRICS}" | grep "godon_breeder_total_trials{.*breeder_id=\"${BID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+              BID="${SYSTEMTENDER_UUIDS[$((N-1))]}"
+              TRIAL=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${BID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
               if [ "${TRIAL}" -lt "${MIN_TRIALS}" ] 2>/dev/null; then
                 ALL_MET=false
               fi
@@ -250,7 +250,7 @@ jobs:
             echo "Trials:${TRIAL_SUMMARY} (${ELAPSED}s)"
 
             if [ "${ALL_MET}" = "true" ]; then
-              echo "All 6 breeders reached trial target (${MIN_TRIALS})"
+              echo "All 6 systemtenders reached trial target (${MIN_TRIALS})"
               break
             fi
 
@@ -259,7 +259,7 @@ jobs:
           done
 
           if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "WARNING: Timed out waiting for all breeders to reach ${MIN_TRIALS} trials"
+            echo "WARNING: Timed out waiting for all systemtenders to reach ${MIN_TRIALS} trials"
           fi
 
       - name: Watermark Detection
@@ -270,12 +270,12 @@ jobs:
           TOTAL=0
 
           for I in 1 2 3 4 5 6; do
-            BID_I=$(cat /tmp/breeder_${I}_uuid)
+            BID_I=$(cat /tmp/systemtender_${I}_uuid)
             for J in 1 2 3 4 5 6; do
               if [ "${I}" -eq "${J}" ]; then
                 continue
               fi
-              BID_J=$(cat /tmp/breeder_${J}_uuid)
+              BID_J=$(cat /tmp/systemtender_${J}_uuid)
               TOTAL=$((TOTAL + 1))
               echo "=== Detection #${TOTAL}: B${I}(${BID_I}) -> B${J}(${BID_J}) ==="
               RESULT=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- "http://localhost:8089/api/watermark-detection/${BID_I}/${BID_J}" 2>/dev/null || echo '{"error":"query failed"}')
@@ -302,12 +302,12 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
           for N in 1 2 3 4 5 6; do
-            BID=$(cat /tmp/breeder_${N}_uuid 2>/dev/null || echo "")
+            BID=$(cat /tmp/systemtender_${N}_uuid 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
-              echo "Purging breeder ${N}: ${BID}"
+              echo "Purging systemtender ${N}: ${BID}"
               docker run --rm --network host "${CLI_IMAGE}" \
                 --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder purge --force --id="${BID}" 2>/dev/null || true
+                systemtender purge --force --id="${BID}" 2>/dev/null || true
             fi
           done
 
@@ -321,7 +321,7 @@ jobs:
             fi
           done
 
-          docker compose -f examples/bench/scenario-microgrid-6breeder/docker-compose.yml -p bench-mg6 down -v 2>/dev/null || true
+          docker compose -f examples/bench/scenario-microgrid-6systemtender/docker-compose.yml -p bench-mg6 down -v 2>/dev/null || true
 
           if [ -f /tmp/pf_pid ]; then
             kill $(cat /tmp/pf_pid) 2>/dev/null || true
@@ -331,10 +331,10 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "Bench Scenario Microgrid 6-Breeder Summary"
+          echo "Bench Scenario Microgrid 6-Systemtender Summary"
           echo "Coupling: ${{ inputs.coupling_factor }}"
-          echo "Min trials per breeder: ${{ inputs.min_trials }}"
+          echo "Min trials per systemtender: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
-          echo "Breeders: 6"
+          echo "Systemtenders: 6"
           echo "Directional detection pairs: 30"
           echo "Status: ${{ job.status }}"

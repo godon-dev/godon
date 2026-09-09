@@ -1,6 +1,6 @@
-# Scenario 2: Breeder — Single Optimizer, Two Independent Targets
+# Scenario 2: Systemtender — Single Optimizer, Two Independent Targets
 #
-# One breeder effectuating the same parameter set to both greenhouse-1 and
+# One systemtender effectuating the same parameter set to both greenhouse-1 and
 # greenhouse-2 per trial. Reconnaissance reads from greenhouse-1.
 #
 # The optimizer cannot tailor params per target — it finds a single config
@@ -14,7 +14,7 @@ meta:
   configVersion: "0.3"
   strict_validation: false
 
-breeder:
+systemtender:
   type: "bench_greenhouse"
 
 settings:

@@ -32,7 +32,7 @@ on:
         required: false
         default: ""
       iterations_max:
-        description: "Override breeder conf iterations.max (empty = conf value stands)"
+        description: "Override systemtender conf iterations.max (empty = conf value stands)"
         required: false
         default: ""
       seed:
@@ -40,13 +40,13 @@ on:
         required: false
         default: "42"
       max_wait_minutes:
-        description: "Watchdog timeout in minutes (must exceed the breeder timing budget)"
+        description: "Watchdog timeout in minutes (must exceed the systemtender timing budget)"
         required: false
         default: "90"
 
 jobs:
   bench-characterization:
-    name: "Characterization: scenario breeders -> coupling curves"
+    name: "Characterization: scenario systemtenders -> coupling curves"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
 
@@ -167,7 +167,7 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
-          rm -f /tmp/breeder_*_uuid /tmp/target_*_id
+          rm -f /tmp/systemtender_*_uuid /tmp/target_*_id
 
           create_target() {
             local NAME=$1
@@ -211,7 +211,7 @@ jobs:
               "${TCFG}" "target-node-${NODE_NUM}.yaml" "/tmp/target_${NODE_NUM}_id"
           done
 
-      - name: Create Breeders
+      - name: Create Systemtenders
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
@@ -219,22 +219,22 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
-          # Purge any existing bench-char breeders first. Fresh walks
-          # need fresh breeders; breeder purge cascades curve-store
+          # Purge any existing bench-char systemtenders first. Fresh walks
+          # need fresh systemtenders; systemtender purge cascades curve-store
           # deletion (DELETE /curves/{sender}), so this also clears
           # stale curves from earlier runs.
-          for NODE_FILE in $(ls examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-*.yml | sort); do
-            PNAME="bench-char-$(basename "${NODE_FILE}" .yml | sed 's/breeder-//')"
-            PID=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${PNAME}\") | .id" 2>/dev/null | head -1)
+          for NODE_FILE in $(ls examples/bench/scenario-${{ inputs.scenario }}/systemtenders/systemtender-*.yml | sort); do
+            PNAME="bench-char-$(basename "${NODE_FILE}" .yml | sed 's/systemtender-//')"
+            PID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${PNAME}\") | .id" 2>/dev/null | head -1)
             if [ -n "${PID}" ]; then
               echo "Purging existing ${PNAME}: ${PID}" >&2
               docker run --rm --network host "${CLI_IMAGE}" \
                 --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder purge --force --id="${PID}" 2>&1 | tail -1
+                systemtender purge --force --id="${PID}" 2>&1 | tail -1
             fi
           done
 
-          create_breeder() {
+          create_systemtender() {
             local NAME=$1
             local TARGET_ID=$2
             local RECON_URL=$3
@@ -243,28 +243,28 @@ jobs:
 
             sed -E -e "s|http://bench-generic:8090/node-[0-9]+|${RECON_URL}|g" \
                    -e "s/\"generic-node-[0-9]+\"/\"${TARGET_ID}\"/g" \
-              examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-${NODE_NUM}.yml > breeder-config-${NODE_NUM}.yaml
+              examples/bench/scenario-${{ inputs.scenario }}/systemtenders/systemtender-${NODE_NUM}.yml > systemtender-config-${NODE_NUM}.yaml
 
             if [ -n "${{ inputs.iterations_max }}" ]; then
-              MAX_LINES=$(grep -cE '^[[:space:]]*max: [0-9]+' "breeder-config-${NODE_NUM}.yaml" || true)
+              MAX_LINES=$(grep -cE '^[[:space:]]*max: [0-9]+' "systemtender-config-${NODE_NUM}.yaml" || true)
               if [ "${MAX_LINES}" != "1" ]; then
-                echo "Expected exactly one iterations.max line in breeder-config-${NODE_NUM}.yaml, found ${MAX_LINES}" >&2
+                echo "Expected exactly one iterations.max line in systemtender-config-${NODE_NUM}.yaml, found ${MAX_LINES}" >&2
                 exit 1
               fi
-              sed -i -E "s/^([[:space:]]*max: )[0-9]+/\1${{ inputs.iterations_max }}/" "breeder-config-${NODE_NUM}.yaml"
+              sed -i -E "s/^([[:space:]]*max: )[0-9]+/\1${{ inputs.iterations_max }}/" "systemtender-config-${NODE_NUM}.yaml"
               echo "Overrode iterations.max -> ${{ inputs.iterations_max }} for ${NAME}" >&2
             fi
 
-            chmod 644 breeder-config-${NODE_NUM}.yaml
+            chmod 644 systemtender-config-${NODE_NUM}.yaml
 
             local UUID=""
             local STEP_START_ISO
             STEP_START_ISO=$(date -u +%Y-%m-%dT%H:%M:%S)
             for ATTEMPT in 1 2 3 4 5 6 7 8; do
-              echo "Creating breeder ${NAME} (attempt ${ATTEMPT})..." >&2
+              echo "Creating systemtender ${NAME} (attempt ${ATTEMPT})..." >&2
 
-              LOOKUP=$(curl -s --max-time 8 ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1)
-              if [ -z "${LOOKUP}" ] && ! curl -s --max-time 8 ${API_URL}/breeders >/dev/null 2>&1; then
+              LOOKUP=$(curl -s --max-time 8 ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1)
+              if [ -z "${LOOKUP}" ] && ! curl -s --max-time 8 ${API_URL}/systemtenders >/dev/null 2>&1; then
                 echo "API tunnel unhealthy — re-establishing port-forward (attempt ${ATTEMPT})" >&2
                 fuser -k 9090/tcp 2>/dev/null || true
                 sleep 1
@@ -275,19 +275,19 @@ jobs:
               fi
               UUID="${LOOKUP}"
               if [ -n "${UUID}" ]; then
-                CREATED_AT=$(curl -s ${API_URL}/breeders | jq -r ".[] | select(.name==\"${NAME}\") | .createdAt[0:19]" 2>/dev/null | head -1 || echo "")
+                CREATED_AT=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .createdAt[0:19]" 2>/dev/null | head -1 || echo "")
                 if [[ "${CREATED_AT}" > "${STEP_START_ISO}" || "${CREATED_AT}" == "${STEP_START_ISO}" ]]; then
-                  echo "Breeder ${NAME} was created by this step (${UUID}) — using it" >&2
+                  echo "Systemtender ${NAME} was created by this step (${UUID}) — using it" >&2
                   break
                 fi
                 if [ "${ATTEMPT}" -gt 1 ]; then
-                  echo "Breeder ${NAME} still exists after purge (${UUID}, createdAt ${CREATED_AT}) — refusing to adopt a stale breeder" >&2
+                  echo "Systemtender ${NAME} still exists after purge (${UUID}, createdAt ${CREATED_AT}) — refusing to adopt a stale systemtender" >&2
                   exit 1
                 fi
-                echo "Breeder ${NAME} survived pre-purge (${UUID}, createdAt ${CREATED_AT}) — purging now, then retrying" >&2
+                echo "Systemtender ${NAME} survived pre-purge (${UUID}, createdAt ${CREATED_AT}) — purging now, then retrying" >&2
                 docker run --rm --network host "${CLI_IMAGE}" \
                   --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                  breeder purge --force --id="${UUID}" 2>&1 | tail -1
+                  systemtender purge --force --id="${UUID}" 2>&1 | tail -1
                 UUID=""
                 sleep 5
                 continue
@@ -296,7 +296,7 @@ jobs:
               CREATE_OUTPUT=$(docker run --rm --network host \
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder create --name="${NAME}" --file=breeder-config-${NODE_NUM}.yaml 2>&1 || true)
+                systemtender create --name="${NAME}" --file=systemtender-config-${NODE_NUM}.yaml 2>&1 || true)
               echo "${CREATE_OUTPUT}" >&2
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
@@ -307,17 +307,17 @@ jobs:
             done
 
             if [ -z "${UUID}" ]; then
-              echo "Failed to create breeder ${NAME}" >&2
+              echo "Failed to create systemtender ${NAME}" >&2
               exit 1
             fi
-            echo "Breeder ${NAME}: ${UUID}" >&2
+            echo "Systemtender ${NAME}: ${UUID}" >&2
             echo "${UUID}" > "${OUTFILE}"
           }
 
-          for BCFG in $(ls examples/bench/scenario-${{ inputs.scenario }}/breeders/breeder-*.yml | sort); do
-            NODE_NUM=$(basename "${BCFG}" .yml | sed 's/breeder-//')
-            create_breeder "bench-char-${NODE_NUM}" "$(cat /tmp/target_${NODE_NUM}_id)" \
-              "${BENCH_URL}/node-${NODE_NUM}" "${NODE_NUM}" "/tmp/breeder_${NODE_NUM}_uuid"
+          for BCFG in $(ls examples/bench/scenario-${{ inputs.scenario }}/systemtenders/systemtender-*.yml | sort); do
+            NODE_NUM=$(basename "${BCFG}" .yml | sed 's/systemtender-//')
+            create_systemtender "bench-char-${NODE_NUM}" "$(cat /tmp/target_${NODE_NUM}_id)" \
+              "${BENCH_URL}/node-${NODE_NUM}" "${NODE_NUM}" "/tmp/systemtender_${NODE_NUM}_uuid"
           done
 
       - name: Poll Walk Completion
@@ -327,21 +327,21 @@ jobs:
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
-          BREEDER_UUIDS=""
-          for UF in $(ls /tmp/breeder_*_uuid | sort); do
-            BREEDER_UUIDS="${BREEDER_UUIDS} $(cat ${UF})"
+          SYSTEMTENDER_UUIDS=""
+          for UF in $(ls /tmp/systemtender_*_uuid | sort); do
+            SYSTEMTENDER_UUIDS="${SYSTEMTENDER_UUIDS} $(cat ${UF})"
           done
 
-          echo "Waiting for all breeders to reach terminal state (walk retired or iteration-capped), watchdog: ${MAX_WAIT}s"
+          echo "Waiting for all systemtenders to reach terminal state (walk retired or iteration-capped), watchdog: ${MAX_WAIT}s"
 
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
             ALL_DONE=1
             SUMMARY=""
-            for BID in ${BREEDER_UUIDS}; do
-              RUNNING=$(echo "${METRICS}" | grep "godon_breeder_worker_status{.*breeder_id=\"${BID}\".*status=\"running\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
+            for BID in ${SYSTEMTENDER_UUIDS}; do
+              RUNNING=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{.*systemtender_id=\"${BID}\".*status=\"running\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
               RUNNING=${RUNNING:-0}
-              STOPPED=$(echo "${METRICS}" | grep "godon_breeder_worker_status{.*breeder_id=\"${BID}\".*status=\"stopped\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
+              STOPPED=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{.*systemtender_id=\"${BID}\".*status=\"stopped\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
               STOPPED=${STOPPED:-0}
 
               if [ "${STOPPED}" -ge 1 ] 2>/dev/null && [ "${RUNNING}" -eq 0 ] 2>/dev/null; then
@@ -356,7 +356,7 @@ jobs:
             echo "${SUMMARY} (${ELAPSED}s)"
 
             if [ "${ALL_DONE}" = "1" ]; then
-              echo "All breeders reached terminal state"
+              echo "All systemtenders reached terminal state"
               break
             fi
 
@@ -365,7 +365,7 @@ jobs:
           done
 
           if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "Watchdog timeout: breeders did not reach terminal state within ${MAX_WAIT}s"
+            echo "Watchdog timeout: systemtenders did not reach terminal state within ${MAX_WAIT}s"
             echo "Budget verdict, not a walk verdict - the curves export below carries per-curve state (converged flags, gaps)"
             exit 1
           fi
@@ -374,10 +374,10 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
 
-          for UF in $(ls /tmp/breeder_*_uuid | sort); do
+          for UF in $(ls /tmp/systemtender_*_uuid | sort); do
             BID=$(cat ${UF})
-            echo "=== Breeder ${BID} Final State ==="
-            curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
+            echo "=== Systemtender ${BID} Final State ==="
+            curl -s "${API_URL}/systemtenders/${BID}" | jq '.' 2>/dev/null || true
             echo ""
           done
 
@@ -401,10 +401,10 @@ jobs:
           kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
           sleep 3
 
-          for UF in $(ls /tmp/breeder_*_uuid | sort); do
+          for UF in $(ls /tmp/systemtender_*_uuid | sort); do
             BID=$(cat ${UF})
-            echo "=== Trials for breeder ${BID} ==="
-            curl -s -m 60 "http://127.0.0.3:9099/api/breeders/${BID}/trials?limit=1000" | jq -c '
+            echo "=== Trials for systemtender ${BID} ==="
+            curl -s -m 60 "http://127.0.0.3:9099/api/systemtenders/${BID}/trials?limit=1000" | jq -c '
               if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
               | {complete: (map(select(.state == "COMPLETE")) | length),
                  fail: (map(select(.state == "FAIL")) | length),
@@ -417,8 +417,8 @@ jobs:
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          echo "=== Breeder Worker Logs (last 200 lines, coordinator trace) ==="
-          for WORKER_POD in $(kubectl get pods -n godon -l workerGroup=breeder -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+          echo "=== Systemtender Worker Logs (last 200 lines, coordinator trace) ==="
+          for WORKER_POD in $(kubectl get pods -n godon -l workerGroup=systemtender -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
             echo "--- ${WORKER_POD} ---"
             kubectl logs -n godon "${WORKER_POD}" --tail=200 2>/dev/null | grep -i "COORD\|PROBE\|CHAR\|CONVERG\|REFINE\|CAUSAL\|SHIFT" | tail -20 || echo "No coordinator lines in kubectl logs"
           done
@@ -437,17 +437,17 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
 
-          for UUID_FILE in $(ls /tmp/breeder_*_uuid 2>/dev/null | sort); do
+          for UUID_FILE in $(ls /tmp/systemtender_*_uuid 2>/dev/null | sort); do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
-              echo "--- Breeder ${BID} ---"
-              curl -s "${API_URL}/breeders/${BID}" | jq '.' 2>/dev/null || true
+              echo "--- Systemtender ${BID} ---"
+              curl -s "${API_URL}/systemtenders/${BID}" | jq '.' 2>/dev/null || true
             fi
           done
 
           echo ""
           echo "--- Worker Logs (last 100 lines) ---"
-          WORKER_POD=$(kubectl get pods -n godon -l component=breeder -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          WORKER_POD=$(kubectl get pods -n godon -l component=systemtender -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
           [ -n "${WORKER_POD}" ] && kubectl logs -n godon "${WORKER_POD}" --tail=100 2>/dev/null || true
 
           echo ""
@@ -478,7 +478,7 @@ jobs:
 
           echo ""
           echo "=== Coordinator Trace via Loki (pre-cleanup export) ==="
-          # Breeder script logs ship OTLP -> Loki (service_name=godon-breeders),
+          # Systemtender script logs ship OTLP -> Loki (service_name=godon-robots),
           # not to kubectl logs. Query the full run window explicitly.
           fuser -k 3100/tcp 2>/dev/null || true
           sleep 1
@@ -489,17 +489,17 @@ jobs:
             END=$(date +%s)
             START=$((END - ${{ fromJSON(inputs.max_wait_minutes) }} * 60 - 900))
             curl -s -G --retry 2 --max-time 30 "http://127.0.0.1:3100/loki/api/v1/query_range" \
-              --data-urlencode 'query={service_name="godon-breeders"}' \
+              --data-urlencode 'query={service_name="godon-robots"}' \
               --data-urlencode "start=${START}" \
               --data-urlencode "end=${END}" \
               --data-urlencode 'direction=forward' \
-              --data-urlencode 'limit=5000' > /tmp/loki_breeders.json \
-              || echo '{"data":{"result":[]}}' > /tmp/loki_breeders.json
+              --data-urlencode 'limit=5000' > /tmp/loki_systemtenders.json \
+              || echo '{"data":{"result":[]}}' > /tmp/loki_systemtenders.json
             echo "--- flattened trace (ts_ns line) ---"
-            jq -r '.data.result[].values[] | "\(.[0]) \(.[1])"' /tmp/loki_breeders.json 2>/dev/null \
+            jq -r '.data.result[].values[] | "\(.[0]) \(.[1])"' /tmp/loki_systemtenders.json 2>/dev/null \
               | grep -i "COORD\|PROBE\|CHAR\|CONVERG\|REFINE\|CAUSAL\|SHIFT\|ERROR\|WARN\|Traceback\|QUANTUM\|ACQUIRE\|denied\|COOLDOWN\|Acquired" \
               || echo "No coordinator lines in Loki window"
-            echo "--- trace line count (all levels): $(jq -r '.data.result[].values[] | .[1]' /tmp/loki_breeders.json 2>/dev/null | wc -l) (raw remains in Loki) ---"
+            echo "--- trace line count (all levels): $(jq -r '.data.result[].values[] | .[1]' /tmp/loki_systemtenders.json 2>/dev/null | wc -l) (raw remains in Loki) ---"
           else
             echo "Loki not reachable via port-forward"
           fi
@@ -512,12 +512,12 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
-          for UUID_FILE in $(ls /tmp/breeder_*_uuid 2>/dev/null | sort); do
+          for UUID_FILE in $(ls /tmp/systemtender_*_uuid 2>/dev/null | sort); do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
               docker run --rm --network host "${CLI_IMAGE}" \
                 --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                breeder purge --force --id="${BID}" 2>/dev/null || true
+                systemtender purge --force --id="${BID}" 2>/dev/null || true
             fi
           done
 
@@ -543,7 +543,7 @@ jobs:
           echo "Bench Characterization Summary"
           echo "Scenario: ${{ inputs.scenario }}"
           echo "Topology: scenario-${{ inputs.scenario }}"
-          echo "Breeders: $(ls /tmp/breeder_*_uuid 2>/dev/null | wc -l)"
+          echo "Systemtenders: $(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)"
           echo "Iterations override: ${{ inputs.iterations_max == '' && 'none (conf value stands)' || inputs.iterations_max }}"
           echo "Bench seed: ${{ inputs.seed }}"
           echo "Watchdog: ${{ fromJSON(inputs.max_wait_minutes) }}m"

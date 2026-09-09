@@ -1,6 +1,6 @@
-# Scenario 1: Breeder — Single Optimizer, Single Target
+# Scenario 1: Systemtender — Single Optimizer, Single Target
 #
-# One breeder with 2 parallel workers cooperating via Optuna study sharing.
+# One systemtender with 2 parallel workers cooperating via Optuna study sharing.
 # Optimizes greenhouse-1 for:
 #   - Maximize growth_rate
 #   - Minimize trial_energy_kwh
@@ -17,7 +17,7 @@ meta:
   configVersion: "0.3"
   strict_validation: false
 
-breeder:
+systemtender:
   type: "bench_greenhouse"
 
 settings:
