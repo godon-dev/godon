@@ -5,20 +5,20 @@
 # minimizing latency and maximizing throughput while maintaining system safety.
 #
 # DESIGN NOTES:
-# - No 'type' field on parameters: breeder knows parameter types internally
+# - No 'type' field on parameters: systemtender knows parameter types internally
 # - Multiple disjoint ranges enable parallel workers to explore different regions
 # - Objectives = what we optimize (multi-objective Pareto optimization)
 # - Guardrails = safety limits (trigger rollback if exceeded)
-# - Separate breeders for different target classes (avoids per-target complexity)
+# - Separate systemtenders for different target classes (avoids per-target complexity)
 #
 # Config format version - independent from godon software version
 meta:
   configVersion: "0.3"
   strict_validation: false  # Allow unknown parameters with warnings (permissive mode)
 
-# Breeder worker configuration
-breeder:
-  type: "linux_performance"  # Which breeder worker implementation to use
+# Systemtender worker configuration
+systemtender:
+  type: "linux_performance"  # Which systemtender worker implementation to use
 
 # ============================================================================
 # PARAMETER SEARCH SPACE
@@ -26,7 +26,7 @@ breeder:
 # Define the Linux tuning knobs to optimize. Each parameter type (sysctl, sysfs,
 # cpufreq, ethtool) represents a different mechanism for modifying system behavior.
 #
-# Parameter types are inferred by the breeder from its internal registry - no
+# Parameter types are inferred by the systemtender from its internal registry - no
 # 'type' field needed in config. This keeps the config clean and avoids errors.
 #
 # Multiple disjoint ranges (e.g., tcp_rmem with conservative and performance

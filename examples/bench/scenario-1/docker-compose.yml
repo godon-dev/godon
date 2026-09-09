@@ -1,11 +1,11 @@
 # Scenario 1: Baseline — Single Optimizer, Single Target
 #
-# The simplest configuration: one breeder optimizing one greenhouse.
+# The simplest configuration: one systemtender optimizing one greenhouse.
 # Establishes baseline performance metrics (convergence speed, best Pareto
 # front) that all other scenarios are measured against.
 #
 # Layout:
-#   [Breeder] --effectuate/recon--> [greenhouse-1]
+#   [Systemtender] --effectuate/recon--> [greenhouse-1]
 #
 # Target environment:
 #   GREENHOUSE_SCENARIO=simple  (2 zones)
@@ -15,7 +15,7 @@
 #
 # Run:
 #   docker compose up -d
-#   # Then submit breeder.yml to godon-api as a breeder configuration
+#   # Then submit systemtender.yml to godon-api as a systemtender configuration
 #
 services:
   greenhouse-1:

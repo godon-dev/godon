@@ -1,6 +1,6 @@
-# Scenario 3: Breeder-2 — Optimizes greenhouse-2
+# Scenario 3: Systemtender-2 — Optimizes greenhouse-2
 #
-# Identical config to breeder-1 except for reconnaissance URL and target ref.
+# Identical config to systemtender-1 except for reconnaissance URL and target ref.
 # The different seed on greenhouse-2 means the optimizer faces a different
 # internal state landscape, preventing trivial correlation.
 
@@ -8,7 +8,7 @@ meta:
   configVersion: "0.3"
   strict_validation: false
 
-breeder:
+systemtender:
   type: "bench_greenhouse"
 
 settings:

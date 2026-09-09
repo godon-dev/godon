@@ -1,14 +1,14 @@
-# Scenario 3: Breeder-1 — Optimizes greenhouse-1
+# Scenario 3: Systemtender-1 — Optimizes greenhouse-1
 #
-# Independent optimizer. Does not communicate with breeder-2.
-# Cooperation (extremes sharing) is intra-breeder only — between this
-# breeder's own parallel workers within the same Optuna study.
+# Independent optimizer. Does not communicate with systemtender-2.
+# Cooperation (extremes sharing) is intra-systemtender only — between this
+# systemtender's own parallel workers within the same Optuna study.
 
 meta:
   configVersion: "0.3"
   strict_validation: false
 
-breeder:
+systemtender:
   type: "bench_greenhouse"
 
 settings:
