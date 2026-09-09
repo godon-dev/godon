@@ -1,11 +1,11 @@
 # Scenario 2: Multi-Target — Single Optimizer, Two Independent Targets
 #
-# One breeder applying the same parameters to two independent greenhouses
+# One systemtender applying the same parameters to two independent greenhouses
 # simultaneously. Tests multi-target optimization within a single study.
 #
 # Layout:
-#   [Breeder] --effectuate--> [greenhouse-1], [greenhouse-2]
-#   [Breeder] --recon-------> [greenhouse-1]  (reads metrics from one)
+#   [Systemtender] --effectuate--> [greenhouse-1], [greenhouse-2]
+#   [Systemtender] --recon-------> [greenhouse-1]  (reads metrics from one)
 #
 # Both greenhouses have the same scenario config but different seeds,
 # producing different internal states and responses to identical parameters.
@@ -19,7 +19,7 @@
 #
 # Run:
 #   docker compose up -d
-#   # Then submit breeder.yml to godon-api
+#   # Then submit systemtender.yml to godon-api
 #
 services:
   greenhouse-1:
