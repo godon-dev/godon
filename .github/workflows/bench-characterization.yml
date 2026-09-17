@@ -223,6 +223,11 @@ jobs:
           # need fresh systemtenders; systemtender purge cascades curve-store
           # deletion (DELETE /curves/{sender}), so this also clears
           # stale curves from earlier runs.
+          ls examples/bench/scenario-${{ inputs.scenario }}/systemtenders/systemtender-*.yml >/dev/null 2>&1 || {
+            echo "::error::no systemtender configs at examples/bench/scenario-${{ inputs.scenario }}/systemtenders/"
+            exit 1
+          }
+
           for NODE_FILE in $(ls examples/bench/scenario-${{ inputs.scenario }}/systemtenders/systemtender-*.yml | sort); do
             PNAME="bench-char-$(basename "${NODE_FILE}" .yml | sed 's/systemtender-//')"
             PID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${PNAME}\") | .id" 2>/dev/null | head -1)
@@ -318,6 +323,12 @@ jobs:
             NODE_NUM=$(basename "${BCFG}" .yml | sed 's/systemtender-//')
             create_systemtender "bench-char-${NODE_NUM}" "$(cat /tmp/target_${NODE_NUM}_id)" \
               "${BENCH_URL}/node-${NODE_NUM}" "${NODE_NUM}" "/tmp/systemtender_${NODE_NUM}_uuid"
+
+            N_CREATED=$(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)
+            if [ "${N_CREATED}" -eq 0 ]; then
+              echo "::error::zero systemtenders created — tender configs missing or rejected (rename wave guard)"
+              exit 1
+            fi
           done
 
       - name: Poll Walk Completion
