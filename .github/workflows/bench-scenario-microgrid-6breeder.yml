@@ -216,6 +216,12 @@ jobs:
               "microgrid-${N}" \
               examples/bench/scenario-microgrid-6systemtender/systemtenders/systemtender-${N}.yml \
               systemtender-mg6-${N}-config.yaml /tmp/systemtender_${N}_uuid
+
+            N_CREATED=$(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)
+            if [ "${N_CREATED}" -eq 0 ]; then
+              echo "::error::zero systemtenders created — tender configs missing or rejected (rename wave guard)"
+              exit 1
+            fi
           done
 
       - name: Poll Optimization Progress

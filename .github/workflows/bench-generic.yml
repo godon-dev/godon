@@ -254,6 +254,12 @@ jobs:
           create_systemtender "bench-generic-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/systemtender_1_uuid
           create_systemtender "bench-generic-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/systemtender_2_uuid
 
+          N_CREATED=$(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)
+          if [ "${N_CREATED}" -eq 0 ]; then
+            echo "::error::zero systemtenders created — tender configs missing or rejected (rename wave guard)"
+            exit 1
+          fi
+
       - name: Poll Optimization Progress
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
