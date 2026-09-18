@@ -517,6 +517,23 @@ jobs:
           true
           kill ${LOKI_PF_PID} 2>/dev/null || true
 
+      - name: Build and Bank Connectome Atlas
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          echo "=== Connectome Atlas (built pre-cleanup, while trial stores live) ==="
+          kubectl exec deploy/godon-causal -n godon -- wget -qO- --header "Content-Type: application/json" --post-data '{}' http://localhost:8091/build 2>&1 || echo "build POST failed"
+          for i in $(seq 1 20); do
+            ST=$(kubectl exec deploy/godon-causal -n godon -- wget -qO- http://localhost:8091/build/status 2>/dev/null || true)
+            echo "build status: ${ST}"
+            case "${ST}" in *'"Done"'*) break ;; esac
+            sleep 3
+          done
+          echo "--- atlas (graph JSON) ---"
+          kubectl exec deploy/godon-causal -n godon -- wget -qO- http://localhost:8091/graph 2>&1 || echo "graph read failed"
+          echo ""
+          echo "=== /atlas export OK ==="
+
       - name: Cleanup
         if: always()
         run: |
