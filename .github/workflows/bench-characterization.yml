@@ -350,9 +350,9 @@ jobs:
             ALL_DONE=1
             SUMMARY=""
             for BID in ${SYSTEMTENDER_UUIDS}; do
-              RUNNING=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{.*systemtender_id=\"${BID}\".*status=\"running\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
+              RUNNING=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{" | grep "systemtender_id=\"${BID}\"" | grep "status=\"running\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
               RUNNING=${RUNNING:-0}
-              STOPPED=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{.*systemtender_id=\"${BID}\".*status=\"stopped\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
+              STOPPED=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{" | grep "systemtender_id=\"${BID}\"" | grep "status=\"stopped\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
               STOPPED=${STOPPED:-0}
 
               if [ "${STOPPED}" -ge 1 ] 2>/dev/null && [ "${RUNNING}" -eq 0 ] 2>/dev/null; then
