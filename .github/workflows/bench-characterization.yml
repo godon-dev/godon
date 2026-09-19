@@ -529,6 +529,20 @@ jobs:
             case "${ST}" in *'"Done"'*) break ;; esac
             sleep 3
           done
+          # Tripwire: a walked cell that feeds detection ZERO sender
+          # trials is a silent contract break (the impulse-phase
+          # vocabulary drift ran two days like this). Silence must
+          # fail loudly, not bank an empty atlas.
+          if echo "${ST}" | grep -q '"edges":0'; then
+            CAUSAL_LOG=$(kubectl logs deploy/godon-causal -n godon --tail=80 2>/dev/null || true)
+            SENDER_TRIALS=$(echo "${CAUSAL_LOG}" | grep -oE "[0-9]+ push, [0-9]+ pause" | tail -1 || true)
+            echo "detection consumed: ${SENDER_TRIALS:-unknown}"
+            case "${SENDER_TRIALS}" in
+              "0 push, 0 pause"*)
+                echo "::error::detection starved: 0 sender trials consumed while the walk ran — contract break (tagging/vocabulary/storage)"
+                ;;
+            esac
+          fi
           echo "--- atlas (graph JSON) ---"
           kubectl exec deploy/godon-causal -n godon -- wget -qO- http://localhost:8091/graph 2>&1 || echo "graph read failed"
           echo ""
