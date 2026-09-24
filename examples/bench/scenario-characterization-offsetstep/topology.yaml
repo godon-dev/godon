@@ -27,10 +27,10 @@ nodes:
     - 0.3
   offset_drift_rate: 0.0
   morphs:
-  - at_tick: 420
-    travel_ticks: 65
+  - at_tick: 2500
+    travel_ticks: 250
     target_weights:
-    - - 0.9
+    - - 0.55
       - 0.3
       - 0.3
     - - 0.2
