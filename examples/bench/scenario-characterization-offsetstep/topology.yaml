@@ -18,7 +18,7 @@ nodes:
       - [0.4, 0.3, 0.3]
       - [0.2, 0.5, 0.3]
     offset_drift_rate: 0.003
-    offset_drift_cap: 0.25
+    offset_drift_cap: 1.12
 edges:
   - from: node-1
     from_channel: 0
