@@ -349,7 +349,7 @@ jobs:
             ALL_DONE=1
             SUMMARY=""
             for BID in ${SYSTEMTENDER_UUIDS}; do
-              STATUS=$(curl -sf "http://${{ env.API_HOST }}:${{ env.API_PORT }}/systemtenders/${BID}" | jq -r '.data.status // "unknown"' 2>/dev/null || echo unknown)
+              STATUS=$(curl -sf "http://${{ env.API_HOST }}:${{ env.API_PORT }}/systemtenders/${BID}" | jq -r '.status // "unknown"' 2>/dev/null || echo unknown)
               case "${STATUS}" in
                 finished|presumed_dead)
                   STATE="${STATUS}" ;;
