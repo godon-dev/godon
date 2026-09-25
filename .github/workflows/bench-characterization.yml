@@ -63,6 +63,8 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Mark cell start
+        run: echo "CELL_START_EPOCH=$(date +%s)" >> "$GITHUB_ENV"
       - name: Verify KIND Cluster
         run: |
           if ! kind get clusters | grep -q "godon-1-cluster"; then
@@ -342,19 +344,20 @@ jobs:
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          # inner watchdog: cell budget minus the ~7 min setup offset,
-          # so the declared-verdict bound always fires before the ceiling
-          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60 - 420))
-          ELAPSED=0
-
+          # the cell budget is spent from the cell's own start clock:
+          # setup counts, nothing is guessed.
+          BUDGET=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
+          CELL_START=${CELL_START_EPOCH:-$(date +%s)}
           SYSTEMTENDER_UUIDS=""
           for UF in $(ls /tmp/systemtender_*_uuid | sort); do
             SYSTEMTENDER_UUIDS="${SYSTEMTENDER_UUIDS} $(cat ${UF})"
           done
 
-          echo "Waiting for declared terminal state (finished | presumed_dead) via GET /systemtenders/{id}, watchdog: ${MAX_WAIT}s"
+          echo "Waiting for declared terminal state (finished | presumed_dead) via GET /systemtenders/{id}, cell budget: ${BUDGET}s"
 
-          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+          ALL_DONE=0
+          while :; do
+            REMAINING=$(( BUDGET - ($(date +%s) - CELL_START) ))
             ALL_DONE=1
             SUMMARY=""
             for BID in ${SYSTEMTENDER_UUIDS}; do
@@ -371,19 +374,18 @@ jobs:
               esac
               SUMMARY="${SUMMARY} B${BID:0:8}:${STATE}"
             done
-            echo "${SUMMARY} (${ELAPSED}s)"
+            echo "${SUMMARY} (remaining ${REMAINING}s)"
 
             if [ "${ALL_DONE}" = "1" ]; then
               echo "All systemtenders reached declared terminal state"
               break
             fi
-
+            [ ${REMAINING} -le 0 ] && break
             sleep 30
-            ELAPSED=$((ELAPSED + 30))
           done
 
-          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "Watchdog timeout: systemtenders did not reach declared terminal state within ${MAX_WAIT}s"
+          if [ "${ALL_DONE}" != "1" ]; then
+            echo "Watchdog timeout: systemtenders did not reach declared terminal state within the cell budget"
             echo "Budget verdict, not a walk verdict - the curves export below carries per-curve state (converged flags, gaps)"
             exit 1
           fi
