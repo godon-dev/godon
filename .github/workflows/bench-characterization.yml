@@ -343,31 +343,29 @@ jobs:
             SYSTEMTENDER_UUIDS="${SYSTEMTENDER_UUIDS} $(cat ${UF})"
           done
 
-          echo "Waiting for all systemtenders to reach terminal state (walk retired or iteration-capped), watchdog: ${MAX_WAIT}s"
+          echo "Waiting for declared terminal state (finished | presumed_dead) via GET /systemtenders/{id}, watchdog: ${MAX_WAIT}s"
 
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
-            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
             ALL_DONE=1
             SUMMARY=""
             for BID in ${SYSTEMTENDER_UUIDS}; do
-              RUNNING=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{" | grep "systemtender_id=\"${BID}\"" | grep "status=\"running\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
-              RUNNING=${RUNNING:-0}
-              STOPPED=$(echo "${METRICS}" | grep "godon_systemtender_worker_status{" | grep "systemtender_id=\"${BID}\"" | grep "status=\"stopped\"" | grep -oP '\} \K[0-9]+' | grep -c '^1$' || true)
-              STOPPED=${STOPPED:-0}
-
-              if [ "${STOPPED}" -ge 1 ] 2>/dev/null && [ "${RUNNING}" -eq 0 ] 2>/dev/null; then
-                STATE=terminal
-              else
-                STATE=walking
-                ALL_DONE=0
-              fi
+              STATUS=$(curl -sf "http://${{ env.API_HOST }}:${{ env.API_PORT }}/systemtenders/${BID}" | jq -r '.data.status // "unknown"' 2>/dev/null || echo unknown)
+              case "${STATUS}" in
+                finished|presumed_dead)
+                  STATE="${STATUS}" ;;
+                running)
+                  STATE="walking"
+                  ALL_DONE=0 ;;
+                *)
+                  STATE="unknown(${STATUS})"
+                  ALL_DONE=0 ;;
+              esac
               SUMMARY="${SUMMARY} B${BID:0:8}:${STATE}"
             done
-
             echo "${SUMMARY} (${ELAPSED}s)"
 
             if [ "${ALL_DONE}" = "1" ]; then
-              echo "All systemtenders reached terminal state"
+              echo "All systemtenders reached declared terminal state"
               break
             fi
 
@@ -376,7 +374,7 @@ jobs:
           done
 
           if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
-            echo "Watchdog timeout: systemtenders did not reach terminal state within ${MAX_WAIT}s"
+            echo "Watchdog timeout: systemtenders did not reach declared terminal state within ${MAX_WAIT}s"
             echo "Budget verdict, not a walk verdict - the curves export below carries per-curve state (converged flags, gaps)"
             exit 1
           fi
