@@ -51,10 +51,10 @@ jobs:
     # job ceiling = walk watchdog + setup headroom: the INNER watchdog
     # must always be the bound that fires (budget verdict with the
     # declared-status trail), never a GitHub job kill mid-poll.
-    # configurable: job ceiling = max_wait_minutes (whole-cell budget);
-    # the poll watchdog below fires max_wait - 420s, keeping >= 7 min
-    # of setup headroom so the INNER bound always fires first.
-    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
+    # anti-zombie last resort: GitHub's own hard maximum, stated
+    # explicitly. The caller's only knob is the inner poll watchdog
+    # (max_wait_minutes); healthy walks declare their end far earlier.
+    timeout-minutes: 360
 
     steps:
       - name: Checkout
@@ -341,8 +341,7 @@ jobs:
         env:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
-          # setup headroom: inner watchdog fires >= 7 min before the job ceiling
-          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60 - 420))
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
 
           SYSTEMTENDER_UUIDS=""
