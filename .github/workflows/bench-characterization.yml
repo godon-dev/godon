@@ -48,7 +48,10 @@ jobs:
   bench-characterization:
     name: "Characterization: scenario systemtenders -> coupling curves"
     runs-on: [self-hosted, linux]
-    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
+    # job ceiling = walk watchdog + setup headroom: the INNER watchdog
+    # must always be the bound that fires (budget verdict with the
+    # declared-status trail), never a GitHub job kill mid-poll.
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) + 30 }}
 
     steps:
       - name: Checkout
