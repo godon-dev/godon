@@ -51,7 +51,9 @@ jobs:
     # job ceiling = walk watchdog + setup headroom: the INNER watchdog
     # must always be the bound that fires (budget verdict with the
     # declared-status trail), never a GitHub job kill mid-poll.
-    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) + 30 }}
+    # anti-zombie ceiling, fixed: covers max_wait up to 390 (ROUND runs
+    # at 360) + setup. The inner watchdog is the bound that fires.
+    timeout-minutes: 420
 
     steps:
       - name: Checkout
