@@ -25,17 +25,8 @@ nodes:
   - - 0.2
     - 0.5
     - 0.3
-  offset_drift_rate: 0.0
-  morphs:
-  - at_tick: 2500
-    travel_ticks: 250
-    target_weights:
-    - - 0.55
-      - 0.3
-      - 0.3
-    - - 0.2
-      - 0.5
-      - 0.3
+  offset_drift_rate: 0.003
+  offset_drift_cap: 1.12
 edges:
 - from: node-1
   from_channel: 0
