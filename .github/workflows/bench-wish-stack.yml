@@ -1,0 +1,422 @@
+name: "Bench Wish-Stack — Compile Room (3 nodes, claims + terms)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_trials:
+        description: "Minimum trials per systemtender for success"
+        required: false
+        default: "10"
+      max_wait_minutes:
+        description: "Max wait time in minutes"
+        required: false
+        default: "25"
+      coupling_strength:
+        description: "Coupling strength (0.0=none, 0.3=moderate, 0.7=strong)"
+        required: false
+        default: "0.7"
+      base_function:
+        description: "linear | polynomial | threshold | saturation"
+        required: false
+        default: "linear"
+      noise_gaussian:
+        description: "Gaussian noise sigma"
+        required: false
+        default: "0.02"
+      noise_colored:
+        description: "Colored noise sigma (0=off)"
+        required: false
+        default: "0.0"
+      push_block_size:
+        description: "Push block size (trials per push phase)"
+        required: false
+        default: "15"
+      pause_block_size:
+        description: "Pause block size (trials per pause phase)"
+        required: false
+        default: "15"
+
+jobs:
+  bench-wish-stack:
+    name: "Wish-stack compile room: 3 nodes, 2 aims + 1 aim + 1 price, 3 edges"
+    runs-on: [self-hosted, linux]
+    timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Verify KIND Cluster
+        run: |
+          if ! kind get clusters | grep -q "godon-1-cluster"; then
+            echo "KIND cluster not found. Run setup workflows first."
+            exit 1
+          fi
+          kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
+
+      - name: Verify Godon Stack
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          if ! helm status godon --namespace godon >/dev/null 2>&1; then
+            echo "Godon stack not found."
+            exit 1
+          fi
+          kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+
+      - name: Start Generic Bench Target
+        run: |
+          # Use the existing topology as template, override params via sed
+          cp examples/bench/scenario-wish-stack/topology.yaml /tmp/topology.yaml
+
+          sed -i "s/strength: .*/strength: ${{ inputs.coupling_strength }}/" /tmp/topology.yaml
+          sed -i "s/base: .*/base: ${{ inputs.base_function }}/" /tmp/topology.yaml
+          sed -i "s/gaussian_sigma: .*/gaussian_sigma: ${{ inputs.noise_gaussian }}/" /tmp/topology.yaml
+          sed -i "s/colored_sigma: .*/colored_sigma: ${{ inputs.noise_colored }}/" /tmp/topology.yaml
+
+          echo "=== Effective topology ==="
+          cat /tmp/topology.yaml
+
+          echo "Removing any existing bench container..."
+          docker rm -f bench-wish-stack 2>/dev/null || true
+
+          docker create \
+            --name bench-wish-stack \
+            --user 0:0 \
+            -p 8090:8090 \
+            -e CONFIG_PATH=/topology.yaml \
+            -e PORT=8090 \
+            -e GENERIC_SEED=42 \
+            -e RUST_LOG=info \
+            ghcr.io/godon-dev/godon-bench-wish-stack:0.2.1
+
+          docker cp /tmp/topology.yaml bench-wish-stack:/topology.yaml
+          docker start bench-wish-stack
+
+          echo "Waiting for generic bench..."
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.1:8090/health >/dev/null 2>&1; then
+              echo "Bench healthy"
+              curl -s http://127.0.0.1:8090/health | jq '.'
+              break
+            fi
+            sleep 2
+          done
+
+          docker network connect kind bench-wish-stack 2>/dev/null || true
+          BENCH_IP=$(docker inspect bench-wish-stack -f '{{.NetworkSettings.Networks.kind.IPAddress}}')
+          echo "Bench KIND IP: ${BENCH_IP}"
+          echo "BENCH_IP=${BENCH_IP}" >> $GITHUB_ENV
+
+      - name: Port Forward to Godon API
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          fuser -k 9090/tcp 2>/dev/null || true
+          sleep 1
+
+          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
+          kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
+          echo $! > /tmp/pf_pid
+          sleep 3
+
+          for i in $(seq 1 30); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
+              echo "API is healthy"
+              break
+            fi
+            sleep 2
+          done
+
+          echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
+          echo "API_PORT=9090" >> $GITHUB_ENV
+
+      - name: Create Targets
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          BENCH_URL="http://${{ env.BENCH_IP }}:8090"
+
+          create_target() {
+            local NAME=$1
+            local NODE_PATH=$2
+            local TEMPLATE=$3
+            local FILE=$4
+            local OUTFILE=$5
+
+            EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            if [ -n "${EXISTING}" ]; then
+              echo "Deleting existing target: ${EXISTING}" >&2
+              curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
+            fi
+
+            sed -e "s|http://bench-wish-stack:8090/node-1|${BENCH_URL}/${NODE_PATH}|" \
+                -e "s|http://bench-wish-stack:8090/node-2|${BENCH_URL}/${NODE_PATH}|" \
+              ${TEMPLATE} > ${FILE}
+            chmod 644 ${FILE}
+
+            echo "Creating target ${NAME}..." >&2
+            CREATE_OUTPUT=$(docker run --rm --network host \
+              -v $(pwd):/work:ro -w /work \
+              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              target create --file=${FILE} 2>&1 || true)
+            echo "${CREATE_OUTPUT}" >&2
+
+            local ID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            if [ -z "${ID}" ]; then
+              ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
+            fi
+            if [ -z "${ID}" ]; then
+              echo "Failed to create target ${NAME}" >&2
+              exit 1
+            fi
+            echo "Target ${NAME}: ${ID}" >&2
+            echo "${ID}" > "${OUTFILE}"
+          }
+
+          create_target "bench-wish-stack-node-1" "node-1" \
+            examples/bench/scenario-wish-stack/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
+          create_target "bench-wish-stack-node-2" "node-2" \
+            examples/bench/scenario-wish-stack/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
+
+      - name: Create Systemtenders
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          TARGET_1_ID=$(cat /tmp/target_1_id)
+          TARGET_2_ID=$(cat /tmp/target_2_id)
+          BENCH_URL="http://${{ env.BENCH_IP }}:8090"
+
+          # Purge any existing bench-wish-stack systemtenders first
+          EXISTING_SYSTEMTENDERS=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name | startswith(\"bench-wish-stack\")) | .id" 2>/dev/null || echo "")
+          for BID in ${EXISTING_SYSTEMTENDERS}; do
+            echo "Purging existing bench-wish-stack systemtender: ${BID}" >&2
+            docker run --rm --network host "${CLI_IMAGE}" \
+              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+              systemtender purge --force --id="${BID}" 2>/dev/null || true
+          done
+
+          create_systemtender() {
+            local NAME=$1
+            local TARGET_ID=$2
+            local RECON_URL=$3
+            local NODE_NUM=$4
+            local OUTFILE=$5
+
+            # Replace target ref and recon URL
+            sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
+                -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
+                -e "s|http://bench-wish-stack:8090/node-1|${RECON_URL}|" \
+                -e "s|http://bench-wish-stack:8090/node-2|${RECON_URL}|" \
+                examples/bench/scenario-wish-stack/systemtenders/systemtender-${NODE_NUM}.yml > systemtender-config-${NODE_NUM}.yaml
+            chmod 644 systemtender-config-${NODE_NUM}.yaml
+
+            # Override detection block sizes
+            sed -i "s/push_block_size: .*/push_block_size: ${{ inputs.push_block_size }}/" systemtender-config-${NODE_NUM}.yaml
+            sed -i "s/pause_block_size: .*/pause_block_size: ${{ inputs.pause_block_size }}/" systemtender-config-${NODE_NUM}.yaml
+
+            local UUID=""
+            for ATTEMPT in 1 2 3 4 5; do
+              echo "Creating systemtender ${NAME} (attempt ${ATTEMPT})..." >&2
+
+              # Check for existing systemtender by name BEFORE attempting create.
+              UUID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
+              if [ -n "${UUID}" ]; then
+                echo "Systemtender ${NAME} already exists: ${UUID}" >&2
+                break
+              fi
+
+              CREATE_OUTPUT=$(docker run --rm --network host \
+                -v $(pwd):/work -w /work \
+                "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                systemtender create --name="${NAME}" --file=systemtender-config-${NODE_NUM}.yaml 2>&1 || true)
+              echo "${CREATE_OUTPUT}" >&2
+
+              UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              if [ -n "${UUID}" ]; then
+                break
+              fi
+              sleep 10
+            done
+
+            if [ -z "${UUID}" ]; then
+              echo "Failed to create systemtender ${NAME}" >&2
+              exit 1
+            fi
+            echo "Systemtender ${NAME}: ${UUID}" >&2
+            echo "${UUID}" > "${OUTFILE}"
+          }
+
+          create_systemtender "bench-wish-stack-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/systemtender_1_uuid
+          create_systemtender "bench-wish-stack-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/systemtender_2_uuid
+
+          N_CREATED=$(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)
+          if [ "${N_CREATED}" -eq 0 ]; then
+            echo "::error::zero systemtenders created — tender configs missing or rejected (rename wave guard)"
+            exit 1
+          fi
+
+      - name: Poll Optimization Progress
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
+          SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
+          MIN_TRIALS=${{ inputs.min_trials }}
+          MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
+          ELAPSED=0
+
+          echo "Waiting for ${MIN_TRIALS} trials per systemtender (timeout: ${MAX_WAIT}s)"
+
+          while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
+            STATE_1=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            STATE_2=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+
+            METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
+            TRIAL_1=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_2=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+
+            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
+
+            if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
+               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
+              echo "A systemtender entered error state"
+              exit 1
+            fi
+
+            if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
+              echo "Both systemtenders reached trial target"
+              break
+            fi
+
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+          done
+
+          if [ ${ELAPSED} -ge ${MAX_WAIT} ]; then
+            echo "Timed out"
+            exit 1
+          fi
+
+      - name: Verify Results
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
+          SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
+
+          echo "=== Systemtender 1 Final State ==="
+          curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_1_UUID}" | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "=== Systemtender 2 Final State ==="
+          curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_2_UUID}" | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "=== Bench Node Status ==="
+          curl -s http://127.0.0.1:8090/node-1/status | jq '.' 2>/dev/null || true
+          curl -s http://127.0.0.1:8090/node-2/status | jq '.' 2>/dev/null || true
+
+          echo ""
+          echo "=== Bench Config (Ground Truth) ==="
+          curl -s http://127.0.0.1:8090/config | jq '.' 2>/dev/null || true
+
+      - name: Dump Trial Data
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
+          SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
+
+          fuser -k 9099/tcp 2>/dev/null || true
+          sleep 1
+          kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
+          sleep 3
+
+          for BID in ${SYSTEMTENDER_1_UUID} ${SYSTEMTENDER_2_UUID}; do
+            echo "=== Trials for systemtender ${BID} ==="
+            curl -s -m 30 "http://127.0.0.3:9099/api/systemtenders/${BID}/trials" | jq -r '
+              if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
+              | {complete: (map(select(.state == "COMPLETE")) | length),
+                 fail: (map(select(.state == "FAIL")) | length),
+                 total: length}
+            ' 2>/dev/null || echo "Failed to fetch trials"
+          done
+
+      - name: Diagnose Failure
+        if: failure()
+        env:
+          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+
+          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid; do
+            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              echo "--- Systemtender ${BID} ---"
+              curl -s "${API_URL}/systemtenders/${BID}" | jq '.' 2>/dev/null || true
+            fi
+          done
+
+          echo ""
+          echo "--- Worker Logs (last 100 lines) ---"
+          WORKER_POD=$(kubectl get pods -n godon -l component=systemtender -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -z "${WORKER_POD}" ] && WORKER_POD=$(kubectl get pods -n godon -l app=windmill-worker -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          [ -n "${WORKER_POD}" ] && kubectl logs -n godon "${WORKER_POD}" --tail=100 2>/dev/null || true
+
+          echo ""
+          echo "--- Bench Logs ---"
+          docker logs bench-wish-stack --tail=30 2>&1 || true
+
+          echo ""
+          echo "--- All Pods ---"
+          kubectl get pods -n godon -o wide 2>/dev/null || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+
+          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid; do
+            BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
+            if [ -n "${BID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                systemtender purge --force --id="${BID}" 2>/dev/null || true
+            fi
+          done
+
+          for TID_FILE in /tmp/target_1_id /tmp/target_2_id; do
+            TID=$(cat ${TID_FILE} 2>/dev/null || echo "")
+            if [ -n "${TID}" ]; then
+              docker run --rm --network host "${CLI_IMAGE}" \
+                --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+                target delete --id="${TID}" 2>/dev/null || true
+            fi
+          done
+
+          docker rm -f bench-wish-stack 2>/dev/null || true
+
+          if [ -f /tmp/pf_pid ]; then
+            kill $(cat /tmp/pf_pid) 2>/dev/null || true
+            rm /tmp/pf_pid
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Bench Generic Summary"
+          echo "Coupling strength: ${{ inputs.coupling_strength }}"
+          echo "Base function: ${{ inputs.base_function }}"
+          echo "Noise gaussian: ${{ inputs.noise_gaussian }}"
+          echo "Noise colored: ${{ inputs.noise_colored }}"
+          echo "Min trials per systemtender: ${{ inputs.min_trials }}"
+          echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
+          echo "Layout: 2 systemtenders -> 2 coupled generic nodes (single container)"
+          echo "Status: ${{ job.status }}"
