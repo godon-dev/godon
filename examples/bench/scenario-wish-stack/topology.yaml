@@ -1,0 +1,53 @@
+nodes:
+  - id: node-a
+    params: 3
+    objectives: 2
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.4, 0.3, 0.3]
+      - [0.2, 0.6, 0.2]
+
+  - id: node-b
+    params: 2
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.5, 0.5]
+
+  - id: node-c
+    params: 2
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [0.6, 0.4]
+
+edges:
+  # A's dials reach claim C3's own reading: the neighbour-claim corridor
+  - from: node-a
+    from_channel: 0
+    to: node-b
+    to_channel: 0
+    strength: 0.7
+  # A's dials reach the term: the price corridor
+  - from: node-a
+    from_channel: 0
+    to: node-c
+    to_channel: 0
+    strength: 0.7
+  # reverse reach: the room stays one - C's dial reaches A's second aim
+  - from: node-c
+    from_channel: 0
+    to: node-a
+    to_channel: 1
+    strength: 0.7
+
+noise:
+  gaussian_sigma: 0.02
+  colored_sigma: 0.0
+  drift_rate: 0.0
