@@ -35,6 +35,14 @@ on:
         description: "Pause block size (trials per pause phase)"
         required: false
         default: "15"
+      keep_room:
+        description: "Keep the room alive after the run (steerwish sessions declare against a living bench)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   bench-wish-stack:
@@ -397,6 +405,10 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
+          if [ "${{ inputs.keep_room }}" = "true" ]; then
+            echo "keep_room=true - the room stays alive: bench container, targets and tenders are left for the steerwish session"
+            exit 0
+          fi
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
