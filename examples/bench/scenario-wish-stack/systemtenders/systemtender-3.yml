@@ -19,9 +19,9 @@ run:
   completion_criteria:
     iterations:
       min: 10
-      max: 300
+      max: 2000
     timing:
-      end: "30m"
+      end: "2h"
     quality_achieved: true
 
 cooperation:
