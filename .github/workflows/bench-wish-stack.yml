@@ -35,6 +35,14 @@ on:
         description: "Pause block size (trials per pause phase)"
         required: false
         default: "15"
+      iterations_max:
+        description: "Override systemtender conf iterations.max (empty = conf value stands)"
+        required: false
+        default: ""
+      timing_end:
+        description: "Override systemtender conf timing.end (empty = conf value stands)"
+        required: false
+        default: ""
 
 jobs:
   bench-wish-stack:
@@ -218,6 +226,26 @@ jobs:
                 -e "s|http://bench-wish-stack:8090/node-2|${RECON_URL}|" \
                 -e "s|http://bench-wish-stack:8090/node-3|${RECON_URL}|" \
                 examples/bench/scenario-wish-stack/systemtenders/systemtender-${NODE_NUM}.yml > systemtender-config-${NODE_NUM}.yaml
+
+            # dispatch-time conf overrides (empty = conf value stands)
+            if [ -n "${{ inputs.iterations_max }}" ]; then
+              MAX_LINES=$(grep -cE '^[[:space:]]*max: [0-9]+' "systemtender-config-${NODE_NUM}.yaml" || true)
+              if [ "${MAX_LINES}" != "1" ]; then
+                echo "Expected exactly one iterations.max line in systemtender-config-${NODE_NUM}.yaml, found ${MAX_LINES}" >&2
+                exit 1
+              fi
+              sed -i -E "s/^([[:space:]]*max: )[0-9]+/\1${{ inputs.iterations_max }}/" "systemtender-config-${NODE_NUM}.yaml"
+              echo "Overrode iterations.max -> ${{ inputs.iterations_max }} for ${NAME}" >&2
+            fi
+            if [ -n "${{ inputs.timing_end }}" ]; then
+              END_LINES=$(grep -cE '^[[:space:]]*end: "' "systemtender-config-${NODE_NUM}.yaml" || true)
+              if [ "${END_LINES}" != "1" ]; then
+                echo "Expected exactly one timing.end line in systemtender-config-${NODE_NUM}.yaml, found ${END_LINES}" >&2
+                exit 1
+              fi
+              sed -i -E "s/^([[:space:]]*end: \").*(\")/\1${{ inputs.timing_end }}\2/" "systemtender-config-${NODE_NUM}.yaml"
+              echo "Overrode timing.end -> ${{ inputs.timing_end }} for ${NAME}" >&2
+            fi
             chmod 644 systemtender-config-${NODE_NUM}.yaml
 
             # Override detection block sizes
