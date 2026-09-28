@@ -90,7 +90,7 @@ jobs:
             -e PORT=8090 \
             -e GENERIC_SEED=42 \
             -e RUST_LOG=info \
-            ghcr.io/godon-dev/godon-bench-generic:0.2.1
+            ghcr.io/godon-dev/godon-bench-generic:0.4.2
 
           docker cp /tmp/topology.yaml bench-wish-stack:/topology.yaml
           docker start bench-wish-stack
@@ -180,6 +180,8 @@ jobs:
             examples/bench/scenario-wish-stack/targets/node-1.yaml target-node-1.yaml /tmp/target_1_id
           create_target "bench-wish-stack-node-2" "node-2" \
             examples/bench/scenario-wish-stack/targets/node-2.yaml target-node-2.yaml /tmp/target_2_id
+          create_target "bench-wish-stack-node-3" "node-3" \
+            examples/bench/scenario-wish-stack/targets/node-3.yaml target-node-3.yaml /tmp/target_3_id
 
       - name: Create Systemtenders
         env:
@@ -189,6 +191,7 @@ jobs:
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           TARGET_1_ID=$(cat /tmp/target_1_id)
           TARGET_2_ID=$(cat /tmp/target_2_id)
+          TARGET_3_ID=$(cat /tmp/target_3_id)
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
           # Purge any existing bench-wish-stack systemtenders first
@@ -208,10 +211,12 @@ jobs:
             local OUTFILE=$5
 
             # Replace target ref and recon URL
-            sed -e "s/\"generic-node-1\"/\"${TARGET_ID}\"/" \
-                -e "s/\"generic-node-2\"/\"${TARGET_ID}\"/" \
+            sed -e "s/\"wish-stack-node-1\"/\"${TARGET_ID}\"/" \
+                -e "s/\"wish-stack-node-2\"/\"${TARGET_ID}\"/" \
+                -e "s/\"wish-stack-node-3\"/\"${TARGET_ID}\"/" \
                 -e "s|http://bench-wish-stack:8090/node-1|${RECON_URL}|" \
                 -e "s|http://bench-wish-stack:8090/node-2|${RECON_URL}|" \
+                -e "s|http://bench-wish-stack:8090/node-3|${RECON_URL}|" \
                 examples/bench/scenario-wish-stack/systemtenders/systemtender-${NODE_NUM}.yml > systemtender-config-${NODE_NUM}.yaml
             chmod 644 systemtender-config-${NODE_NUM}.yaml
 
@@ -253,6 +258,7 @@ jobs:
 
           create_systemtender "bench-wish-stack-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/systemtender_1_uuid
           create_systemtender "bench-wish-stack-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/systemtender_2_uuid
+          create_systemtender "bench-wish-stack-3" "${TARGET_3_ID}" "${BENCH_URL}/node-3" 3 /tmp/systemtender_3_uuid
 
           N_CREATED=$(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)
           if [ "${N_CREATED}" -eq 0 ]; then
@@ -267,6 +273,7 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
           SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
+          SYSTEMTENDER_3_UUID=$(cat /tmp/systemtender_3_uuid)
           MIN_TRIALS=${{ inputs.min_trials }}
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
           ELAPSED=0
@@ -276,22 +283,26 @@ jobs:
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             STATE_1=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_1_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
             STATE_2=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_2_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
+            STATE_3=$(curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_3_UUID}" | jq -r '.status // .state // "unknown"' 2>/dev/null || echo "unknown")
 
             METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
             TRIAL_1=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_1_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
             TRIAL_2=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_2_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
+            TRIAL_3=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${SYSTEMTENDER_3_UUID}\"" | grep -oP '\} \K[0-9]+' || echo "0")
 
-            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2} (${ELAPSED}s)"
+            echo "B1: state=${STATE_1} trials=${TRIAL_1}, B2: state=${STATE_2} trials=${TRIAL_2}, B3: state=${STATE_3} trials=${TRIAL_3} (${ELAPSED}s)"
 
             if [ "${STATE_1}" = "failed" ] || [ "${STATE_1}" = "error" ] || \
-               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ]; then
+               [ "${STATE_2}" = "failed" ] || [ "${STATE_2}" = "error" ] || \
+               [ "${STATE_3}" = "failed" ] || [ "${STATE_3}" = "error" ]; then
               echo "A systemtender entered error state"
               exit 1
             fi
 
             if [ "${TRIAL_1}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
-               [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
-              echo "Both systemtenders reached trial target"
+               [ "${TRIAL_2}" -ge "${MIN_TRIALS}" ] 2>/dev/null && \
+               [ "${TRIAL_3}" -ge "${MIN_TRIALS}" ] 2>/dev/null; then
+              echo "All systemtenders reached trial target"
               break
             fi
 
@@ -318,9 +329,14 @@ jobs:
           curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_2_UUID}" | jq '.' 2>/dev/null || true
 
           echo ""
+          echo "=== Systemtender 3 Final State ==="
+          curl -s "${API_URL}/systemtenders/${SYSTEMTENDER_3_UUID}" | jq '.' 2>/dev/null || true
+
+          echo ""
           echo "=== Bench Node Status ==="
           curl -s http://127.0.0.1:8090/node-1/status | jq '.' 2>/dev/null || true
           curl -s http://127.0.0.1:8090/node-2/status | jq '.' 2>/dev/null || true
+          curl -s http://127.0.0.1:8090/node-3/status | jq '.' 2>/dev/null || true
 
           echo ""
           echo "=== Bench Config (Ground Truth) ==="
@@ -332,13 +348,14 @@ jobs:
         run: |
           SYSTEMTENDER_1_UUID=$(cat /tmp/systemtender_1_uuid)
           SYSTEMTENDER_2_UUID=$(cat /tmp/systemtender_2_uuid)
+          SYSTEMTENDER_3_UUID=$(cat /tmp/systemtender_3_uuid)
 
           fuser -k 9099/tcp 2>/dev/null || true
           sleep 1
           kubectl port-forward -n godon --address 127.0.0.3 deploy/godon-godon-observer 9099:8089 > /tmp/pf_obs.log 2>&1 &
           sleep 3
 
-          for BID in ${SYSTEMTENDER_1_UUID} ${SYSTEMTENDER_2_UUID}; do
+          for BID in ${SYSTEMTENDER_1_UUID} ${SYSTEMTENDER_2_UUID} ${SYSTEMTENDER_3_UUID}; do
             echo "=== Trials for systemtender ${BID} ==="
             curl -s -m 30 "http://127.0.0.3:9099/api/systemtenders/${BID}/trials" | jq -r '
               if type == "array" then . elif .trials then .trials elif .data then .data else [.] end
@@ -355,7 +372,7 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
 
-          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid; do
+          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid /tmp/systemtender_3_uuid; do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
               echo "--- Systemtender ${BID} ---"
@@ -383,7 +400,7 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
 
-          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid; do
+          for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid /tmp/systemtender_3_uuid; do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
               docker run --rm --network host "${CLI_IMAGE}" \
@@ -392,7 +409,7 @@ jobs:
             fi
           done
 
-          for TID_FILE in /tmp/target_1_id /tmp/target_2_id; do
+          for TID_FILE in /tmp/target_1_id /tmp/target_2_id /tmp/target_3_id; do
             TID=$(cat ${TID_FILE} 2>/dev/null || echo "")
             if [ -n "${TID}" ]; then
               docker run --rm --network host "${CLI_IMAGE}" \
@@ -418,5 +435,5 @@ jobs:
           echo "Noise colored: ${{ inputs.noise_colored }}"
           echo "Min trials per systemtender: ${{ inputs.min_trials }}"
           echo "Max wait: ${{ fromJSON(inputs.max_wait_minutes) }}m"
-          echo "Layout: 2 systemtenders -> 2 coupled generic nodes (single container)"
+          echo "Layout: 3 systemtenders -> 3 nodes, bidirectional (claims + terms compile room)"
           echo "Status: ${{ job.status }}"
