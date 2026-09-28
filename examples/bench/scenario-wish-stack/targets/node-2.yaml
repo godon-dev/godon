@@ -1,0 +1,5 @@
+name: "wish-stack-node-2"
+targetType: "http"
+spec:
+  url: "http://bench-wish-stack:8090/node-2"
+  auth_type: "none"
