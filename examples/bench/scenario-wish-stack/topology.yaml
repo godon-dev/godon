@@ -34,18 +34,21 @@ edges:
     to: node-2
     to_channel: 0
     strength: 0.7
+    drift_rate: 0.0
   # node-1's dials reach the price: the term corridor
   - from: node-1
     from_channel: 0
     to: node-3
     to_channel: 0
     strength: 0.7
+    drift_rate: 0.0
   # reverse reach: the room stays one
   - from: node-3
     from_channel: 0
     to: node-1
     to_channel: 1
     strength: 0.7
+    drift_rate: 0.0
 
 noise:
   gaussian_sigma: 0.02
