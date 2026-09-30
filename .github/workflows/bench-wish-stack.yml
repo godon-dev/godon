@@ -27,6 +27,14 @@ on:
         description: "Colored noise sigma (0=off)"
         required: false
         default: "0.0"
+      edge_drift_rate:
+        description: "Per-edge drift rate (the coupling slides over time; 0=off)"
+        required: false
+        default: "0.0"
+      noise_drift_rate:
+        description: "Noise floor drift rate (the noise slides over time; 0=off)"
+        required: false
+        default: "0.0"
       push_block_size:
         description: "Push block size (trials per push phase)"
         required: false
@@ -83,6 +91,8 @@ jobs:
           sed -i "s/base: .*/base: ${{ inputs.base_function }}/" /tmp/topology.yaml
           sed -i "s/gaussian_sigma: .*/gaussian_sigma: ${{ inputs.noise_gaussian }}/" /tmp/topology.yaml
           sed -i "s/colored_sigma: .*/colored_sigma: ${{ inputs.noise_colored }}/" /tmp/topology.yaml
+            sed -i -E "s/^  drift_rate: .*/  drift_rate: ${{ inputs.noise_drift_rate }}/" /tmp/topology.yaml
+            sed -i -E "s/^    drift_rate: .*/    drift_rate: ${{ inputs.edge_drift_rate }}/" /tmp/topology.yaml
 
           echo "=== Effective topology ==="
           cat /tmp/topology.yaml
