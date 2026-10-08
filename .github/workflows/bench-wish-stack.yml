@@ -128,28 +128,22 @@ jobs:
           echo "Bench KIND IP: ${BENCH_IP}"
           echo "BENCH_IP=${BENCH_IP}" >> $GITHUB_ENV
 
-      - name: Port Forward to Godon API
-        env:
-          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+      - name: Point the CLI at the API node port
         run: |
-          fuser -k 9090/tcp 2>/dev/null || true
-          sleep 1
+          # The kind cluster maps host 127.0.0.1:32002 -> nodePort 32002
+          # (godon-api-np). Direct node-port access replaces kubectl
+          # port-forward, whose single flaky tunnel killed two flights
+          # on 10-08 (create storms + cleanup purges silently lost).
+          echo "API_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "API_PORT=32002" >> $GITHUB_ENV
 
-          API_POD=$(kubectl get pods -n godon -l component=api -o jsonpath='{.items[0].metadata.name}')
-          kubectl port-forward -n godon --address 127.0.0.3 "${API_POD}" 9090:8080 > /tmp/pf.log 2>&1 &
-          echo $! > /tmp/pf_pid
-          sleep 3
-
-          for i in $(seq 1 30); do
-            if curl -s -f --connect-timeout 2 http://127.0.0.3:9090/health >/dev/null 2>&1; then
-              echo "API is healthy"
+          for i in $(seq 1 15); do
+            if curl -s -f --connect-timeout 2 http://127.0.0.1:32002/health >/dev/null 2>&1; then
+              echo "API reachable via node port"
               break
             fi
             sleep 2
           done
-
-          echo "API_HOST=127.0.0.3" >> $GITHUB_ENV
-          echo "API_PORT=9090" >> $GITHUB_ENV
 
       - name: Create Targets
         run: |
@@ -457,11 +451,6 @@ jobs:
           done
 
           docker rm -f bench-wish-stack 2>/dev/null || true
-
-          if [ -f /tmp/pf_pid ]; then
-            kill $(cat /tmp/pf_pid) 2>/dev/null || true
-            rm /tmp/pf_pid
-          fi
 
       - name: Summary
         if: always()
