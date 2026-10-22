@@ -1,10 +1,17 @@
 nodes:
+  # node-1 is the watched node (2 objectives; the wish's receiver sits
+  # here). It alone carries the scheduled offset drift — the canonical
+  # re-walk shape: the readout holds still while the map builds and
+  # the wish lands, then slides on schedule, to a destination (cap).
   - id: node-1
     params: 3
     objectives: 2
     base: linear
     param_lower: 0.0
     param_upper: 100.0
+    offset_drift_rate: 0.0
+    offset_drift_start_tick: 0
+    offset_drift_cap: null
     weights:
       - [0.4, 0.3, 0.3]
       - [0.2, 0.6, 0.2]
