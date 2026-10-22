@@ -31,6 +31,18 @@ on:
         description: "Per-edge drift rate (the coupling slides over time; 0=off)"
         required: false
         default: "0.0"
+      offset_drift_rate:
+        description: "Watched node (node-1) readout slides by rate x ticks (0=off; the canonical re-walk drift)"
+        required: false
+        default: "0.0"
+      offset_drift_start_tick:
+        description: "The slide begins only at this tick (0=from boot; world holds still, then moves on schedule)"
+        required: false
+        default: "0"
+      offset_drift_cap:
+        description: "The slide stops at this far (empty=no cap; drift with a destination)"
+        required: false
+        default: ""
       noise_drift_rate:
         description: "Noise floor drift rate (the noise slides over time; 0=off)"
         required: false
@@ -93,6 +105,12 @@ jobs:
           sed -i "s/colored_sigma: .*/colored_sigma: ${{ inputs.noise_colored }}/" /tmp/topology.yaml
             sed -i -E "s/^  drift_rate: .*/  drift_rate: ${{ inputs.noise_drift_rate }}/" /tmp/topology.yaml
             sed -i -E "s/^    drift_rate: .*/    drift_rate: ${{ inputs.edge_drift_rate }}/" /tmp/topology.yaml
+          # node-1 alone carries the offset drift keys (the only node with them)
+          sed -i -E "s/^(    offset_drift_rate: ).*/\1${{ inputs.offset_drift_rate }}/" /tmp/topology.yaml
+          sed -i -E "s/^(    offset_drift_start_tick: ).*/\1${{ inputs.offset_drift_start_tick }}/" /tmp/topology.yaml
+          if [ -n "${{ inputs.offset_drift_cap }}" ]; then
+            sed -i -E "s/^(    offset_drift_cap: ).*/\1${{ inputs.offset_drift_cap }}/" /tmp/topology.yaml
+          fi
 
           echo "=== Effective topology ==="
           cat /tmp/topology.yaml
