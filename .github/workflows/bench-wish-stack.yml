@@ -224,13 +224,34 @@ jobs:
           TARGET_3_ID=$(cat /tmp/target_3_id)
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
 
-          # Purge any existing bench-wish-stack systemtenders first
+          # Purge any existing bench-wish-stack systemtenders first —
+          # and PROVE them gone. A purge that fails silently once handed
+          # the next steps a dead tender and the run went vacuously
+          # green in 54s (godon#409). No swallow, no unverified purge.
           EXISTING_SYSTEMTENDERS=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name | startswith(\"bench-wish-stack\")) | .id" 2>/dev/null || echo "")
           for BID in ${EXISTING_SYSTEMTENDERS}; do
             echo "Purging existing bench-wish-stack systemtender: ${BID}" >&2
-            docker run --rm --network host "${CLI_IMAGE}" \
+            PURGE_OUTPUT=$(docker run --rm --network host "${CLI_IMAGE}" \
               --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              systemtender purge --force --id="${BID}" 2>/dev/null || true
+              systemtender purge --force --id="${BID}" 2>&1)
+            PURGE_RC=$?
+            echo "${PURGE_OUTPUT}" >&2
+            if [ ${PURGE_RC} -ne 0 ]; then
+              echo "::error::purge of ${BID} exited ${PURGE_RC} (godon#409) — failing instead of running against a stale tender"
+              exit 1
+            fi
+            # Deletion is async (workers cancel first): wait for the row to die.
+            STILL=""
+            for i in $(seq 1 36); do
+              STILL=$(curl -s ${API_URL}/systemtenders | jq -r --arg id "${BID}" '.[] | select(.id==$id) | .id' 2>/dev/null || echo "")
+              [ -z "${STILL}" ] && break
+              sleep 5
+            done
+            if [ -n "${STILL}" ]; then
+              echo "::error::systemtender ${BID} still listed 180s after purge (godon#409) — failing instead of adopting it"
+              exit 1
+            fi
+            echo "Purged ${BID} — verified gone" >&2
           done
 
           create_systemtender() {
@@ -275,13 +296,24 @@ jobs:
             sed -i "s/pause_block_size: .*/pause_block_size: ${{ inputs.pause_block_size }}/" systemtender-config-${NODE_NUM}.yaml
 
             local UUID=""
+            local CREATE_ISSUED=0
             for ATTEMPT in 1 2 3 4 5; do
               echo "Creating systemtender ${NAME} (attempt ${ATTEMPT})..." >&2
 
               # Check for existing systemtender by name BEFORE attempting create.
+              # The purge above proved the estate clean of bench-wish-stack
+              # tenders, so a name hit here is either ours from an earlier
+              # attempt of THIS loop (create won, output lost) or a foreign
+              # tender the purge never covered. Only the first is adoptable;
+              # the second is the godon#409 reuse-by-name fault — fail it.
               UUID=$(curl -s ${API_URL}/systemtenders | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1 || echo "")
               if [ -n "${UUID}" ]; then
-                echo "Systemtender ${NAME} already exists: ${UUID}" >&2
+                if [ "${CREATE_ISSUED}" = "1" ]; then
+                  echo "Systemtender ${NAME} exists from this run's earlier attempt: ${UUID}" >&2
+                else
+                  echo "::error::systemtender ${NAME} exists (${UUID}) but this run created nothing — the clean-estate guarantee is broken (godon#409). Failing instead of adopting an unknown-age tender."
+                  exit 1
+                fi
                 break
               fi
 
@@ -289,6 +321,7 @@ jobs:
                 -v $(pwd):/work -w /work \
                 "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
                 systemtender create --name="${NAME}" --file=systemtender-config-${NODE_NUM}.yaml 2>&1 || true)
+              CREATE_ISSUED=1
               echo "${CREATE_OUTPUT}" >&2
 
               UUID=$(echo "${CREATE_OUTPUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
@@ -453,18 +486,23 @@ jobs:
           for UUID_FILE in /tmp/systemtender_1_uuid /tmp/systemtender_2_uuid /tmp/systemtender_3_uuid; do
             BID=$(cat ${UUID_FILE} 2>/dev/null || echo "")
             if [ -n "${BID}" ]; then
-              docker run --rm --network host "${CLI_IMAGE}" \
+              # best-effort by design, but NEVER silent: a purge that dies
+              # here lingers and the next run's verified purge pays for it
+              # (godon#409) — say what happened.
+              PURGE_OUT=$(docker run --rm --network host "${CLI_IMAGE}" \
                 --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                systemtender purge --force --id="${BID}" 2>/dev/null || true
+                systemtender purge --force --id="${BID}" 2>&1) || true
+              echo "cleanup purge ${BID}: ${PURGE_OUT}"
             fi
           done
 
           for TID_FILE in /tmp/target_1_id /tmp/target_2_id /tmp/target_3_id; do
             TID=$(cat ${TID_FILE} 2>/dev/null || echo "")
             if [ -n "${TID}" ]; then
-              docker run --rm --network host "${CLI_IMAGE}" \
+              DEL_OUT=$(docker run --rm --network host "${CLI_IMAGE}" \
                 --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-                target delete --id="${TID}" 2>/dev/null || true
+                target delete --id="${TID}" 2>&1) || true
+              echo "cleanup target delete ${TID}: ${DEL_OUT}"
             fi
           done
 
