@@ -19,17 +19,6 @@ settings:
 
 run:
   parallel: 1
-  completion_criteria:
-    iterations:
-      min: 10
-      max: 300
-    timing:
-      end: "30m"
-    quality_achieved: true
-
-cooperation:
-  active: false
-
 interference_detection:
   group: bench-generic-pair
   mode: active

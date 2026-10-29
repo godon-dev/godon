@@ -13,17 +13,6 @@ settings:
 
 run:
   parallel: 1
-  completion_criteria:
-    iterations:
-      min: 10
-      max: 500
-    timing:
-      end: "240m"
-    quality_achieved: true
-
-cooperation:
-  active: false
-
 interference_detection:
   group: bench-characterization
   mode: active

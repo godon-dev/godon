@@ -125,28 +125,6 @@ settings:
 run:
   parallel: 3  # Number of parallel workers
 
-  completion_criteria:
-    iterations:
-      min: 10  # Minimum trials before considering early stopping
-      max: 1000  # Maximum trials before forcing termination
-    timing:
-      end: "7d"  # Maximum lifetime of the optimization run (e.g., 7d, 24h, 60m)
-    quality_achieved: true  # Stop when all quality_threshold objectives are met
-
-cooperation:
-  active: true  # Enable shared learning between parallel workers
-
-  # Sharing strategy: "probabilistic", "best", "worst", "extremes"
-  share_strategy: "extremes"
-
-  # Quality-based filtering parameters
-  top_percentile: 0.2  # Share top 20% of trials
-  bottom_percentile: 0.2  # Share bottom 20% of trials
-  min_trials_for_filtering: 10  # Wait for 10 trials before quality filtering kicks in
-
-  # Legacy probabilistic sharing
-  probability: 0.8  # 80% chance to share each trial
-
 # ============================================================================
 # RECONNAISSANCE CONFIGURATION
 # ============================================================================

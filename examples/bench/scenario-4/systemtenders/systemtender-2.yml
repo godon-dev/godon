@@ -38,17 +38,6 @@ settings:
 
 run:
   parallel: 1
-  completion_criteria:
-    iterations:
-      min: 10
-      max: 200
-    timing:
-      end: "30m"
-    quality_achieved: true
-
-cooperation:
-  active: false
-
 interference_detection:
   group: bench-greenhouse-uncoupled
   mode: active

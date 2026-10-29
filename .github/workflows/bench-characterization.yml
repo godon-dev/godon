@@ -31,10 +31,6 @@ on:
         description: "Override edge drift_rate (drifting strength; needs a scenario with the field present)"
         required: false
         default: ""
-      iterations_max:
-        description: "Override systemtender conf iterations.max (empty = conf value stands)"
-        required: false
-        default: ""
       seed:
         description: "GENERIC_SEED for the bench container"
         required: false
@@ -258,16 +254,6 @@ jobs:
             sed -E -e "s|http://bench-generic:8090/node-[0-9]+|${RECON_URL}|g" \
                    -e "s/\"generic-node-[0-9]+\"/\"${TARGET_ID}\"/g" \
               examples/bench/scenario-${{ inputs.scenario }}/systemtenders/systemtender-${NODE_NUM}.yml > systemtender-config-${NODE_NUM}.yaml
-
-            if [ -n "${{ inputs.iterations_max }}" ]; then
-              MAX_LINES=$(grep -cE '^[[:space:]]*max: [0-9]+' "systemtender-config-${NODE_NUM}.yaml" || true)
-              if [ "${MAX_LINES}" != "1" ]; then
-                echo "Expected exactly one iterations.max line in systemtender-config-${NODE_NUM}.yaml, found ${MAX_LINES}" >&2
-                exit 1
-              fi
-              sed -i -E "s/^([[:space:]]*max: )[0-9]+/\1${{ inputs.iterations_max }}/" "systemtender-config-${NODE_NUM}.yaml"
-              echo "Overrode iterations.max -> ${{ inputs.iterations_max }} for ${NAME}" >&2
-            fi
 
             chmod 644 systemtender-config-${NODE_NUM}.yaml
 
@@ -581,7 +567,6 @@ jobs:
           echo "Scenario: ${{ inputs.scenario }}"
           echo "Topology: scenario-${{ inputs.scenario }}"
           echo "Systemtenders: $(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)"
-          echo "Iterations override: ${{ inputs.iterations_max == '' && 'none (conf value stands)' || inputs.iterations_max }}"
           echo "Bench seed: ${{ inputs.seed }}"
           echo "Watchdog: ${{ fromJSON(inputs.max_wait_minutes) }}m"
           echo "Status: ${{ job.status }}"
