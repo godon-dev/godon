@@ -44,22 +44,6 @@ settings:
 
 run:
   parallel: 2
-  completion_criteria:
-    iterations:
-      min: 10
-      max: 200
-    timing:
-      end: "30m"
-    quality_achieved: true
-
-cooperation:
-  active: true
-  share_strategy: "extremes"
-  top_percentile: 0.2
-  bottom_percentile: 0.2
-  min_trials_for_filtering: 10
-  probability: 0.8
-
 reconnaissance:
   type: http
   http:
