@@ -22,16 +22,6 @@ settings:
 
 run:
   parallel: 1
-  completion_criteria:
-    iterations:
-      min: 10
-      max: 5000
-    timing:
-      end: "600m"
-
-cooperation:
-  active: false
-
 interference_detection:
   group: bench-microgrid
   mode: active
