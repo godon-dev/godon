@@ -35,6 +35,10 @@ on:
         description: "Watched node (node-1) readout slides by rate x ticks (0=off; the canonical re-walk drift)"
         required: false
         default: "0.0"
+      drift_manual:
+        description: "true = no scheduled slide (offset drift zeroed); the drift door (POST /node-1/drift/start, image 0.5.0+) cues the world — stage hand: examples/bench/stage/drift_when.sh"
+        required: false
+        default: "false"
       offset_drift_start_tick:
         description: "The slide begins only at this tick (0=from boot; world holds still, then moves on schedule)"
         required: false
@@ -98,7 +102,14 @@ jobs:
             sed -i -E "s/^  drift_rate: .*/  drift_rate: ${{ inputs.noise_drift_rate }}/" /tmp/topology.yaml
             sed -i -E "s/^    drift_rate: .*/    drift_rate: ${{ inputs.edge_drift_rate }}/" /tmp/topology.yaml
           # node-1 alone carries the offset drift keys (the only node with them)
-          sed -i -E "s/^(    offset_drift_rate: ).*/\1${{ inputs.offset_drift_rate }}/" /tmp/topology.yaml
+          DRIFT_RATE=${{ inputs.offset_drift_rate }}
+          if [ "${{ inputs.drift_manual }}" = "true" ]; then
+            DRIFT_RATE=0.0
+            echo "drift_manual: scheduled slide OFF — cue the world through the door:"
+            echo "  curl -X POST \$BENCH/node-1/drift/start -d '{\"rate_per_second\": R, \"cap\": C}'"
+            echo "  stage hand: examples/bench/stage/drift_when.sh (--at-minute N | --when walk-finished)"
+          fi
+          sed -i -E "s/^(    offset_drift_rate: ).*/\1${DRIFT_RATE}/" /tmp/topology.yaml
           sed -i -E "s/^(    offset_drift_start_tick: ).*/\1${{ inputs.offset_drift_start_tick }}/" /tmp/topology.yaml
           if [ -n "${{ inputs.offset_drift_cap }}" ]; then
             sed -i -E "s/^(    offset_drift_cap: ).*/\1${{ inputs.offset_drift_cap }}/" /tmp/topology.yaml
@@ -118,7 +129,7 @@ jobs:
             -e PORT=8090 \
             -e GENERIC_SEED=42 \
             -e RUST_LOG=info \
-            ghcr.io/godon-dev/godon-bench-generic:0.4.2
+            ghcr.io/godon-dev/godon-bench-generic:0.5.0
 
           docker cp /tmp/topology.yaml bench-wish-stack:/topology.yaml
           docker start bench-wish-stack
