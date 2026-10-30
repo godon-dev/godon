@@ -22,7 +22,7 @@ run:
 interference_detection:
   # walk retirement bar (default 0.02): the holder's relaxation lever —
   # retire params on coarser certificates so walks conclude inside a room
-  convergence_threshold: 0.05
+  convergence_threshold: 0.1
   group: bench-wish-stack
   mode: active
   min_optimize_trials: 15
