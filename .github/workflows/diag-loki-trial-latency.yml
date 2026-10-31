@@ -1,0 +1,74 @@
+name: "Diagnostic — Loki trial latencies (throwaway branch, no merge)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      window_minutes:
+        description: "Lookback window in minutes"
+        required: false
+        default: "90"
+
+jobs:
+  loki-trial-latency:
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 10
+    steps:
+      - name: Export kubeconfig
+        run: kind export kubeconfig --name=godon-1-cluster --kubeconfig=/tmp/kind_kubeconfig.yaml
+
+      - name: Port-forward Loki
+        run: |
+          kubectl port-forward -n godon-observability svc/godon-observability-loki 13100:3100 &>/dev/null &
+          sleep 5
+          curl -s http://127.0.0.1:13100/ready || (echo "loki not ready"; exit 1)
+
+      - name: Discover service_name labels in window (the log lives under TENDERS, not breeders)
+        run: |
+          START=$(date -u -d "${{ inputs.window_minutes }} min ago" +%s)
+          END=$(date -u +%s)
+          echo "---- service_name values in window:"
+          curl -sG http://127.0.0.1:13100/loki/api/v1/label/service_name/values \
+            --data-urlencode "start=${START}000000000" --data-urlencode "end=${END}000000000"
+          echo ""
+
+      - name: Dump raw trial lines (started/completed, any godon service)
+        run: |
+          START=$(date -u -d "${{ inputs.window_minutes }} min ago" +%s)
+          END=$(date -u +%s)
+          # broad on the label (tenders naming), tight on content; RAW
+          # dump with loud emptiness — never a silent zero.
+          curl -sG http://127.0.0.1:13100/loki/api/v1/query_range \
+            --data-urlencode 'query={service_name=~"godon-.*"} |~ "Trial [0-9]+ (started|completed)"' \
+            --data-urlencode "limit=5000" \
+            --data-urlencode "start=${START}000000000" \
+            --data-urlencode "end=${END}000000000" \
+            > /tmp/trial_lines.json
+          N=$(jq '[.data.result[].values[]] | length' /tmp/trial_lines.json)
+          echo "trial_lines_total=${N}"
+          if [ "${N}" -eq 0 ]; then
+            echo "::error::zero trial lines in window — emptiness is loud"
+            exit 1
+          fi
+          jq -r '.data.result[] | .values[] | "\(.[0])|\(.[1])"' /tmp/trial_lines.json | sort -n > /tmp/trial_lines.txt
+          echo "---- raw sample (first 400 chars):"
+          head -c 400 /tmp/trial_lines.txt
+          echo ""
+          echo "---- full dump ----"
+          cat /tmp/trial_lines.txt
+
+      - name: Dump boot/error lines (raw)
+        run: |
+          START=$(date -u -d "${{ inputs.window_minutes }} min ago" +%s)
+          END=$(date -u +%s)
+          curl -sG http://127.0.0.1:13100/loki/api/v1/query_range \
+            --data-urlencode 'query={service_name=~"godon-.*"} |~ "(?i)Starting SystemtenderWorker|panic|ledger init failed|WorkerError|evidence flush|readings flush"' \
+            --data-urlencode "limit=2000" \
+            --data-urlencode "start=${START}000000000" \
+            --data-urlencode "end=${END}000000000" \
+            | jq -r '.data.result[] | .values[] | "\(.[0])|\(.[1])"' | sort -n > /tmp/boot_lines.txt || true
+          echo "boot/flush/error lines: $(wc -l < /tmp/boot_lines.txt)"
+          head -80 /tmp/boot_lines.txt
+
+      - name: Cleanup port-forward
+        if: always()
+        run: pkill -f "port-forward.*13100" || true
