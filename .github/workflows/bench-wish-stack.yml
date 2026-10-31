@@ -39,6 +39,10 @@ on:
         description: "true = no scheduled slide (offset drift zeroed); the drift door (POST /node-1/drift/start, image 0.5.0+) cues the world — stage hand: examples/bench/stage/drift_when.sh"
         required: false
         default: "false"
+      receiver_create_delay_minutes:
+        description: "Staged creates: helpers (2,3) first, receiver (1) after this many minutes — the receiver measures a still world and its walk can conclude. 0 = all at once"
+        required: false
+        default: "0"
       offset_drift_start_tick:
         description: "The slide begins only at this tick (0=from boot; world holds still, then moves on schedule)"
         required: false
@@ -323,9 +327,17 @@ jobs:
             echo "${UUID}" > "${OUTFILE}"
           }
 
-          create_systemtender "bench-wish-stack-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/systemtender_1_uuid
+          # Staged creates: the helpers (2,3) first; the receiver (1) after a
+          # declared delay — with its upstream parked, the receiver measures
+          # a still world and its walk can conclude. 0 = all at once (the
+          # banked behavior).
           create_systemtender "bench-wish-stack-2" "${TARGET_2_ID}" "${BENCH_URL}/node-2" 2 /tmp/systemtender_2_uuid
           create_systemtender "bench-wish-stack-3" "${TARGET_3_ID}" "${BENCH_URL}/node-3" 3 /tmp/systemtender_3_uuid
+          if [ "${{ inputs.receiver_create_delay_minutes }}" != "0" ]; then
+            echo "staged creates: helpers up, receiver in ${{ inputs.receiver_create_delay_minutes }}m"
+            sleep $(( ${{ inputs.receiver_create_delay_minutes }} * 60 ))
+          fi
+          create_systemtender "bench-wish-stack-1" "${TARGET_1_ID}" "${BENCH_URL}/node-1" 1 /tmp/systemtender_1_uuid
 
           N_CREATED=$(ls /tmp/systemtender_*_uuid 2>/dev/null | wc -l)
           if [ "${N_CREATED}" -eq 0 ]; then
