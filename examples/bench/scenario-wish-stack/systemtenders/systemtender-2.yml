@@ -9,10 +9,7 @@ settings:
   generic:
     param_0:
       constraints:
-        - {step: 5.0, lower: 0.0, upper: 100.0}
-    param_1:
-      constraints:
-        - {step: 5.0, lower: 0.0, upper: 100.0}
+        - {step: 25.0, lower: 0.0, upper: 100.0}
 
 run:
   parallel: 1
