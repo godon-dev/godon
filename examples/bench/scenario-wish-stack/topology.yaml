@@ -3,8 +3,15 @@ nodes:
   # here). It alone carries the scheduled offset drift — the canonical
   # re-walk shape: the readout holds still while the map builds and
   # the wish lands, then slides on schedule, to a destination (cap).
+  #
+  # MINIMAL (godon#423, the demo shape): ONE dial per node — the walk's
+  # level grid collapses to the coarse pass (~5 levels) and concludes
+  # in minutes, which every 3-dial room (10 receipts) could not do in
+  # 25-90 min: the grid x latency arithmetic (levels 202-303 measured
+  # at room nine's close). The coupling story is unchanged — same
+  # edges, same objectives, the wish still rides node-1/objective_1.
   - id: node-1
-    params: 3
+    params: 1
     objectives: 2
     base: linear
     param_lower: 0.0
@@ -13,26 +20,26 @@ nodes:
     offset_drift_start_tick: 0
     offset_drift_cap: null
     weights:
-      - [0.4, 0.3, 0.3]
-      - [0.2, 0.6, 0.2]
+      - [0.7]
+      - [0.6]
 
   - id: node-2
-    params: 2
+    params: 1
     objectives: 1
     base: linear
     param_lower: 0.0
     param_upper: 100.0
     weights:
-      - [0.5, 0.5]
+      - [1.0]
 
   - id: node-3
-    params: 2
+    params: 1
     objectives: 1
     base: linear
     param_lower: 0.0
     param_upper: 100.0
     weights:
-      - [0.6, 0.4]
+      - [1.0]
 
 edges:
   # node-1's dials reach node-2's aim: the neighbour-claim corridor
