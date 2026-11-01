@@ -103,7 +103,14 @@ than 4 windows/key = floor-scope receipt, not a failure).
    stamps, curves for the exact (sender, receiver, channel) triples a claim
    rides, second-leg prediction error, post-terminal swing.
 
-(The S3 effort-currency decision dissolved with the race.)
+(The S3 effort-currency cell is NOT a sub-cell of this paper — holder
+ruling 2026-11-01: it is a SEPARATE instrument, wholly the follow-up
+race paper's own. This paper's cells are S1/S2/S4 + D1/D2, complete;
+nothing of the effort currency appears here, not even as a residue
+number. The earlier "dissolved with the race" phrasing under-stated
+it: the currency was never part of this paper's world — keeping is
+priced in its OWN units (rounds, waterings, payback vs quiet), which
+is the point of the containment.)
 
 ## Open before submission
 
