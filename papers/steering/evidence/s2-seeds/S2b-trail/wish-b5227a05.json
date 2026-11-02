@@ -1,0 +1,110 @@
+{
+ "id": "b5227a05-dd44-4b08-b4f3-91a0910e407c",
+ "state": "missed",
+ "createdAt": "2026-11-02T14:02:46.143509+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T14:02:46.168280+00:00"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T14:02:46.600571+00:00",
+   "detail": "{\"at\":1793628166.600571,\"book\":null}"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T14:02:46.660210+00:00",
+   "detail": "{\"claims\":[{\"bars\":0.014355320645107594,\"outcome\":\"ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e/objective_0\",\"predicted\":0.6818000000000001},{\"bars\":0.008685343461620627,\"outcome\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0\",\"predicted\":0.6854126098371043}],\"moves\":[{\"bars\":0.014355320645107594,\"param\":\"param_0\",\"sender\":\"18dae587-b57e-4d2c-a4bc-d08a8be234d1\",\"setting\":62.45491261387018},{\"bars\":0.008685343461620627,\"param\":\"param_0\",\"sender\":\"ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e\",\"setting\":46.90199801427884}],\"path\":[\"18dae587-b57e-4d2c-a4bc-d08a8be234d1\",\"ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e\",\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130\"],\"predicted\":{\"bars\":0.014355320645107594,\"value\":0.6818000000000001},\"range_used\":{\"param_0\":[25.0,75.0]},\"status\":\"planned\",\"wish_id\":\"b5227a05-dd44-4b08-b4f3-91a0910e407c\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T14:02:47.241134+00:00",
+   "detail": "{\"sender\":\"18dae587-b57e-4d2c-a4bc-d08a8be234d1\",\"db\":\"systemtender_18dae587_b57e_4d2c_a4bc_d08a8be234d1\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T14:02:47.467326+00:00",
+   "detail": "{\"sender\":\"ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e\",\"db\":\"systemtender_ef7c4b9b_4a22_4002_9e2e_0f7670ae3f9e\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T14:02:47.688746+00:00",
+   "detail": "{\"receiver\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130\",\"db\":\"systemtender_0ed2e559_b6c3_444d_a2dc_7eb6dab45130\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:03:03.181268+00:00",
+   "detail": "{\"at\":1793628183.181268,\"book\":{\"judged\":[{\"bar\":0.0283582681608264,\"kind\":\"claim\",\"median\":0.7988694094584384,\"n\":3,\"reading\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0\",\"verdict\":\"undecidable\"}],\"n\":1}}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:03:03.185460+00:00",
+   "detail": "{\"at\":1793628183.18546,\"book\":{\"judged\":[{\"bar\":0.0283582681608264,\"kind\":\"claim\",\"median\":0.7988694094584384,\"n\":3,\"reading\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0\",\"verdict\":\"undecidable\"}],\"n\":1}}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T14:04:15.857295+00:00",
+   "detail": "{\"at\":1793628255.857295,\"book\":{\"judged\":[{\"bar\":0.0037493698491185097,\"kind\":\"claim\",\"median\":0.8098567166460227,\"n\":41,\"reading\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0\",\"verdict\":\"missed\"}],\"n\":1}}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T14:04:15.857336+00:00",
+   "detail": "{\"at\":1793628255.857336,\"book\":{\"judged\":[{\"bar\":0.0037493698491185097,\"kind\":\"claim\",\"median\":0.8098567166460227,\"n\":41,\"reading\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0\",\"verdict\":\"missed\"}],\"n\":1}}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T14:04:16.520175+00:00",
+   "detail": "{\"at\":1793628256.520175,\"book\":{\"judged\":[{\"bar\":0.0037493698491185097,\"kind\":\"claim\",\"median\":0.8098567166460227,\"n\":41,\"reading\":\"0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0\",\"verdict\":\"missed\"}],\"n\":1}}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 0.8418,
+  "lo": 0.6818,
+  "target": 0.7618
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 0.8418,
+    "lo": 0.6818,
+    "target": 0.7618
+   },
+   "outcome": "ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.8059,
+    "lo": 0.6459,
+    "target": 0.7259
+   },
+   "outcome": "0ed2e559-b6c3-444d-a2dc-7eb6dab45130/objective_0"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e/objective_0",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": [
+  {
+   "band": {
+    "hi": 0.9731,
+    "lo": 0.7331
+   },
+   "outcome": "18dae587-b57e-4d2c-a4bc-d08a8be234d1/objective_1"
+  },
+  {
+   "band": {
+    "hi": 0.4982,
+    "lo": 0.2582
+   },
+   "outcome": "18dae587-b57e-4d2c-a4bc-d08a8be234d1/objective_0"
+  }
+ ]
+}

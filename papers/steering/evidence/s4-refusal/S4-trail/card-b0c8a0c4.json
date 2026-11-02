@@ -1,0 +1,19 @@
+{
+ "events": [
+  {
+   "detail": null,
+   "event": "refused",
+   "tsz": 1793606420.856618
+  }
+ ],
+ "instruction": "release",
+ "plan": {
+  "detail": "2 candidate(s) evaluated; most advanced refusal - claim '236a3fda-aa51-4d72-b9ca-f9140317df71/objective_1': hill on [25, 75]: branches [25, 50]~-0.0065 [63, 72]~0.1184 [75, 75]~-0.8224 - none reaches shift 0.6362925064174229 within the noise gate 0.0514",
+  "reason": "outside_measured_range"
+ },
+ "probe": null,
+ "status": "refused",
+ "verdict": null,
+ "walk": null,
+ "wish_id": "b0c8a0c4-8473-4643-bf82-56d9dd3dba50"
+}
