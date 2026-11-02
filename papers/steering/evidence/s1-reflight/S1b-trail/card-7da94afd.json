@@ -1,0 +1,19 @@
+{
+ "events": [
+  {
+   "detail": null,
+   "event": "refused",
+   "tsz": 1793609658.339281
+  }
+ ],
+ "instruction": "release",
+ "plan": {
+  "detail": "position conflict: your plan would break a held band. outcome '9f32e207-711e-4779-8278-f93e3ca896ff/objective_0' is held by wish f3704571-f019-445f-9b87-0144a833b19e (band [0.5443, 0.6643]) on dial 3a9baca5-b15d-46e0-bef5-7573442c9039/param_0 at level 45.7765 since t=1793609021; the compile says: term '9f32e207-711e-4779-8278-f93e3ca896ff/objective_0': band [0.5657, 0.9257] spans 0.3600 - under the wander floor 0.4914 (derived wander 0.4914): no setting can hold a band narrower than the reading's own wander; widen the band. Coexistence is found by re-declaring outside: retarget, widen a band, or release theirs \u2014 the engine never chooses between wishes.",
+  "reason": "position_conflict"
+ },
+ "probe": null,
+ "status": "refused",
+ "verdict": null,
+ "walk": null,
+ "wish_id": "7da94afd-1fb7-4728-9331-6b651398dbb7"
+}

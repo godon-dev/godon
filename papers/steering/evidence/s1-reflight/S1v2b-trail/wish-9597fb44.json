@@ -1,0 +1,90 @@
+{
+ "id": "9597fb44-4919-4f02-944c-df1a91e37adf",
+ "state": "landed",
+ "createdAt": "2026-11-02T20:02:58.691164+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T20:02:58.764136+00:00"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T20:02:59.169558+00:00",
+   "detail": "{\"at\":1793649779.169558,\"book\":null}"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T20:02:59.196479+00:00",
+   "detail": "{\"claims\":[{\"bars\":0.0029282317686434287,\"outcome\":\"3d646626-54c3-499a-a892-d952925c4aec/objective_0\",\"value\":0.7465145295188739},{\"bars\":0.0035798875903926765,\"outcome\":\"c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0\",\"value\":0.7411000987112122}],\"hold\":true,\"moves\":[],\"predicted\":{\"value\":0.7465145295188739},\"receivers\":[\"3d646626-54c3-499a-a892-d952925c4aec\",\"c1aadefe-77a1-418b-be36-f0e2f9b3a1aa\"],\"status\":\"planned\",\"wish_id\":\"9597fb44-4919-4f02-944c-df1a91e37adf\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T20:03:00.740432+00:00",
+   "detail": "{\"receiver\":\"3d646626-54c3-499a-a892-d952925c4aec\",\"db\":\"systemtender_3d646626_54c3_499a_a892_d952925c4aec\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T20:03:01.744362+00:00",
+   "detail": "{\"receiver\":\"c1aadefe-77a1-418b-be36-f0e2f9b3a1aa\",\"db\":\"systemtender_c1aadefe_77a1_418b_be36_f0e2f9b3a1aa\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T20:03:07.406212+00:00",
+   "detail": "{\"at\":1793649787.406212,\"book\":{\"judged\":[{\"bar\":0.005157447801834201,\"kind\":\"claim\",\"median\":0.7395684110044218,\"n\":3,\"reading\":\"c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T20:03:07.866889+00:00",
+   "detail": "{\"at\":1793649787.866889,\"book\":{\"judged\":[{\"bar\":0.005157447801834201,\"kind\":\"claim\",\"median\":0.7395684110044218,\"n\":3,\"reading\":\"c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 0.8526,
+  "lo": 0.6926,
+  "target": 0.7726
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 0.8526,
+    "lo": 0.6926,
+    "target": 0.7726
+   },
+   "outcome": "3d646626-54c3-499a-a892-d952925c4aec/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.822,
+    "lo": 0.662,
+    "target": 0.742
+   },
+   "outcome": "c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "3d646626-54c3-499a-a892-d952925c4aec/objective_0",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": [
+  {
+   "band": {
+    "hi": 0.9403,
+    "lo": 0.7003
+   },
+   "outcome": "8f33fd3d-d352-4706-b258-c4b2189aa1e7/objective_1"
+  },
+  {
+   "band": {
+    "hi": 0.4997,
+    "lo": 0.2597
+   },
+   "outcome": "8f33fd3d-d352-4706-b258-c4b2189aa1e7/objective_0"
+  }
+ ]
+}

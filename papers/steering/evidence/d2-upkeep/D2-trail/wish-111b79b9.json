@@ -1,0 +1,57 @@
+{
+ "id": "111b79b9-368d-44ac-835b-227edb784049",
+ "state": "landed",
+ "createdAt": "2026-11-02T15:36:16.184810+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T15:36:16.197103+00:00"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T15:36:16.443797+00:00",
+   "detail": "{\"at\":1793633776.443797,\"book\":null}"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T15:36:16.462162+00:00",
+   "detail": "{\"claims\":[{\"bars\":0.0025029815084789964,\"outcome\":\"8d7e2212-920b-4320-a82c-500a8ce36174/objective_1\",\"value\":0.9697333884972872}],\"hold\":true,\"moves\":[],\"predicted\":{\"value\":0.9697333884972872},\"receivers\":[\"8d7e2212-920b-4320-a82c-500a8ce36174\"],\"status\":\"planned\",\"wish_id\":\"111b79b9-368d-44ac-835b-227edb784049\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T15:36:16.813667+00:00",
+   "detail": "{\"receiver\":\"8d7e2212-920b-4320-a82c-500a8ce36174\",\"db\":\"systemtender_8d7e2212_920b_4320_a82c_500a8ce36174\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T15:36:19.695717+00:00",
+   "detail": "{\"at\":1793633779.695717,\"book\":{\"judged\":[{\"bar\":0.0032885719031276305,\"kind\":\"claim\",\"median\":0.9723479797974632,\"n\":3,\"reading\":\"8d7e2212-920b-4320-a82c-500a8ce36174/objective_1\",\"verdict\":\"landed\"}],\"n\":1}}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 1.1148782984295944,
+  "lo": 0.8148782984295945,
+  "target": 0.9648782984295944
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 1.1148782984295944,
+    "lo": 0.8148782984295945,
+    "target": 0.9648782984295944
+   },
+   "outcome": "8d7e2212-920b-4320-a82c-500a8ce36174/objective_1"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "8d7e2212-920b-4320-a82c-500a8ce36174/objective_1",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": []
+}

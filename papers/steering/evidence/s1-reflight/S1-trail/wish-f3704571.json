@@ -1,0 +1,110 @@
+{
+ "id": "f3704571-f019-445f-9b87-0144a833b19e",
+ "state": "untended",
+ "createdAt": "2026-11-02T08:43:35.179837+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T08:43:35.193507+00:00"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T08:43:35.637714+00:00",
+   "detail": "{\"at\":1793609015.637714,\"book\":null}"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T08:43:35.660357+00:00",
+   "detail": "{\"claims\":[{\"bars\":0.01518080811579513,\"outcome\":\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0\",\"predicted\":0.6414271092965079},{\"bars\":0.013655294113071375,\"outcome\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"predicted\":0.6490555901044163}],\"moves\":[{\"bars\":0.01518080811579513,\"param\":\"param_0\",\"sender\":\"3a9baca5-b15d-46e0-bef5-7573442c9039\",\"setting\":45.776515000769095}],\"path\":[\"3a9baca5-b15d-46e0-bef5-7573442c9039\",\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04\",\"9f32e207-711e-4779-8278-f93e3ca896ff\"],\"predicted\":{\"bars\":0.01518080811579513,\"value\":0.6414271092965079},\"range_used\":{\"param_0\":[25.0,75.0]},\"status\":\"planned\",\"wish_id\":\"f3704571-f019-445f-9b87-0144a833b19e\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T08:43:35.985630+00:00",
+   "detail": "{\"sender\":\"3a9baca5-b15d-46e0-bef5-7573442c9039\",\"db\":\"systemtender_3a9baca5_b15d_46e0_bef5_7573442c9039\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T08:43:37.098605+00:00",
+   "detail": "{\"receiver\":\"9f32e207-711e-4779-8278-f93e3ca896ff\",\"db\":\"systemtender_9f32e207_711e_4779_8278_f93e3ca896ff\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T08:43:37.895737+00:00",
+   "detail": "{\"at\":1793609017.895737,\"book\":{\"judged\":[{\"bar\":0.0029609217679311905,\"kind\":\"claim\",\"median\":0.7433048723499691,\"n\":80,\"reading\":\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0\",\"verdict\":\"missed\"},{\"bar\":0.0028290058581191746,\"kind\":\"claim\",\"median\":0.7453135733807407,\"n\":81,\"reading\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"verdict\":\"missed\"}],\"n\":2}}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T08:43:37.982794+00:00",
+   "detail": "{\"at\":1793609017.982794,\"book\":{\"judged\":[{\"bar\":0.0029609217679311905,\"kind\":\"claim\",\"median\":0.7433048723499691,\"n\":80,\"reading\":\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0\",\"verdict\":\"missed\"},{\"bar\":0.0028290058581191746,\"kind\":\"claim\",\"median\":0.7453135733807407,\"n\":81,\"reading\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"verdict\":\"missed\"}],\"n\":2}}"
+  },
+  {
+   "type": "replanned",
+   "at": "2026-11-02T08:43:38.185425+00:00",
+   "detail": "{\"at\":1793609018.185425,\"book\":{\"moves\":1}}"
+  },
+  {
+   "type": "replanned",
+   "at": "2026-11-02T08:43:38.233371+00:00",
+   "detail": "{\"at\":1793609018.233371,\"book\":{\"moves\":1}}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T08:43:41.394680+00:00",
+   "detail": "{\"at\":1793609021.39468,\"book\":{\"judged\":[{\"bar\":0.011294882522440876,\"kind\":\"claim\",\"median\":0.7540933467401176,\"n\":3,\"reading\":\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0\",\"verdict\":\"missed\"},{\"bar\":0.016641489771233167,\"kind\":\"claim\",\"median\":0.7574986376074425,\"n\":3,\"reading\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"verdict\":\"missed\"}],\"n\":2}}"
+  },
+  {
+   "type": "untended",
+   "at": "2026-11-02T08:58:07.932362+00:00",
+   "detail": "{\"tender\":\"{3a9baca5-b15d-46e0-bef5-7573442c9039,9f32e207-711e-4779-8278-f93e3ca896ff}\",\"reason\":\"tender gone\"}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 0.709,
+  "lo": 0.589,
+  "target": 0.649
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 0.709,
+    "lo": 0.589,
+    "target": 0.649
+   },
+   "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.6643,
+    "lo": 0.5443,
+    "target": 0.6043
+   },
+   "outcome": "9f32e207-711e-4779-8278-f93e3ca896ff/objective_0"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": [
+  {
+   "band": {
+    "hi": 0.9733,
+    "lo": 0.6133
+   },
+   "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_1"
+  },
+  {
+   "band": {
+    "hi": 0.5233,
+    "lo": 0.1633
+   },
+   "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_0"
+  }
+ ]
+}
