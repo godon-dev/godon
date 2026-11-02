@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="330" font-family="Helvetica,Arial,sans-serif">
+<rect width="980" height="330" fill="white"/>
+<text x="240" y="20" font-size="13" fill="#333">Promise held per flight: declared &#8594; planned &#8594; judged windows &#8594; verdict (one row per room; repetition visible)</text>
+<text x="10" y="47" font-size="11" fill="#333">S1 full-loop (f3704571)</text>
+<line x1="240" y1="48" x2="940" y2="48" stroke="#ccc" stroke-width="1"/>
+<text x="248" y="42" font-size="11" fill="#999">(room purged before bundling &#8212; numbers in notes.md)</text>
+<text x="10" y="87" font-size="11" fill="#333">S2-a landed</text>
+<line x1="240" y1="88" x2="940" y2="88" stroke="#ccc" stroke-width="1"/>
+<text x="248" y="82" font-size="11" fill="#999">(room purged before bundling &#8212; numbers in notes.md)</text>
+<text x="10" y="127" font-size="11" fill="#333">S2-b missed</text>
+<line x1="240" y1="128" x2="940" y2="128" stroke="#ccc" stroke-width="1"/>
+<line x1="240.0" y1="120" x2="240.0" y2="134" stroke="#3a6ea5" stroke-width="2"/>
+<line x1="369.1" y1="120" x2="369.1" y2="134" stroke="#9467bd" stroke-width="2"/>
+<line x1="369.1" y1="120" x2="369.1" y2="134" stroke="#9467bd" stroke-width="2"/>
+<line x1="934.8" y1="120" x2="934.8" y2="134" stroke="#b35900" stroke-width="2"/>
+<line x1="934.8" y1="120" x2="934.8" y2="134" stroke="#b35900" stroke-width="2"/>
+<line x1="940.0" y1="120" x2="940.0" y2="134" stroke="#b35900" stroke-width="2"/>
+<circle cx="938" cy="127" r="4" fill="#b35900"/>
+<text x="244" y="119" font-size="9" fill="#666">planned t0 .. missed (+90s) claim med 0.810 -> missed</text>
+<text x="10" y="167" font-size="11" fill="#333">S2-c landed</text>
+<line x1="240" y1="168" x2="940" y2="168" stroke="#ccc" stroke-width="1"/>
+<line x1="240.0" y1="160" x2="240.0" y2="174" stroke="#3a6ea5" stroke-width="2"/>
+<line x1="373.4" y1="160" x2="373.4" y2="174" stroke="#b35900" stroke-width="2"/>
+<line x1="379.8" y1="160" x2="379.8" y2="174" stroke="#b35900" stroke-width="2"/>
+<line x1="382.7" y1="160" x2="382.7" y2="174" stroke="#b35900" stroke-width="2"/>
+<line x1="389.2" y1="160" x2="389.2" y2="174" stroke="#b35900" stroke-width="2"/>
+<line x1="443.6" y1="160" x2="443.6" y2="174" stroke="#9467bd" stroke-width="2"/>
+<line x1="450.0" y1="160" x2="450.0" y2="174" stroke="#9467bd" stroke-width="2"/>
+<line x1="549.1" y1="160" x2="549.1" y2="174" stroke="#2e7d32" stroke-width="2"/>
+<line x1="551.2" y1="160" x2="551.2" y2="174" stroke="#2e7d32" stroke-width="2"/>
+<line x1="708.4" y1="160" x2="708.4" y2="174" stroke="#9467bd" stroke-width="2"/>
+<line x1="708.4" y1="160" x2="708.4" y2="174" stroke="#9467bd" stroke-width="2"/>
+<line x1="761.9" y1="160" x2="761.9" y2="174" stroke="#2e7d32" stroke-width="2"/>
+<line x1="766.8" y1="160" x2="766.8" y2="174" stroke="#2e7d32" stroke-width="2"/>
+<line x1="827.3" y1="160" x2="827.3" y2="174" stroke="#9467bd" stroke-width="2"/>
+<line x1="835.1" y1="160" x2="835.1" y2="174" stroke="#9467bd" stroke-width="2"/>
+<line x1="930.0" y1="160" x2="930.0" y2="174" stroke="#2e7d32" stroke-width="2"/>
+<line x1="940.0" y1="160" x2="940.0" y2="174" stroke="#2e7d32" stroke-width="2"/>
+<circle cx="938" cy="167" r="4" fill="#2e7d32"/>
+<text x="244" y="159" font-size="9" fill="#666">planned t0 .. landed (+35s) claim med 0.741 -> landed</text>
+<text x="10" y="207" font-size="11" fill="#333">S2-d landed</text>
+<line x1="240" y1="208" x2="940" y2="208" stroke="#ccc" stroke-width="1"/>
+<line x1="240.0" y1="200" x2="240.0" y2="214" stroke="#3a6ea5" stroke-width="2"/>
+<line x1="940.0" y1="200" x2="940.0" y2="214" stroke="#2e7d32" stroke-width="2"/>
+<circle cx="938" cy="207" r="4" fill="#2e7d32"/>
+<text x="244" y="199" font-size="9" fill="#666">planned t0 .. landed (+5s) claim med 0.751 -> landed</text>
+<text x="10" y="247" font-size="11" fill="#333">S2-e landed</text>
+<line x1="240" y1="248" x2="940" y2="248" stroke="#ccc" stroke-width="1"/>
+<text x="248" y="242" font-size="11" fill="#999">(room purged before bundling &#8212; numbers in notes.md)</text>
+<line x1="10" y1="308" x2="24" y2="308" stroke="#888" stroke-width="2"/>
+<text x="28" y="312" font-size="10" fill="#555">declared</text>
+<line x1="94" y1="308" x2="108" y2="308" stroke="#3a6ea5" stroke-width="2"/>
+<text x="112" y="312" font-size="10" fill="#555">planned</text>
+<line x1="170" y1="308" x2="184" y2="308" stroke="#3a6ea5" stroke-width="2"/>
+<text x="188" y="312" font-size="10" fill="#555">assigned</text>
+<line x1="254" y1="308" x2="268" y2="308" stroke="#b35900" stroke-width="2"/>
+<text x="272" y="312" font-size="10" fill="#555">missed</text>
+<line x1="322" y1="308" x2="336" y2="308" stroke="#2e7d32" stroke-width="2"/>
+<text x="340" y="312" font-size="10" fill="#555">landed</text>
+<line x1="390" y1="308" x2="404" y2="308" stroke="#9467bd" stroke-width="2"/>
+<text x="408" y="312" font-size="10" fill="#555">undecidable</text>
+<line x1="498" y1="308" x2="512" y2="308" stroke="#c62828" stroke-width="2"/>
+<text x="516" y="312" font-size="10" fill="#555">refused</text>
+<line x1="574" y1="308" x2="588" y2="308" stroke="#b35900" stroke-width="2"/>
+<text x="592" y="312" font-size="10" fill="#555">replanned</text>
+<line x1="666" y1="308" x2="680" y2="308" stroke="#795548" stroke-width="2"/>
+<text x="684" y="312" font-size="10" fill="#555">remeasure</text>
+</svg>

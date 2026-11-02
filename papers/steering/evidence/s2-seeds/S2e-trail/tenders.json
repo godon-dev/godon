@@ -1,0 +1,20 @@
+[
+ {
+  "id": "8d7e2212-920b-4320-a82c-500a8ce36174",
+  "name": "bench-wish-stack-1",
+  "status": "active",
+  "createdAt": "2026-11-02T15:26:45.654893+00:00"
+ },
+ {
+  "id": "61aa8d1e-5acb-4455-9e0c-327e708f3b72",
+  "name": "bench-wish-stack-2",
+  "status": "active",
+  "createdAt": "2026-11-02T15:26:39.353208+00:00"
+ },
+ {
+  "id": "d36b6f9a-4c44-4b90-83cc-f0495dfb2b33",
+  "name": "bench-wish-stack-3",
+  "status": "active",
+  "createdAt": "2026-11-02T15:26:42.248676+00:00"
+ }
+]

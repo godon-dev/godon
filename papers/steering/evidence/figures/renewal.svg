@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="380" font-family="Helvetica,Arial,sans-serif">
+<rect width="880" height="380" fill="white"/>
+<text x="250" y="24" font-size="13" fill="#333">Renewal: map error against the answer key, around a world move</text>
+<line x1="80" y1="330" x2="850" y2="330" stroke="#999"/>
+<line x1="80" y1="50" x2="80" y2="330" stroke="#999"/>
+<text x="126" y="346" font-size="10" fill="#666" text-anchor="middle">quiet</text>
+<text x="342" y="346" font-size="10" fill="#666" text-anchor="middle">world moves</text>
+<text x="557" y="346" font-size="10" fill="#666" text-anchor="middle">re-measure</text>
+<text x="773" y="346" font-size="10" fill="#666" text-anchor="middle">healed</text>
+<path d="M 80,314 L 311,314 L 326,202 L 357,114 L 450,106 L 480,258 L 527,302 L 619,310 L 850,314" fill="none" stroke="#3a6ea5" stroke-width="2.2"/>
+<line x1="326" y1="50" x2="326" y2="330" stroke="#c62828" stroke-dasharray="4 3"/>
+<text x="331" y="64" font-size="10" fill="#c62828">band broken (misses counted)</text>
+<line x1="480" y1="50" x2="480" y2="330" stroke="#2e7d32" stroke-dasharray="4 3"/>
+<text x="485" y="64" font-size="10" fill="#2e7d32">re-measured region served again</text>
+<text x="419" y="98" font-size="10" fill="#3a6ea5">error ~0.28 (~7x the promise bar)</text>
+<text x="86" y="64" font-size="10" fill="#888">shape from the 2026-11-01 battery arcs; D2 strip data overlays this at room close</text>
+</svg>

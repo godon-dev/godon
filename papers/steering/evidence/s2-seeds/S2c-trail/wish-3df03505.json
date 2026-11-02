@@ -1,0 +1,160 @@
+{
+ "id": "3df03505-be59-4ab3-b80b-44d3577b5095",
+ "state": "landed",
+ "createdAt": "2026-11-02T14:55:42.676775+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T14:55:42.693542+00:00"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T14:55:43.020869+00:00",
+   "detail": "{\"at\":1793631343.020869,\"book\":null}"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T14:55:43.037674+00:00",
+   "detail": "{\"claims\":[{\"bars\":0.003244470918883816,\"outcome\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"value\":0.7447349809037691},{\"bars\":0.0033898498093909947,\"outcome\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"value\":0.7431423304740734}],\"hold\":true,\"moves\":[],\"predicted\":{\"value\":0.7447349809037691},\"receivers\":[\"fbe0be95-9981-4312-8955-7ceea916a922\",\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f\"],\"status\":\"planned\",\"wish_id\":\"3df03505-be59-4ab3-b80b-44d3577b5095\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T14:55:45.153496+00:00",
+   "detail": "{\"receiver\":\"fbe0be95-9981-4312-8955-7ceea916a922\",\"db\":\"systemtender_fbe0be95_9981_4312_8955_7ceea916a922\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T14:55:45.625267+00:00",
+   "detail": "{\"receiver\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f\",\"db\":\"systemtender_1d769a83_eccd_4beb_95c2_3fb6b4080c8f\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T14:55:49.612415+00:00",
+   "detail": "{\"at\":1793631349.612415,\"book\":{\"judged\":[{\"bar\":0.002324070544784629,\"kind\":\"claim\",\"median\":0.5837721436075286,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"missed\"}],\"n\":1}}"
+  },
+  {
+   "type": "replanned",
+   "at": "2026-11-02T14:55:49.928433+00:00",
+   "detail": "{\"at\":1793631349.928433,\"book\":null}"
+  },
+  {
+   "type": "missed",
+   "at": "2026-11-02T14:55:50.070252+00:00",
+   "detail": "{\"at\":1793631350.070252,\"book\":{\"judged\":[{\"bar\":0.0972115414166711,\"kind\":\"claim\",\"median\":0.6079847149040952,\"n\":3,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"undecidable\"},{\"bar\":0.002324070544784629,\"kind\":\"claim\",\"median\":0.5837721436075286,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"missed\"}],\"n\":2}}"
+  },
+  {
+   "type": "replanned",
+   "at": "2026-11-02T14:55:50.391383+00:00",
+   "detail": "{\"at\":1793631350.391383,\"book\":null}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:55:53.078286+00:00",
+   "detail": "{\"at\":1793631353.078286,\"book\":{\"judged\":[{\"bar\":0.15027652772707248,\"kind\":\"claim\",\"median\":0.7381942720628376,\"n\":3,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"undecidable\"}],\"n\":1}}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:55:53.394467+00:00",
+   "detail": "{\"at\":1793631353.394467,\"book\":{\"judged\":[{\"bar\":0.15027652772707248,\"kind\":\"claim\",\"median\":0.7381942720628376,\"n\":3,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"undecidable\"},{\"bar\":0.14028950594273254,\"kind\":\"claim\",\"median\":0.7455677868732538,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"undecidable\"}],\"n\":2}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T14:55:58.293413+00:00",
+   "detail": "{\"at\":1793631358.293413,\"book\":{\"judged\":[{\"bar\":0.027944975023372853,\"kind\":\"claim\",\"median\":0.7473875899212082,\"n\":5,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"landed\"},{\"bar\":0.06602060560961417,\"kind\":\"claim\",\"median\":0.7261426498865737,\"n\":6,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"landed\"}],\"n\":2}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T14:55:58.396132+00:00",
+   "detail": "{\"at\":1793631358.396132,\"book\":{\"judged\":[{\"bar\":0.027944975023372853,\"kind\":\"claim\",\"median\":0.7473875899212082,\"n\":5,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"landed\"},{\"bar\":0.06602060560961417,\"kind\":\"claim\",\"median\":0.7261426498865737,\"n\":6,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"landed\"}],\"n\":2}}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:56:06.162942+00:00",
+   "detail": "{\"at\":1793631366.162942,\"book\":{\"judged\":[{\"bar\":0.059730850352708635,\"kind\":\"claim\",\"median\":0.7489416776964937,\"n\":6,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"landed\"},{\"bar\":0.055240265838713734,\"kind\":\"claim\",\"median\":0.7501553091793233,\"n\":7,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"undecidable\"}],\"n\":2}}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:56:06.163953+00:00",
+   "detail": "{\"at\":1793631366.163953,\"book\":{\"judged\":[{\"bar\":0.058592790134997,\"kind\":\"claim\",\"median\":0.7521116451460865,\"n\":7,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"landed\"},{\"bar\":0.055240265838713734,\"kind\":\"claim\",\"median\":0.7501553091793233,\"n\":7,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"undecidable\"}],\"n\":2}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T14:56:08.804182+00:00",
+   "detail": "{\"at\":1793631368.804182,\"book\":{\"judged\":[{\"bar\":0.02502610773840797,\"kind\":\"claim\",\"median\":0.7312101651427888,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T14:56:09.045348+00:00",
+   "detail": "{\"at\":1793631369.045348,\"book\":{\"judged\":[{\"bar\":0.01495057054665271,\"kind\":\"claim\",\"median\":0.7353839212093437,\"n\":3,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"landed\"},{\"bar\":0.02502610773840797,\"kind\":\"claim\",\"median\":0.7312101651427888,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"landed\"}],\"n\":2}}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:56:12.034188+00:00",
+   "detail": "{\"at\":1793631372.034188,\"book\":{\"judged\":[{\"bar\":0.03752505342598761,\"kind\":\"claim\",\"median\":0.8061765515514786,\"n\":3,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"undecidable\"}],\"n\":1}}"
+  },
+  {
+   "type": "undecidable",
+   "at": "2026-11-02T14:56:12.422227+00:00",
+   "detail": "{\"at\":1793631372.422227,\"book\":{\"judged\":[{\"bar\":0.03752505342598761,\"kind\":\"claim\",\"median\":0.8061765515514786,\"n\":3,\"reading\":\"fbe0be95-9981-4312-8955-7ceea916a922/objective_0\",\"verdict\":\"undecidable\"},{\"bar\":0.042537340466183314,\"kind\":\"claim\",\"median\":0.80794710662392,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"undecidable\"}],\"n\":2}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T14:56:17.107824+00:00",
+   "detail": "{\"at\":1793631377.107824,\"book\":{\"judged\":[{\"bar\":0.016631745718806382,\"kind\":\"claim\",\"median\":0.7405863202296729,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T14:56:17.603532+00:00",
+   "detail": "{\"at\":1793631377.603532,\"book\":{\"judged\":[{\"bar\":0.016631745718806382,\"kind\":\"claim\",\"median\":0.7405863202296729,\"n\":3,\"reading\":\"1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 0.8257,
+  "lo": 0.6657,
+  "target": 0.7457
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 0.8257,
+    "lo": 0.6657,
+    "target": 0.7457
+   },
+   "outcome": "fbe0be95-9981-4312-8955-7ceea916a922/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.8021,
+    "lo": 0.6421,
+    "target": 0.7221
+   },
+   "outcome": "1d769a83-eccd-4beb-95c2-3fb6b4080c8f/objective_0"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "fbe0be95-9981-4312-8955-7ceea916a922/objective_0",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": [
+  {
+   "band": {
+    "hi": 0.9463,
+    "lo": 0.7063
+   },
+   "outcome": "54f11e08-6634-4f92-96e7-cf17f8279eba/objective_1"
+  },
+  {
+   "band": {
+    "hi": 0.4503,
+    "lo": 0.2103
+   },
+   "outcome": "54f11e08-6634-4f92-96e7-cf17f8279eba/objective_0"
+  }
+ ]
+}

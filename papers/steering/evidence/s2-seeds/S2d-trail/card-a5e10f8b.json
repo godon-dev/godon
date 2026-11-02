@@ -1,0 +1,55 @@
+{
+ "events": [
+  {
+   "detail": null,
+   "event": "planned",
+   "tsz": 1793632174.646145
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.006356918340987695,
+      "kind": "claim",
+      "median": 0.7513771093876219,
+      "n": 3,
+      "reading": "2672f2af-0683-4889-83a8-9dd5cfff6e74/objective_0",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793632179.762342
+  }
+ ],
+ "instruction": "hold",
+ "plan": {
+  "claims": [
+   {
+    "bars": 0.0039717279944679745,
+    "outcome": "2672f2af-0683-4889-83a8-9dd5cfff6e74/objective_0",
+    "value": 0.747206610993846
+   },
+   {
+    "bars": 0.0033927814025954527,
+    "outcome": "46820d50-5508-4843-bd3d-308e45084230/objective_0",
+    "value": 0.7433926360963196
+   }
+  ],
+  "hold": true,
+  "moves": [],
+  "predicted": {
+   "value": 0.747206610993846
+  },
+  "receivers": [
+   "2672f2af-0683-4889-83a8-9dd5cfff6e74",
+   "46820d50-5508-4843-bd3d-308e45084230"
+  ]
+ },
+ "probe": null,
+ "status": "landed",
+ "verdict": null,
+ "walk": null,
+ "wish_id": "a5e10f8b-102c-4f6a-ae2a-aa48cd223524"
+}

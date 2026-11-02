@@ -1,0 +1,63 @@
+{
+ "node-1": {
+  "node_id": "node-1",
+  "objective_0": 0.3677273103977848,
+  "objective_1": 0.8020115215029047,
+  "tick": 1010
+ },
+ "node-2": {
+  "node_id": "node-2",
+  "objective_0": 0.24289889414806226,
+  "tick": 1273
+ },
+ "node-3": {
+  "node_id": "node-3",
+  "objective_0": 0.7470733145293242,
+  "tick": 950
+ },
+ "node-1/truth": {
+  "base_from": "linear",
+  "base_progress": 1.0,
+  "base_to": "linear",
+  "edges": [
+   {
+    "from": "node-1",
+    "strength_effective": 0.7,
+    "to": "node-2",
+    "to_channel": 0
+   },
+   {
+    "from": "node-1",
+    "strength_effective": 0.7,
+    "to": "node-3",
+    "to_channel": 0
+   },
+   {
+    "from": "node-3",
+    "strength_effective": 0.7,
+    "to": "node-1",
+    "to_channel": 1
+   }
+  ],
+  "effective_weights": [
+   [
+    0.7
+   ],
+   [
+    0.6
+   ]
+  ],
+  "node_id": "node-1",
+  "objectives": [
+   0.35,
+   0.8214999999999999
+  ],
+  "total_ticks": 3233
+ },
+ "drift-state": {
+  "node": "node-1",
+  "running": [],
+  "total_ticks": 3235,
+  "uptime_secs": 709.434712058
+ }
+}

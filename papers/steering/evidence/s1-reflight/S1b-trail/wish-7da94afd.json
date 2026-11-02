@@ -1,0 +1,70 @@
+{
+ "id": "7da94afd-1fb7-4728-9331-6b651398dbb7",
+ "state": "unservable",
+ "createdAt": "2026-11-02T08:54:17.830308+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T08:54:17.844260+00:00"
+  },
+  {
+   "type": "refused",
+   "at": "2026-11-02T08:54:18.339281+00:00",
+   "detail": "{\"at\":1793609658.339281,\"book\":null}"
+  },
+  {
+   "type": "refused",
+   "at": "2026-11-02T08:54:18.359143+00:00",
+   "detail": "{\"reason\":\"position_conflict\",\"detail\":\"position conflict: your plan would break a held band. outcome '9f32e207-711e-4779-8278-f93e3ca896ff/objective_0' is held by wish f3704571-f019-445f-9b87-0144a833b19e (band [0.5443, 0.6643]) on dial 3a9baca5-b15d-46e0-bef5-7573442c9039/param_0 at level 45.7765 since t=1793609021; the compile says: term '9f32e207-711e-4779-8278-f93e3ca896ff/objective_0': band [0.5657, 0.9257] spans 0.3600 - under the wander floor 0.4914 (derived wander 0.4914): no setting can hold a band narrower than the reading's own wander; widen the band. Coexistence is found by re-declaring outside: retarget, widen a band, or release theirs \u2014 the engine never chooses between wishes.\"}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 0.3338,
+  "lo": 0.2138,
+  "target": 0.2738
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 0.3338,
+    "lo": 0.2138,
+    "target": 0.2738
+   },
+   "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.7855,
+    "lo": 0.6655,
+    "target": 0.7255
+   },
+   "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_1"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_0",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": [
+  {
+   "band": {
+    "hi": 0.9257,
+    "lo": 0.5657
+   },
+   "outcome": "9f32e207-711e-4779-8278-f93e3ca896ff/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.9338,
+    "lo": 0.5738
+   },
+   "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0"
+  }
+ ]
+}

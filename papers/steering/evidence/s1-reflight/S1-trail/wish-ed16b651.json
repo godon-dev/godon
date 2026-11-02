@@ -1,0 +1,95 @@
+{
+ "id": "ed16b651-c1e8-4f82-a10d-4c885fe4d6c8",
+ "state": "untended",
+ "createdAt": "2026-11-02T08:19:28.556096+00:00",
+ "events": [
+  {
+   "type": "declared",
+   "at": "2026-11-02T08:19:31.879561+00:00"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T08:19:32.305956+00:00",
+   "detail": "{\"at\":1793607572.305956,\"book\":null}"
+  },
+  {
+   "type": "planned",
+   "at": "2026-11-02T08:19:32.325941+00:00",
+   "detail": "{\"claims\":[{\"bars\":0.004061036734934784,\"outcome\":\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0\",\"value\":0.7443499534891586},{\"bars\":0.004039551368976823,\"outcome\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"value\":0.7440675464199827}],\"hold\":true,\"moves\":[],\"predicted\":{\"value\":0.7443499534891586},\"receivers\":[\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04\",\"9f32e207-711e-4779-8278-f93e3ca896ff\"],\"status\":\"planned\",\"wish_id\":\"ed16b651-c1e8-4f82-a10d-4c885fe4d6c8\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T08:19:32.673852+00:00",
+   "detail": "{\"receiver\":\"40e3ed18-b25c-47a1-9fce-e3fa2850ee04\",\"db\":\"systemtender_40e3ed18_b25c_47a1_9fce_e3fa2850ee04\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "assigned",
+   "at": "2026-11-02T08:19:32.860450+00:00",
+   "detail": "{\"receiver\":\"9f32e207-711e-4779-8278-f93e3ca896ff\",\"db\":\"systemtender_9f32e207_711e_4779_8278_f93e3ca896ff\",\"role\":\"receiver\"}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T08:19:37.520174+00:00",
+   "detail": "{\"at\":1793607577.520174,\"book\":{\"judged\":[{\"bar\":0.006661431876358015,\"kind\":\"claim\",\"median\":0.738750518026131,\"n\":3,\"reading\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  },
+  {
+   "type": "landed",
+   "at": "2026-11-02T08:19:37.886285+00:00",
+   "detail": "{\"at\":1793607577.886285,\"book\":{\"judged\":[{\"bar\":0.006661431876358015,\"kind\":\"claim\",\"median\":0.738750518026131,\"n\":3,\"reading\":\"9f32e207-711e-4779-8278-f93e3ca896ff/objective_0\",\"verdict\":\"landed\"}],\"n\":1}}"
+  },
+  {
+   "type": "untended",
+   "at": "2026-11-02T08:59:13.142789+00:00",
+   "detail": "{\"tender\":\"{40e3ed18-b25c-47a1-9fce-e3fa2850ee04,9f32e207-711e-4779-8278-f93e3ca896ff}\",\"reason\":\"tender gone\"}"
+  }
+ ],
+ "answer": "now",
+ "band": {
+  "hi": 0.8065,
+  "lo": 0.6465,
+  "target": 0.7265
+ },
+ "budget": 10,
+ "claims": [
+  {
+   "band": {
+    "hi": 0.8065,
+    "lo": 0.6465,
+    "target": 0.7265
+   },
+   "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0"
+  },
+  {
+   "band": {
+    "hi": 0.8217,
+    "lo": 0.6617,
+    "target": 0.7417
+   },
+   "outcome": "9f32e207-711e-4779-8278-f93e3ca896ff/objective_0"
+  }
+ ],
+ "limits": {
+  "exclude": [],
+  "maxChange": 0.25
+ },
+ "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0",
+ "regime": "standing",
+ "seek": null,
+ "standard": "all",
+ "terms": [
+  {
+   "band": {
+    "hi": 0.9657,
+    "lo": 0.7257
+   },
+   "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_1"
+  },
+  {
+   "band": {
+    "hi": 0.4703,
+    "lo": 0.2303
+   },
+   "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_0"
+  }
+ ]
+}

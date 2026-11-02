@@ -1,0 +1,72 @@
+{
+ "events": [
+  {
+   "detail": null,
+   "event": "planned",
+   "tsz": 1793649779.169558
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.005157447801834201,
+      "kind": "claim",
+      "median": 0.7395684110044218,
+      "n": 3,
+      "reading": "c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793649787.406212
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.005157447801834201,
+      "kind": "claim",
+      "median": 0.7395684110044218,
+      "n": 3,
+      "reading": "c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793649787.866889
+  }
+ ],
+ "instruction": "hold",
+ "plan": {
+  "claims": [
+   {
+    "bars": 0.0029282317686434287,
+    "outcome": "3d646626-54c3-499a-a892-d952925c4aec/objective_0",
+    "value": 0.7465145295188739
+   },
+   {
+    "bars": 0.0035798875903926765,
+    "outcome": "c1aadefe-77a1-418b-be36-f0e2f9b3a1aa/objective_0",
+    "value": 0.7411000987112122
+   }
+  ],
+  "hold": true,
+  "moves": [],
+  "predicted": {
+   "value": 0.7465145295188739
+  },
+  "receivers": [
+   "3d646626-54c3-499a-a892-d952925c4aec",
+   "c1aadefe-77a1-418b-be36-f0e2f9b3a1aa"
+  ]
+ },
+ "probe": null,
+ "status": "landed",
+ "verdict": null,
+ "walk": null,
+ "wish_id": "9597fb44-4919-4f02-944c-df1a91e37adf"
+}

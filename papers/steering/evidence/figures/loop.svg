@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" font-family="Helvetica,Arial,sans-serif">
+<rect width="900" height="420" fill="white"/>
+<text x="330" y="28" font-size="14" fill="#333">The keeping loop (one round per watering)</text>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#555"/></marker></defs>
+<rect x="60" y="70" width="150" height="44" rx="8" fill="#fff8e1" stroke="#b35900"/>
+<text x="135.0" y="96.0" font-size="12" fill="#222" text-anchor="middle">promise declared (band on a reading)</text>
+<rect x="280" y="70" width="150" height="44" rx="8" fill="#eef4fb" stroke="#3a6ea5"/>
+<text x="355.0" y="96.0" font-size="12" fill="#222" text-anchor="middle">compiled against the measured map</text>
+<rect x="500" y="70" width="130" height="44" rx="8" fill="#eef4fb" stroke="#3a6ea5"/>
+<text x="565.0" y="96.0" font-size="12" fill="#222" text-anchor="middle">served: the dial holds</text>
+<rect x="690" y="70" width="130" height="44" rx="8" fill="#eef4fb" stroke="#3a6ea5"/>
+<text x="755.0" y="96.0" font-size="12" fill="#222" text-anchor="middle">judged per window</text>
+<rect x="690" y="200" width="130" height="44" rx="8" fill="#fdecea" stroke="#c62828"/>
+<text x="755.0" y="226.0" font-size="12" fill="#222" text-anchor="middle">reading leaves band</text>
+<rect x="470" y="200" width="160" height="44" rx="8" fill="#eef4fb" stroke="#3a6ea5"/>
+<text x="550.0" y="226.0" font-size="12" fill="#222" text-anchor="middle">conviction + aimed probe</text>
+<rect x="240" y="200" width="160" height="44" rx="8" fill="#eef4fb" stroke="#3a6ea5"/>
+<text x="320.0" y="226.0" font-size="12" fill="#222" text-anchor="middle">map re-measures the moved region</text>
+<rect x="60" y="200" width="120" height="44" rx="8" fill="#eef7ee" stroke="#2e7d32"/>
+<text x="120.0" y="226.0" font-size="12" fill="#222" text-anchor="middle">re-served (watering)</text>
+<line x1="210" y1="92" x2="280" y2="92" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="430" y1="92" x2="500" y2="92" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="630" y1="92" x2="690" y2="92" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="755" y1="114" x2="755" y2="200" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="755.0" y="151.0" font-size="10" fill="#555" text-anchor="middle">the world moved</text>
+<line x1="690" y1="222" x2="630" y2="222" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="470" y1="222" x2="400" y2="222" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="240" y1="222" x2="180" y2="222" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+<line x1="120" y1="200" x2="120" y2="114" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="120.0" y="151.0" font-size="10" fill="#2e7d32" text-anchor="middle">next round</text>
+<line x1="135" y1="70" x2="690" y2="55" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#a)"/>
+<text x="412.5" y="56.5" font-size="10" fill="#2e7d32" text-anchor="middle">kept: stays in band — verdict per line, no move needed</text>
+<text x="60" y="300" font-size="11" fill="#777">Receipts live per cell: refusal at the unmeasured edge (S4); the composed serve and its judged lines (S1, S2 x5);</text>
+<text x="60" y="318" font-size="11" fill="#777">rounds and their cost against the quiet stretches between world moves (D2); survival of a declared move (D1, the 2026-11-01 battery).</text>
+</svg>

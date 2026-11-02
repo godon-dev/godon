@@ -1,0 +1,56 @@
+[
+ {
+  "id": "b5227a05-dd44-4b08-b4f3-91a0910e407c",
+  "state": "missed",
+  "createdAt": "2026-11-02T14:02:46.143509+00:00",
+  "outcome": "ef7c4b9b-4a22-4002-9e2e-0f7670ae3f9e/objective_0"
+ },
+ {
+  "id": "5be311f2-9b37-4068-ba47-112fde7a93bc",
+  "state": "untended",
+  "createdAt": "2026-11-02T09:48:50.781405+00:00",
+  "outcome": "cc6dcbe4-1054-49b6-be56-a404d54cec1d/objective_0"
+ },
+ {
+  "id": "138d8607-76c4-41ae-9aab-6c57ffa89677",
+  "state": "unservable",
+  "createdAt": "2026-11-02T09:10:30.262901+00:00",
+  "outcome": "72a761bb-2cbd-4f65-9179-09579303e823/objective_0"
+ },
+ {
+  "id": "7da94afd-1fb7-4728-9331-6b651398dbb7",
+  "state": "unservable",
+  "createdAt": "2026-11-02T08:54:17.830308+00:00",
+  "outcome": "3a9baca5-b15d-46e0-bef5-7573442c9039/objective_0"
+ },
+ {
+  "id": "f3704571-f019-445f-9b87-0144a833b19e",
+  "state": "untended",
+  "createdAt": "2026-11-02T08:43:35.179837+00:00",
+  "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0"
+ },
+ {
+  "id": "e8c6dab0-7b95-42ea-8157-22f30160e340",
+  "state": "unservable",
+  "createdAt": "2026-11-02T08:40:35.739975+00:00",
+  "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0"
+ },
+ {
+  "id": "ed16b651-c1e8-4f82-a10d-4c885fe4d6c8",
+  "state": "untended",
+  "createdAt": "2026-11-02T08:19:28.556096+00:00",
+  "outcome": "40e3ed18-b25c-47a1-9fce-e3fa2850ee04/objective_0"
+ },
+ {
+  "id": "b0c8a0c4-8473-4643-bf82-56d9dd3dba50",
+  "state": "unservable",
+  "createdAt": "2026-11-02T08:00:20.480146+00:00",
+  "outcome": "236a3fda-aa51-4d72-b9ca-f9140317df71/objective_1"
+ },
+ {
+  "id": "350c3313-4001-4082-8666-47c99fee484d",
+  "state": "unservable",
+  "createdAt": "2026-11-02T07:36:30.334086+00:00",
+  "outcome": "96682eeb-b76f-4f3c-8ff1-7c9ae393e7b0/objective_1"
+ }
+]
