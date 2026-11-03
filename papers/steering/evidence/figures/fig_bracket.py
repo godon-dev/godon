@@ -30,10 +30,10 @@ svg.append(f'<line x1="{x(8):.0f}" y1="{y(0.02):.0f}" x2="{x(92):.0f}" y2="{y(0.
 svg.append(f'<text x="{x(8):.0f}" y="{y(0.02)-8:.0f}" font-size="10" fill="#c62828">doing nothing (band broken by the moving world; ~0 kept)</text>')
 svg.append(f'<line x1="{x(8):.0f}" y1="{y(0.93):.0f}" x2="{x(92):.0f}" y2="{y(0.93):.0f}" stroke="#795548" stroke-width="2" stroke-dasharray="6 3"/>')
 svg.append(f'<text x="{x(8):.0f}" y="{y(0.93)-8:.0f}" font-size="10" fill="#795548">re-planning from the answer key (post-hoc ceiling)</text>')
-svg.append(f'<rect x="{x(30):.0f}" y="{y(0.78):.0f}" width="{x(70)-x(30):.0f}" height="{y(0.55)-y(0.78):.0f}" fill="#2e7d32" fill-opacity="0.25" stroke="#2e7d32"/>')
-svg.append(f'<text x="{x(50):.0f}" y="{y(0.66):.0f}" font-size="11" fill="#2e7d32" text-anchor="middle">the kept promise (D2 fills)</text>')
+svg.append(f'<rect x="{x(30):.0f}" y="{y(0.874):.0f}" width="{x(70)-x(30):.0f}" height="{y(0.60)-y(0.874):.0f}" fill="#2e7d32" fill-opacity="0.25" stroke="#2e7d32"/>')
+svg.append(f'<text x="{x(50):.0f}" y="{y(0.66):.0f}" font-size="11" fill="#2e7d32" text-anchor="middle">the kept promise: 0.874 (139/159, D2″ 4h)</text>')
 
-svg.append(f'<text x="{L}" y="{H-28}" font-size="10" fill="#888">Fraction of judged windows inside the promised band, over the whole 6-hour room.</text>')
+svg.append(f'<text x="{L}" y="{H-28}" font-size="10" fill="#888">Fraction of 90s samples inside the promised band, over the D2″ 4-hour room (run 41600115558).</text>')
 svg.append(f'<text x="{L}" y="{H-14}" font-size="10" fill="#888">Floor from the same recording with serves withheld; ceiling computed post-hoc from truth (never a live arm).</text>')
 svg.append("</svg>")
 open(os.path.join(HERE, "bracket.svg"), "w").write("\n".join(svg))
