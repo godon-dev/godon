@@ -1,0 +1,32 @@
+[
+ {
+  "id": "ec9a28e3-447f-4907-9df1-cd626d5b3a2e",
+  "state": "landed",
+  "createdAt": "2026-11-03T08:15:17.522267+00:00",
+  "outcome": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1"
+ },
+ {
+  "id": "eb7ca8df-344c-4342-b9f9-74ccea13b72a",
+  "state": "untended",
+  "createdAt": "2026-11-02T20:55:38.046224+00:00",
+  "outcome": "c49d468b-0123-4bdd-b1cc-4d212a27b9bd/objective_1"
+ },
+ {
+  "id": "691bd975-b604-4875-9f1a-ef3053401e99",
+  "state": "unservable",
+  "createdAt": "2026-11-02T20:44:51.382279+00:00",
+  "outcome": "45d80aa5-8742-4e38-ab22-4a953f427fa3/objective_0"
+ },
+ {
+  "id": "e0bca60f-ac6a-4de0-b2b1-d4b0a5e2206c",
+  "state": "unservable",
+  "createdAt": "2026-11-02T20:33:28.639292+00:00",
+  "outcome": "9fb0e687-aacf-4696-9127-b9934cadf38b/objective_0"
+ },
+ {
+  "id": "49029316-15cd-4ab4-a268-2f256c11cfe8",
+  "state": "unservable",
+  "createdAt": "2026-11-02T20:33:09.741239+00:00",
+  "outcome": "9fb0e687-aacf-4696-9127-b9934cadf38b/objective_0"
+ }
+]

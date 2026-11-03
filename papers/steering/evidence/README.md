@@ -65,3 +65,11 @@ documented numbers + run ids (e.g. 41332501386) are the citable trail.
   1.000; strip.log = the 90s sampler: readings/truth/drift/registry;
   d2_oracle.py regenerates the bracket numbers from strip.log alone).
   D2' (hw 0.08, run 41522315492) lands here at its close.
+
+- d2-upkeep/D2pp-trail (2026-11-03, the 4h close at the holder's sealed
+  window): the bracket receipt — kept 0.874 (139/159) vs do-nothing
+  floor 0.013 vs oracle 1.000; the slide saturated 08:12:45Z;
+  compensation continuous (zero discrete waterings; 19 one-minute
+  wander straddles; one undecidable blip; no misses; claim judged
+  landed n=48). d2pp_oracle.py regenerates every number from
+  strip.log alone.
