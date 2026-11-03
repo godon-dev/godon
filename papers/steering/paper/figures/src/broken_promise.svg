@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="640" font-family="Helvetica,Arial,sans-serif">
+<rect width="940" height="640" fill="white"/>
+<text x="470" y="30" font-size="17" fill="#222" text-anchor="middle" font-weight="bold">How drift impacts a promise</text>
+<rect x="110" y="209" width="790" height="48" fill="#2e7d32" fill-opacity="0.15" stroke="#2e7d32" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="122" y="225" font-size="13" fill="#2e7d32">the promised band</text>
+<line x1="110" y1="281" x2="900" y2="281" stroke="#eeeeee"/>
+<text x="102" y="285" font-size="12" fill="#666" text-anchor="end">0.9</text>
+<line x1="110" y1="233" x2="900" y2="233" stroke="#eeeeee"/>
+<text x="102" y="237" font-size="12" fill="#666" text-anchor="end">1.0</text>
+<line x1="110" y1="185" x2="900" y2="185" stroke="#eeeeee"/>
+<text x="102" y="189" font-size="12" fill="#666" text-anchor="end">1.1</text>
+<line x1="110" y1="138" x2="900" y2="138" stroke="#eeeeee"/>
+<text x="102" y="142" font-size="12" fill="#666" text-anchor="end">1.2</text>
+<text x="26" y="195" font-size="13" fill="#444">the reading</text>
+<path d="M 110,233 L 347,233 L 355,224 L 371,176 L 394,138 L 442,133 L 505,147 L 537,185 L 568,214 L 631,228 L 900,233" fill="none" stroke="#3a6ea5" stroke-width="3"/>
+<text x="221" y="248" font-size="13" fill="#555" text-anchor="middle">quiet</text>
+<text x="426" y="104" font-size="13" fill="#b35900" text-anchor="middle">the alarm</text>
+<text x="710" y="201" font-size="13" fill="#2e7d32" text-anchor="middle">re-landed</text>
+<line x1="110" y1="560" x2="900" y2="560" stroke="#eeeeee"/>
+<text x="102" y="564" font-size="12" fill="#666" text-anchor="end">0</text>
+<line x1="110" y1="494" x2="900" y2="494" stroke="#eeeeee"/>
+<text x="102" y="498" font-size="12" fill="#666" text-anchor="end">0.1</text>
+<line x1="110" y1="429" x2="900" y2="429" stroke="#eeeeee"/>
+<text x="102" y="433" font-size="12" fill="#666" text-anchor="end">0.2</text>
+<line x1="110" y1="363" x2="900" y2="363" stroke="#eeeeee"/>
+<text x="102" y="367" font-size="12" fill="#666" text-anchor="end">0.3</text>
+<text x="26" y="455" font-size="13" fill="#444">map error</text>
+<path d="M 110,547 L 347,547 L 363,455 L 394,383 L 489,376 L 521,501 L 568,537 L 663,544 L 900,547" fill="none" stroke="#3a6ea5" stroke-width="3"/>
+<text x="458" y="357" font-size="13" fill="#3a6ea5" text-anchor="middle">stale</text>
+<text x="726" y="521" font-size="13" fill="#2e7d32" text-anchor="middle">error collapses</text>
+<line x1="355" y1="86" x2="355" y2="560" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="363" y="64" font-size="13" fill="#c62828">the world moves</text>
+<line x1="521" y1="86" x2="521" y2="560" stroke="#795548" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="529" y="78" font-size="13" fill="#795548">re-measured</text>
+<line x1="110" y1="560" x2="900" y2="560" stroke="#999999" stroke-width="1.5"/>
+<line x1="110" y1="554" x2="110" y2="566" stroke="#999999"/>
+<line x1="308" y1="554" x2="308" y2="566" stroke="#999999"/>
+<line x1="505" y1="554" x2="505" y2="566" stroke="#999999"/>
+<line x1="702" y1="554" x2="702" y2="566" stroke="#999999"/>
+<line x1="900" y1="554" x2="900" y2="566" stroke="#999999"/>
+<text x="505" y="586" font-size="13" fill="#444" text-anchor="middle">time (one run's life)</text>
+<text x="16" y="632" font-size="12" fill="#888">Schematic of the documented battery arc (Section 5.3).</text>
+</svg>

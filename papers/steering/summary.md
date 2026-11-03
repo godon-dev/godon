@@ -51,11 +51,11 @@ the discussion and the follow-up paper's spine.)
 
 | Cell | Collector | Receipt slot | Status |
 |------|-----------|--------------|--------|
-| S1 first landing | landed reflight (a+b fork, 2+2 shape: N claims + M terms) | S1-LAND: wish id, four lines in band, conjunction exact; second-leg prediction error logged even where non-verdict-relevant; post-terminal swing | EMPTY |
-| S2 repeats | same room, k seeds | S2-SEEDS: per-seed verdict + landing margin | EMPTY |
-| S4 refusal | target outside measured envelope | S4-REFUSE: refusal with named reason, zero actuation | EMPTY |
-| D1 drift | declared morph at a tick (bench 0.4.0 machinery) | D1-DRIFT: miss stamps → re-walk → re-land timeline | EMPTY |
-| D2 economics | held wish, long window | D2-UPKEEP: watering count, cost/watering, payback ceiling vs quiet | EMPTY |
+| S1 first landing | landed reflight (a+b fork, 2+2 shape: N claims + M terms) | S1-LAND: TWO-ERA FILLED — era-1 miss f3704571 (second-leg ~0.11 vs bars 0.015, the trail that root-caused the witnessing gaps); post-repair 41510475429 (terms judged+held live 0.8204/0.3534, one claim missed 0.022) + 41512715962 hold-shape landed; four-of-four gated on map density alone (3 named joint refusals — the #399 cure class) | FILLED (boundary stated) |
+| S2 repeats | same room, k seeds | S2-SEEDS: 4/5 landed (5be311f2, 41465042445, 41467200842, 41469440919; b5227a05 honest miss 0.004 over edge — 4h declare-delay artifact) | FILLED |
+| S4 refusal | target outside measured envelope | S4-REFUSE: b0c8a0c4 refused by name (hill [25,75], 0.1184 vs 0.6363, gate 0.0514), zero actuation; first-attempt instrument trail banked | FILLED |
+| D1 drift | declared morph at a tick (bench 0.4.0 machinery) | D1-DRIFT: the 2026-11-01 battery (rooms 19–23, 41332501386 era) — convictions 65–300× bars, 76–90 s slide→conviction; second lap n=1, framed done | FILLED |
+| D2 economics | held wish, long window | D2-UPKEEP: three-flight envelope — 41471550622 vacuous (floor 1.000), 41522315492 kept 0.093 (floor 0.000, 16 breaks), 41600115558 kept 0.874 vs floor 0.013 vs post-hoc oracle 1.000; continuous compensation, zero discrete waterings | FILLED |
 
 Bracket arms (cheap, internal, no race): do-nothing (the band is not
 satisfied by luck — kept-fraction ~0 under drift) and oracle re-planning
@@ -122,3 +122,107 @@ is the point of the containment.)
    trailer.
 4. Holder: title pick + the four collection decisions.
 5. Zenodo + HAL + arXiv drill per P1/P2 pattern.
+
+## Novelty sweep — 2026-11-03, writing-day (gate 1; recorded BEFORE prose)
+
+Live arXiv API, 11 queries across the five ordered slices. Nearest
+neighbors per slice, with the defensive phrasing each one forces:
+
+- Safe/conservative model-based control (refusal's primitive ancestor):
+  1509.01066 (GP safe controller optimization, quadrotors), 2409.01163
+  (PACSBO), 2501.12969 (Lipschitz safe BO, automotive), 2405.10534
+  (CMA-ES for safe optimization). All bound EXPLORATION to a trusted
+  region; none decline the target itself, none refuse with zero
+  actuation. Phrase safe model-based optimization as the ancestor,
+  never as us.
+- Steering under drift / time-variation: 1712.07548 (adaptive MPC,
+  constrained linear time-varying), 2410.11107 (recursively feasible
+  stochastic MPC, time-varying). Re-learn the plant, track a
+  reference — no priced upkeep, no named refusal of unmeasurable
+  targets, no shared substrate.
+- Held-setpoint / promise vocabulary: 2311.07815 (decentralized
+  commitment devices, cooperative AI) — normative economics, no
+  metrology, no anchors. The setpoint+drift query returns
+  instrumentation-drift compensation (2311.05345) — a different sense
+  of drift. The vocabulary cell stays unoccupied on arXiv.
+- Self-adaptive upkeep economics: 1402.2144 / 1402.2611 (self-adaptive
+  software under runtime uncertainty), 2608.01001 (agentic technical
+  debt, systematic mapping). Costs are named, never measured against
+  do-nothing/oracle anchors.
+- Refusal / calibrated abstention under action: 2511.04855 (epistemic
+  reject option), 2101.12523 (optimal reject-option strategies),
+  2309.16412 (selective nonparametric regression via testing),
+  2007.03574 (provably safe PAC-MDP exploration). Declining a label
+  vs declining an action on actuators — complements, does not occupy.
+
+Verdict: no neighbor prices a kept promise in its own units between a
+do-nothing floor and an oracle ceiling, and none refuses by name with
+zero actuation. Defensive phrasing per P1-P3 holds; no superlatives
+needed. Journal-only residual: SEAMS/TAAS-style self-adaptive
+maintenance economics sits outside arXiv — noted, not blocking (P2
+precedent, holder's call).
+
+## Title candidates — 2026-11-03 (HOLDER'S WORD: the title carries
+"steerwish" as a word; the earlier steerwish-free set is superseded)
+
+- "The Price of a Steerwish: Steering a Living Substrate Through
+  Drift" (draft v1.1 carries this one)
+- "A Steerwish Is a Chosen State: Steering, Refusal, and Upkeep on a
+  Drifting Substrate"
+- "Promises, Not Maxima: The Steerwish on a Living Substrate"
+- "Steerwish: Refusal, Drift Survival, and the Upkeep of a Held
+  Promise"
+- "The Steerwish: Between Floor and Oracle on a Drifting Substrate"
+
+Snappy set (holder ask, same evening — all carry the word):
+
+- "Steerwish: Tending What Drifts"
+- "Steerwish, Priced"
+- "Steerwish: A Chosen State, Held"
+- "Steerwish: Refuse, Never Extrapolate"
+- "A Steerwish Kept"
+- "Steerwish Under Drift"
+- "Steerwish: Keep the Band, Refuse the Rest"
+- "The Steerwish and Its Price"
+- "Steerwish: A Chosen State, Not a Maximum"
+
+Round-4 set (same evening, fresh forms):
+
+- "Steerwish: The Keeping Is the Work" (thesis in six words)
+- "One Steerwish, Four Receipts" (the paper's shape, five words)
+- "What a Steerwish Costs" (claim 4 as the title)
+- "Steerwish: Hold, Refuse, Survive, Price" (the four claims as verbs)
+- "Steerwish: Promises, Priced"
+- "The Steerwish: Between Luck and Oracle" (the bracket by meaning)
+- "Steerwish: Held Through the Drift"
+- "A Steerwish Is Not a Maximum" (tightest doctrine form)
+
+Round-5 set (holder seed: "intent kept in dynamics"; optimum over
+maximum in text — doctrine line now reads "a chosen state, not an
+optimum"):
+
+- "Steerwish: Intent Kept in Dynamics" (the holder's phrase verbatim)
+- "Steerwish: Chosen, Not Searched" (contrast relocated to
+  chosen-vs-found — no optimum needed)
+- "Steerwish: Intent, Kept" (two-word verdict form)
+- "A Steerwish Is a Chosen State" (positive doctrine)
+- "Steerwish: Intent Under Drift"
+- "Steerwish: Keeping Intent in a Moving World"
+- "Intent, Kept: The Steerwish on a Drifting Substrate"
+
+Round-6 — THE LANDING as source (holder, verbatim): "Steerwishes are
+intent made keepable — promises to a live system: declared by holder
+or co-mind, kept against drift; refused, not faked, when the system
+says no." Title = the head of the definition; the grammar section and
+abstract now carry the landing in public words:
+
+- "The Steerwish: Intent Made Keepable" (the head, verbatim — DEFAULT)
+- "Steerwish: Promises to a Live System" (the direction clause)
+- "The Steerwish: Intent Kept Against Drift" (the kept clause)
+- "Steerwish: Kept or Refused, Never Faked" (the honesty clause)
+
+ROUND-7 — PICKED (holder, 2026-11-03): **"The Steerwish: Intent Kept
+on Live Systems"** — draft v1.2 carries it. The rounds above are the
+derivation record: borrowed idioms rejected as non-native; the
+pattern round produced the series forms; the pick is the holder's
+own seed from the deep round, tightened.

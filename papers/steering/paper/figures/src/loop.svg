@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="440" font-family="Helvetica,Arial,sans-serif">
+<rect width="940" height="440" fill="white"/>
+<text x="470" y="30" font-size="17" fill="#222" text-anchor="middle" font-weight="bold">The keeping loop: one promise's life on a live substrate</text>
+<rect x="40" y="84" width="180" height="52" rx="8" fill="#fff8e1" stroke="#b35900" stroke-width="1.5"/>
+<text x="130" y="108" font-size="13" fill="#222" text-anchor="middle">PROMISE DECLARED</text>
+<text x="130" y="123" font-size="13" fill="#222" text-anchor="middle">(a band on a reading)</text>
+<rect x="280" y="84" width="180" height="52" rx="8" fill="#eef4fb" stroke="#3a6ea5" stroke-width="1.5"/>
+<text x="370" y="108" font-size="13" fill="#222" text-anchor="middle">COMPILED AGAINST</text>
+<text x="370" y="123" font-size="13" fill="#222" text-anchor="middle">THE MEASURED MAP</text>
+<rect x="520" y="84" width="180" height="52" rx="8" fill="#eef4fb" stroke="#3a6ea5" stroke-width="1.5"/>
+<text x="610" y="108" font-size="13" fill="#222" text-anchor="middle">THE KEEPER ACTS</text>
+<text x="610" y="123" font-size="13" fill="#222" text-anchor="middle">(one dial, once)</text>
+<rect x="740" y="84" width="160" height="52" rx="8" fill="#eef4fb" stroke="#3a6ea5" stroke-width="1.5"/>
+<text x="820" y="108" font-size="13" fill="#222" text-anchor="middle">JUDGED,</text>
+<text x="820" y="123" font-size="13" fill="#222" text-anchor="middle">LINE BY LINE</text>
+<rect x="740" y="250" width="160" height="52" rx="8" fill="#fdecea" stroke="#c62828" stroke-width="1.5"/>
+<text x="820" y="274" font-size="13" fill="#222" text-anchor="middle">READING LEAVES</text>
+<text x="820" y="289" font-size="13" fill="#222" text-anchor="middle">ITS BAND</text>
+<rect x="500" y="250" width="180" height="52" rx="8" fill="#fdecea" stroke="#c62828" stroke-width="1.5"/>
+<text x="590" y="274" font-size="13" fill="#222" text-anchor="middle">MISSES ACCUMULATE</text>
+<text x="590" y="289" font-size="13" fill="#222" text-anchor="middle">INTO A CONVICTION</text>
+<rect x="270" y="250" width="180" height="52" rx="8" fill="#f3e5f5" stroke="#795548" stroke-width="1.5"/>
+<text x="360" y="274" font-size="13" fill="#222" text-anchor="middle">THE MAP RE-MEASURES</text>
+<text x="360" y="289" font-size="13" fill="#222" text-anchor="middle">THE MOVED REGION</text>
+<rect x="40" y="250" width="180" height="52" rx="8" fill="#eef7ee" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="130" y="274" font-size="13" fill="#222" text-anchor="middle">RE-SERVED</text>
+<text x="130" y="289" font-size="13" fill="#222" text-anchor="middle">(a watering)</text>
+<line x1="220" y1="110.0" x2="280" y2="110.0" stroke="#555" stroke-width="2"/>
+<path d="M 280,110 L 270,105 L 270,115 z" fill="#555"/>
+<line x1="460" y1="110.0" x2="520" y2="110.0" stroke="#555" stroke-width="2"/>
+<path d="M 520,110 L 510,105 L 510,115 z" fill="#555"/>
+<line x1="700" y1="110.0" x2="740" y2="110.0" stroke="#555" stroke-width="2"/>
+<path d="M 740,110 L 730,105 L 730,115 z" fill="#555"/>
+<line x1="820" y1="136" x2="820" y2="250" stroke="#c62828" stroke-width="2"/>
+<path d="M 820,250 L 825,240 L 815,240 z" fill="#c62828"/>
+<text x="820" y="193" font-size="11" fill="#c62828" text-anchor="middle">the world moved</text>
+<line x1="740" y1="276.0" x2="680" y2="276.0" stroke="#c62828" stroke-width="2"/>
+<path d="M 680,276 L 690,281 L 690,271 z" fill="#c62828"/>
+<line x1="500" y1="276.0" x2="450" y2="276.0" stroke="#795548" stroke-width="2"/>
+<path d="M 450,276 L 460,281 L 460,271 z" fill="#795548"/>
+<line x1="270" y1="276.0" x2="220" y2="276.0" stroke="#795548" stroke-width="2"/>
+<path d="M 220,276 L 230,281 L 230,271 z" fill="#795548"/>
+<line x1="130" y1="250" x2="130" y2="136" stroke="#2e7d32" stroke-width="2"/>
+<path d="M 130,136 L 125,146 L 135,146 z" fill="#2e7d32"/>
+<text x="130" y="193" font-size="11" fill="#2e7d32" text-anchor="middle">next round</text>
+<text x="740" y="72" font-size="12" fill="#2e7d32" text-anchor="end">in band: the verdict is KEPT, no move needed - the loop rests</text>
+<text x="40" y="380" font-size="12" fill="#666">Green: the kept path. Red/brown: the repair path the drift forces. Every arrow above is receipted in Section 5.</text>
+<text x="40" y="400" font-size="12" fill="#666">Public words only: promise, band, round, watering.</text>
+</svg>
