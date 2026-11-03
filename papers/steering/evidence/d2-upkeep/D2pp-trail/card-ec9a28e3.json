@@ -1,0 +1,151 @@
+{
+ "events": [
+  {
+   "detail": null,
+   "event": "planned",
+   "tsz": 1793693717.745194
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.013563644358588195,
+      "kind": "claim",
+      "median": 0.9864776419752286,
+      "n": 3,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793693720.200822
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.02172463865110918,
+      "kind": "claim",
+      "median": 0.9677354208694746,
+      "n": 82,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "undecidable"
+     }
+    ],
+    "n": 1
+   },
+   "event": "undecidable",
+   "tsz": 1793694046.977566
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.01222187366791012,
+      "kind": "claim",
+      "median": 0.9597371981777768,
+      "n": 3,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793694048.673341
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.20230293473450717,
+      "kind": "claim",
+      "median": 0.9598913402387534,
+      "n": 3,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "undecidable"
+     }
+    ],
+    "n": 1
+   },
+   "event": "undecidable",
+   "tsz": 1793694050.424314
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.019438939928461497,
+      "kind": "claim",
+      "median": 0.966177102320103,
+      "n": 35,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793694072.077648
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.022862287870362596,
+      "kind": "claim",
+      "median": 0.96559855013586,
+      "n": 23,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "undecidable"
+     }
+    ],
+    "n": 1
+   },
+   "event": "undecidable",
+   "tsz": 1793694085.721483
+  },
+  {
+   "detail": {
+    "judged": [
+     {
+      "bar": 0.03320289513208259,
+      "kind": "claim",
+      "median": 0.9803721139648724,
+      "n": 48,
+      "reading": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+      "verdict": "landed"
+     }
+    ],
+    "n": 1
+   },
+   "event": "landed",
+   "tsz": 1793694113.766
+  }
+ ],
+ "instruction": "hold",
+ "plan": {
+  "claims": [
+   {
+    "bars": 0.002454975638991577,
+    "outcome": "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f/objective_1",
+    "value": 0.9718071841312794
+   }
+  ],
+  "hold": true,
+  "moves": [],
+  "predicted": {
+   "value": 0.9718071841312794
+  },
+  "receivers": [
+   "5555fe67-bb4c-41e8-be15-31a5ec9e4c0f"
+  ]
+ },
+ "probe": null,
+ "status": "landed",
+ "verdict": null,
+ "walk": null,
+ "wish_id": "ec9a28e3-447f-4907-9df1-cd626d5b3a2e"
+}
