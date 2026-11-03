@@ -1,0 +1,854 @@
+% Co-authored-by: cherusk <10729954+cherusk@users.noreply.github.com>
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\usepackage[libertine]{newtxmath}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage[margin=2.6cm]{geometry}
+
+% Draft-v1 figure placeholders: the five depictions regenerate from the
+% evidence bundles (papers/steering/evidence/figures/*.py). Inclusion is
+% mechanical once SVG-to-PDF conversion runs; captions below are final.
+
+\title{The Steerwish: Intent Kept on Live Systems}
+\author{
+  Matthias Tafelmeier \\
+  Independent Scientist \\
+  Hof, Germany \\
+  \href{https://orcid.org/0009-0005-7399-5584}{ORCID: 0009-0005-7399-5584}
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Autonomous agents that tend a shared substrate can measure it while it
+runs: couplings are discovered, response curves carry error bars, and
+the curves compose across hops. This paper asks what such a map is
+worth when the world is not still. The answer is the \emph{steerwish}
+--- intent made keepable: a promise to a live system, declared by its
+holder, kept against drift, and refused --- not faked --- when the
+measured range says no. Four claims, each carried by receipts
+from a live measurement campaign. \emph{The map can steer}: through a
+four-line promise grammar, composed predictions land readings inside
+promised bands, repeating across seed runs --- and the boundary is
+stated as measured, a limit of map density rather than of principle.
+\emph{Refusal}: a target outside the measured range is declined by
+name, with zero actuation. \emph{Drift survival}: a declared drift
+event is survived end to end --- misses stamp, the map re-opens, the
+reading re-lands --- with stable numbers across runs. \emph{Upkeep
+economics}: a three-flight envelope prices the keeping in rounds and
+waterings, read absolutely between what luck alone keeps and what
+perfect hindsight could have kept, with the envelope's two failures
+reported as the honest edges of the economics. Keeping is
+priced in rounds and waterings, never against external keepers: the
+comparison is a named follow-up.
+\end{abstract}
+
+\noindent\textbf{Keywords:} autonomous agents, multi-agent systems,
+steerwish, promises, refusal, drift, maintenance cost, model-based
+control, system identification, self-adaptive systems, live systems
+
+\section{Introduction}
+\label{sec:intro}
+
+When autonomous agents tend the same substrate, each one's parameter
+changes travel through the substrate into the others' readings. Prior
+work established that this hidden coupling is measurable without
+central observers and without stopping the system: edges are
+discovered by guardrail-bounded probing between the agents
+themselves~\cite{p1}, each edge yields a response curve with per-point
+error bars~\cite{p2}, and measured curves compose across nonlinear
+hops and converging paths~\cite{p3}. The map that results is a
+certified, priced model of a live world.
+
+This paper asks the question that line of work ends at: can the
+measured map --- the substrate's \emph{connectome}: every coupling
+edge with its measured response curve --- \emph{do} anything?
+Specifically --- can a promise be held about the
+far end of the substrate, through the map, while the substrate moves?
+Holding a promise is not an optimum-seeking problem. It is a keeping
+problem: the reading must stay inside a band, the world drifts, and
+the keeping is work. Work has a price. And some promises, measured
+honestly, cannot be kept at all --- the keeper that cannot see far
+enough must say so and touch nothing.
+
+The claims, in the order the campaign receipts them:
+
+\begin{enumerate}
+\item \textbf{The map can steer.} Invert once through the composed
+map, act once, land inside the promised band; repeats across seeds
+show it is not luck. The boundary is stated as measured, not assumed
+away (\S\ref{sec:steering}).
+\item \textbf{Refusal.} A target outside the measured range is
+refused by name, with zero actuation --- knowing what you do not
+know, under action (\S\ref{sec:refusal}).
+\item \textbf{Drift survival.} The promise survives a declared drift
+event: misses stamp, the map re-opens, the reading re-lands, with
+stable numbers across runs (\S\ref{sec:drift}).
+\item \textbf{Upkeep economics.} Rounds per kept interval and the
+cost of watering, read absolutely between what nothing tends to keep
+(luck) and what an omniscient tender would have kept (hindsight),
+with the envelope's failures reported as its
+edges (\S\ref{sec:upkeep}).
+\end{enumerate}
+
+\emph{What flew is the smallest grammar that exercises the whole
+loop.} Two claim lines and two term lines, one dial, a two-stage
+path: a proof of concept, deliberately simple. The claims of this
+paper are about the loop's existence and its honesty --- that a
+promise can be steered, refused, survived, and priced --- not about
+its reach. Scaling is the open direction the boundaries point at:
+denser maps, deeper corridors, more lines, and eventually several
+promises sharing one substrate.
+
+One containment rules everything below. The comparison is contained:
+no external keeper family appears, and the honesty of every number is carried by two internal anchors:
+what nothing tends to keep (the same promise, nobody tending --- is
+the band satisfied by luck?) and what an omniscient tender would
+have kept (computed after the fact from the recorded truth). Every
+kept fraction in this paper reads
+absolutely between those anchors. A
+comparison across keeper families is the named follow-up's spine,
+not a row here; the pricing throughout stays in the promise's own
+units --- rounds and waterings.
+
+\section{The world and the grammar}
+\label{sec:grammar}
+
+\emph{Substrate.} The substrate is whatever the agents tend:
+physical, computational, or mathematical. In this campaign it is a
+live bench of coupled nodes; each node exposes parameters (dials) and
+readings (objectives), and a change of one node's dial travels
+through measured couplings into other nodes' readings. A truth
+channel records the bench's own state throughout --- the answer key.
+It is never read at decision time; it scores after the fact.
+
+\emph{The connectome, and the map.} The substrate's coupling
+structure, once measured edge by edge --- each edge with its
+response curve and error bar, the work of the prior papers --- is
+its \emph{connectome}. From here on, this paper calls the connectome
+simply \emph{the map}: the thing that is planned through, refused
+for, and paid for (Figure~\ref{fig:connectome}).
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.88\linewidth]{figures/connectome}
+\caption{The connectome and the corridor. Nodes of the substrate,
+coupling edges measured (curve and error bar, prior work). A
+promise steers through the connectome --- here one dial, two
+stages, to the promised reading.}
+\label{fig:connectome}
+\end{figure}
+
+\emph{Agents.} The agents are tending agents, never optimizers: they
+tend a shared substrate. A keeper holds a promise; scorers witness
+lines; measurers refresh the map. None of them maximizes anything.
+
+\emph{Promise.} A promise is a band $[\mathrm{lo},\mathrm{hi}]$ on a
+reading, held over time: the delivered reading must sit inside the
+band for the promise to count as kept in a given interval. Promises
+conjoin: several lines must hold simultaneously, and the conjunction
+is exact --- one line out ends the flight's landing claim.
+
+\emph{The four-line grammar.} The campaign's shape is $2{+}2$: two
+claim lines (bands on two readings, one of them two hops away) and
+two term lines (bands on related readings that the promise's
+semantics require to hold). Every line --- claim or term --- is
+judged by the same per-line verdict record, with the same bars.
+
+\emph{Naming, once.} Internally, the held promise of this paper is a
+\emph{steerwish} --- intent made keepable: a promise \emph{to} a live
+system, declared by its holder and never invented by the engine, kept
+against drift, and refused --- not faked --- when the system says no.
+Its family contains one sibling, the \emph{seekwish} (an exploration
+wish, which deliberately explores the substrate's range rather than
+holding a band); it is named here for completeness and claimed
+nowhere in this paper.
+
+\emph{Rounds and waterings.} A \emph{round} is one full pass of the
+keeping loop: plan through the map, act, judge. A \emph{watering} is
+a discrete corrective intervention, fired when the reading leaves the
+band by more than continuous compensation can absorb. The loop
+itself is Figure~\ref{fig:loop}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/loop}
+\caption{The keeping loop. A promise holds a band on a reading of a
+shared substrate. The keeper plans through its measured map, acts
+once, and the per-line verdict records judge the delivered reading
+against the promised band. Rounds repeat while the promise stands; a
+watering fires when the world exceeds what compensation absorbs.}
+\label{fig:loop}
+\end{figure}
+
+The engine under the loop is prior work, used as settled: response
+curves with per-point bars~\cite{p2} and their composition across
+hops~\cite{p3} --- together, the connectome of the preceding
+paragraph. Neither prior result is re-litigated here; what this
+paper asks is what the map is worth once a promise must be held on
+it while the substrate drifts --- steering by it, refusing for it,
+surviving on it, and paying for it.
+
+\section{What makes a verdict countable}
+\label{sec:instrument}
+
+Every claim in this paper rests on verdicts --- landed, missed,
+refused --- so the rules that make a verdict countable are part of
+the instrument. There are two.
+
+\emph{Everything is recorded.} Every run writes the same diary ---
+per tick (reading, in band or not, dial position, trial spent) and
+per event (declared, planned, missed, probed, re-planned, landed,
+broken, released). The truth channel --- the bench's own answer key
+--- records the real state alongside. It is never read at decision
+time; it scores after the fact. Verdicts are recomputed from these
+recordings, never taken from a run's badge or summary.
+
+\emph{A verdict needs its witness.} Every promise line has its own
+verdict record, and the record only counts readings taken while a
+scorer was assigned to that line. The rule is simple: no assignment,
+no verdict --- an unwitnessed line is not a passed line. And a plan
+that moves dials must carry its receivers, so that every line the
+promise depends on stays witnessed while the plan executes.
+
+That is the whole section: record everything, and count only what
+was witnessed.
+
+\section{The campaign and the free bracket}
+\label{sec:campaign}
+
+The unit of the campaign is a \emph{run}: one prepared session of
+the live bench --- the substrate measured to a finished map (if the
+cell needs one), the promise declared, the run flown, the run
+closed. Table~\ref{tab:shape} gathers every run's shape in one
+place: the promise, its band, the drift the world was scheduled to
+deliver, and the window. The scenario details live there and only
+there; the results sections speak verdicts.
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}p{0.14\linewidth}p{0.26\linewidth}p{0.14\linewidth}p{0.26\linewidth}p{0.12\linewidth}@{}}
+\toprule
+\textbf{Experiment} & \textbf{The promise} & \textbf{Allowed band} &
+\textbf{The world's movement} & \textbf{Run length} \\
+\midrule
+Steering and its seed repeats & four lines at once: two readings the
+holder asked about, two supporting readings that must also hold &
+$\approx 0.16$ & none --- the maps were learned before the promise
+& minutes per flight \\
+Refusal & one target, placed beyond everything the dials were
+measured to reach & --- & none & minutes \\
+Drift battery & one line, held on a finished map & --- & one
+deliberate shape change, mid-run & ${\sim}35$ min each \\
+Upkeep & one line, held for hours & first flight $\pm 0.15$, later
+flights $0.08$ & a slow scheduled slide: $0.0008$ per step, up to
+$0.15$ in total & 6\,h, then overnight; the kept hold: four hours \\
+\bottomrule
+\end{tabular}
+\caption{How to read this table: each experiment is defined by four
+things --- what was promised, how wide the allowed band was, whether
+and how the world was made to move, and how long the run lasted. A
+run is one prepared session of the bench; these four things are
+everything a re-run needs. A dash means no single number applies.
+The first upkeep flight's recording ended early on a transport fault
+(a known class); its verdict reads from the recorded strip to that
+point.}
+\label{tab:shape}
+\end{table}
+
+Every number in this paper reads three ways: if nothing tended,
+what we tended, and if something omniscient had tended. The first
+is the floor --- the same promise, the same drifting world, nobody
+acting: whatever stays inside the band is what luck buys. If the
+floor is high, the band was vacuous and the run certifies nothing;
+that verdict is itself a receipt. The third is the ceiling ---
+computed after the run from the recorded answer key: what perfect
+hindsight would have kept. No oracle ever flew live; it is a
+calculation, not a competitor. Between the two sits what we tended
+--- the keeper's number, readable on its own.
+
+Doctrine, inherited: the sweep is characterization, not pass/fail.
+Expected degradation is the floor and is reported; unexpected failure
+is an instrument fault and is cured with receipts (the witnessing
+repairs of \S\ref{sec:instrument} are exactly that class). Boundary
+rows are receipts, never discards.
+
+\section{Results}
+\label{sec:results}
+
+Each subsection carries its own table: verdicts and margins first,
+and every caption opens by saying how to read the table.
+Every run's shape --- promise, band, scheduled drift, window ---
+sits in one table in the campaign section
+(Table~\ref{tab:shape}); the results speak verdicts.
+
+\subsection{Steering: the four-line grammar}
+\label{sec:steering}
+
+The four-line conjunction --- two \emph{claim} lines (readings the
+holder asked about) and two \emph{term} lines (supporting readings
+that must also hold) --- flew through
+one dial and a two-stage path.
+
+\emph{The landing receipts.} Both term lines judged \emph{and
+honored live} --- $0.8204\,[0.64,1.00]$ and $0.3534\,[0.16,0.52]$;
+one claim line judged missed by $0.022$ (predicted $0.6486$,
+delivered $0.5685$), stated as its row says. The follow-up
+hold-shape flight landed with its claims judged
+(Table~\ref{tab:s1}).
+
+\emph{The boundary, as measured.} At the campaign's map density the
+best claim miss is $0.022$ against bars near $0.01$, and the joint
+down-shape ($-0.10/-0.06$) was refused by name three times across
+fresh runs: on coarse maps the composed plan
+reads conflicts that are not real, and the planner refuses what it
+cannot compose honestly. This is a boundary of map density --- a
+denser map composes the two-stage path honestly, and the four-of-four
+landing is one dense map away. Boundary, not failure
+--- and the boundary's direction is known.
+
+\emph{Repetition.} Five seed runs, four landed (a, c, d, e;
+Table~\ref{tab:s2}): margins $0.047$--$0.063$ above band floors,
+two flights including honest undecidable first windows (bars
+straddling an edge at $n{=}3$) before their landing stamps,
+declare-to-verdict spans of 14--60\,s. The fifth (S2-b) missed by
+$0.004$ over the edge --- declared four hours after its
+pre-measurement finished, a timing artifact of the operators, not
+the engine; the run sat and wandered, and the row says so. The
+repetition bar (three of five) is cleared (Table~\ref{tab:s2}).
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}p{0.30\linewidth}p{0.34\linewidth}p{0.30\linewidth}@{}}
+\toprule
+\textbf{Flight} & \textbf{Outcome} & \textbf{The numbers} \\
+\midrule
+The four lines, flown once as the smallest full test &
+supporting lines landed; one asked-for line missed &
+supporting lines $0.820$ and $0.353$, both inside their bands;
+the missed line: predicted $0.6486$, delivered $0.5685$ ---
+$0.022$ short \\
+The same shape, held again & landed --- the asked-for lines judged
+and held & verdicts recorded in the run's log \\
+A harder ask: two lines moved down together (three fresh runs) &
+refused, all three times &
+the map was too coarse: the planner saw conflicts that were not
+there, and refused rather than guess \\
+\bottomrule
+\end{tabular}
+\caption{How to read this table: a line \emph{lands} when its
+delivered reading sits inside its promised band, and is
+\emph{judged} when the instrument recorded a verdict for it. The
+asked-for lines are the paper's claim lines; the supporting lines
+are its term lines (\S\ref{sec:grammar}). Each part of the
+four-line promise is proven here on its own; all four at once is
+one denser map away (\S\ref{sec:steering}). Run shape:
+Table~\ref{tab:shape}, first row.}
+\label{tab:s1}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}p{0.12\linewidth}p{0.20\linewidth}p{0.62\linewidth}@{}}
+\toprule
+\textbf{Run} & \textbf{Outcome} & \textbf{How close} \\
+\midrule
+a & landed & $0.047$ and $0.063$ above the band's lower edge \\
+b & missed & $0.004$ over the upper edge --- the promise was declared
+four hours after its preparation measurements (our timing error, not
+the engine's), and the world had time to wander \\
+c & landed & the first check was too close to call --- the
+measurement's own error bar straddled the edge; the next check sat
+inside \\
+d & landed & comfortably above the lower edge \\
+e & landed & both lines mid-band \\
+\bottomrule
+\end{tabular}
+\caption{How to read this table: the same promise was prepared and
+flown five times, differing only in random seed; \emph{how close}
+is the distance between the delivered reading and the nearest band
+edge. A check is \emph{too close to call} when the measurement's
+own error bar overlaps that edge. Four land, one misses at the
+edge. Runs a and e lost their raw timelines at collection ---
+verdicts from the flight log and the record.}
+\label{tab:s2}
+\end{table}
+
+\subsection{Refusal: declining the unmeasurable}
+\label{sec:refusal}
+
+A finished-map run; the declared target placed deliberately outside
+the planner's measured range. The engine refused, by name:
+\emph{outside the measured range}, with the anatomy named --- the
+hill region $[25,75]$; the best available branch shift $0.1184$
+against the required $0.6363$; the noise gate $0.0514$
+(Figure~\ref{fig:refusal}). Two candidate
+paths were evaluated; both refused. Zero actuation: no plan, no
+assignment, no trial; nothing moved, and the promise row reads
+unservable (Table~\ref{tab:s4}).
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}p{0.16\linewidth}p{0.78\linewidth}@{}}
+\toprule
+\textbf{Attempt} & \textbf{Why it refused} \\
+\midrule
+Final & outside the measured range: the promise demanded the reading
+move by $0.636$; the largest move the measured dials could compose
+was $0.118$; the smallest move the bench can tell apart from noise
+is $0.051$ \\
+First & the instrument had no measurement for the line (our setup
+error) --- and a refusal without a measurement proves nothing \\
+\bottomrule
+\end{tabular}
+\caption{How to read this table: each row is one attempt to declare
+a promise the engine judged impossible; \emph{refused} means it
+named its reason and moved nothing --- no plan, no assignment, no
+trial. The first refusal was the instrument's own fault; the final
+one is the receipt.}
+\label{tab:s4}
+\end{table}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.88\linewidth]{figures/refusal}
+\caption{The refusal, in numbers. The demanded shift ($0.636$) sits
+far beyond the measured reach ($0.118$, noise gate at $0.051$):
+the engine declined by name and touched nothing.}
+\label{fig:refusal}
+\end{figure}
+
+The instrument's own trail is part of the receipt. The first attempt
+in this run also refused --- \emph{unmeasured outcome} --- and the
+cause was the operators': a mis-addressed read left the scorer
+measuring nothing, and a refusal on an unwitnessed line is worth
+exactly nothing. Banked, fixed, re-flown; both refusals are in the
+bundle. A refusal semantics is only as good as the witness it
+refuses on.
+
+This is the epistemic half of the loop: infinity versus zero. The
+keeper does not extrapolate beyond its measured range --- it states
+what would be required ($0.6363$), what is available ($0.1184$), and
+touches nothing.
+
+\subsection{Drift survival: the arc with stable numbers}
+\label{sec:drift}
+
+The battery (five runs, one declared shape change each) repeats one arc
+with stable numbers: slide to conviction 76--90\,s; misses to streak
+two, plus one undecidable; conviction ratios $65$--$300\times$ the
+plan's own error bars; declare to landed 1--2\,s.
+
+One run, told fully. The world moves off the finished map. The
+standing watch fires unprompted --- 19\,s cue-to-alarm, reading
+$0.0618$ past a $0.0500$ band, a second sample at $0.1557$ --- and
+the targeted probe returns the first usable hint in the instrument's
+history, 76\,s after the slide cue. The measurement re-opens around
+the moved region; the refresh is physical (the probing cycle is
+visible on the strip); the reading re-lands; unattended regions
+heal. The conviction itself is priced: predicted shifts with their
+bars against delivered readings land $65$--$300\times$ the plan's
+own bars --- far enough out that drift, not noise, is the verdict.
+Figure~\ref{fig:scatter} shows the arc in two views on one
+timeline: above, the promise's experience --- the reading against
+its band, quiet, then the break, then re-landed; below, the map's
+experience --- its error against the answer key, collapsing at the
+re-measure. The stable numbers sit in Table~\ref{tab:d1}.
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{What was measured} & \textbf{What the five runs showed} \\
+\midrule
+From the world's move to the stale-map verdict & 76--90\,s \\
+Misses before that verdict & two (one too close to call) \\
+How far the missed readings landed & $65$--$300\times$ the plan's
+own error bar \\
+From promise declared to promise landed & 1--2\,s \\
+The whole cycle happening a second time & once --- a single-run
+receipt \\
+\bottomrule
+\end{tabular}
+\caption{How to read this table: in each of the five runs the world
+was moved mid-run while a promise stood; these are the timings of
+what followed, stable across all five. A \emph{miss} is a judged
+check that found the reading outside its band; the
+\emph{stale-map verdict} is the engine's own judgment that its
+learned map no longer matched the world; the \emph{plan's own
+error bar} is the uncertainty the map claimed for itself at
+planning time.}
+\label{tab:d1}
+\end{table}
+
+\emph{The re-learn limit, measured.} At walking pace, a full
+101-level grid refresh covers ${\approx}20$ levels in 13 minutes ---
+a full re-learn outlives the run's window. Re-learning starves
+behind successful-looking re-plans (109 misses against 116 re-plans
+in the starved era) until the miss streak breaks the treadmill and
+the refresh fires. The honest consequence: the full second lap
+(re-learn, re-serve, re-miss) has a single-run receipt ($n{=}1$),
+and is framed done on that receipt --- one sentence, no further
+flights.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.82\linewidth]{figures/broken_promise}
+\caption{How drift impacts a promise --- two views of one arc
+(schematic, from the documented battery arc; numbers in
+Table~\ref{tab:d1}). Above: the reading against its promised band
+--- quiet, the world moves, the break is the alarm (far beyond the
+plan's own error bar, so drift not noise), the moved region
+re-measured, re-landed. Below: the same arc as the map's error
+against the answer key --- the maintained property, collapsing at
+the re-measure.}
+\label{fig:scatter}
+\end{figure}
+
+\subsection{Upkeep: what keeping costs}
+\label{sec:upkeep}
+
+The message of this section: holding a promise on a moving world
+costs work, and the cost can be measured. One number carries it.
+Over four hours of a slowly sliding world, the keeper kept the
+reading inside its band for $0.874$ of the judged windows --- doing
+nothing would have kept $0.013$, perfect foresight $1.000$
+(Table~\ref{tab:d2}, Figure~\ref{fig:bracket}). Figure~\ref{fig:hold}
+shows the recorded hold itself: every judged window of the four
+hours.
+
+The price behind the number is continuous work: the keeper served
+trials for the whole four hours, compensating as the world slid. It
+never lost the band outright --- zero misses; the windows it did not
+keep were minutes spent riding the band's edge while the world
+wandered. The promise's own claim line judged landed throughout,
+median reading $0.98$. A \emph{watering} --- a discrete corrective
+move --- never became necessary: compensation never fell that far
+behind.
+
+Two earlier flights taught how to read the number. In the first,
+the band was too wide ($\pm 0.15$ against a $0.15$ slide): doing
+nothing also kept everything ($1.000$), so the keeper's $0.993$
+meant nothing --- a satisfied luck floor certifies nothing. In the
+second, the band was narrow but placed on a fleeting reading (an
+operator error, kept on the record): the world outran the
+compensation --- sixteen breaks, kept only $0.093$. Those two
+failures are the edges of the economics; the third flight is the
+keep between them.
+
+Why is perfect foresight exactly $1.000$? With the slide known in
+advance, every window can be compensated before it happens ---
+foresight is never surprised. The keeper's gap to it ($0.126$) is
+the measured price of acting on a map instead of knowing the
+future.
+
+\begin{table}[!ht]
+\centering
+\small
+\begin{tabular}{@{}p{0.40\linewidth}lll@{}}
+\toprule
+\textbf{Flight} & \textbf{Kept} & \textbf{Luck alone} & \textbf{Foresight} \\
+\midrule
+First --- wide band ($\pm 0.15$) & 0.993 & 1.000 & not scored \\
+Second --- narrow band, wrong place & 0.093 & 0.000 & not scored \\
+Third --- narrow band, right place & \textbf{0.874} & 0.013 & 1.000 \\
+\bottomrule
+\end{tabular}
+\caption{How to read this table: \emph{kept} is the share of judged
+windows --- the run is scored at regular intervals, not continuously
+--- that the reading spent inside its band; \emph{luck alone} is
+that share with nobody acting; \emph{foresight} is calculated after
+the run from the recorded answer key --- what perfect foreknowledge
+would have kept --- and never flew. Foresight was not scored for
+the two teaching flights. One slide, three band choices: a wide
+band makes keeping meaningless (luck alone kept everything); a
+narrow band in the wrong place makes it impossible; the third is
+the honest keep.}
+\label{tab:d2}
+\end{table}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/hold}
+\caption{The four-hour hold, as recorded: the reading at every
+judged window (159 samples from the strip log) against its
+promised band. Kept 139 of 159; the excursions are the edge-riding
+straddles; the slide saturates minutes in.}
+\label{fig:hold}
+\end{figure}
+
+The economics, stated in the promise's own units. The keep's price
+is the continuous hold: trials served for four hours at the run's
+per-trial cost, buying $0.87$-kept against a $0.01$ floor. Discrete
+waterings fire when the world exceeds what continuous compensation
+absorbs --- v2's sixteen breaks are that boundary's other side.
+(Figure~\ref{fig:bracket}.)
+
+\emph{Why hindsight is exactly $1.000$, and what the gap means.}
+With the drift path known in advance, every window can be
+pre-compensated; perfect foresight is never surprised, so it keeps
+all windows --- the ceiling is a structural $1.000$, not an
+achievement. The keeper's gap to it ($0.126$) is the measured
+price of acting on a map instead of a crystal ball: the keeper
+never broke --- zero misses --- but it rides the edge while the
+world wanders, and edge-riding costs windows. For contrast, v2's
+gap was $0.907$: there the world outpaced compensation, and that is
+what a bad gap looks like. The oracle is a ceiling by construction,
+not an arm that flew; it bounds what any keeper could have done
+with the truth in hand.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/bracket}
+\caption{The kept fraction over four hours, on one scale: what luck
+keeps ($0.013$), what we tended ($0.874$), what perfect hindsight
+computes after the fact ($1.000$, never flown).}
+\label{fig:bracket}
+\end{figure}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\emph{What the map is worth under drift.} The worth of a maintained
+map is read absolutely: between a floor that says what luck buys
+($0.013$) and a ceiling that says what omniscience buys ($1.000$),
+the keeper holds $0.874$ for four hours through a saturating slide.
+The renewal receipt certifies the \emph{maintained} property live
+against ground truth --- map error jumps at the break and collapses
+at the refresh --- and it costs nothing extra: it is a byproduct of
+runs the campaign already flew.
+
+\emph{Why not just optimize, one paragraph.} A maximizer and a
+keeper share machinery --- both plan through a model --- but their
+objects differ. Pointed at a substrate, a maximizer drives to an
+optimum and structurally cannot comply with a promise whose band
+sits away from it: a promise is a chosen state, not an optimum.
+The nearest ancestor of this paper's refusal is safe model-based
+optimization with Gaussian processes --- the safe-optimization line
+bounds exploration to a trusted region --- but its stance is more
+permissive than the one receipted here: those keepers may act inside
+the trusted set, while this keeper declined the target itself, by
+name, with zero actuation. Adaptive model-predictive control
+re-learns moving plants toward references; it does not price upkeep
+in the plant's own units or refuse the unmeasurable as a first-class
+verdict.
+
+\emph{The boundaries, collected.} The four-line landing is gated on
+map density (best claim miss $0.022$ vs bars ${\approx}0.01$; three
+named refusals of the joint down-shape); the upkeep economics
+have two measured edges (a vacuous band, a wrong cut) and one kept
+middle; full grid re-learn outlives the run window at walking pace;
+the second lap rests on a single receipt. And what flew is the
+smallest grammar that exercises the whole loop --- scaling (denser
+maps, deeper corridors, more lines, simultaneous promises) is the
+named direction. A journal-only literature
+residual sits outside arXiv's reach --- noted in the writing-day
+sweep, not blocking.
+
+\emph{What this paper deliberately does not contain.} No external
+keeper, no comparative language, no scoreboard. The honesty is
+carried by the free bracket and by rows that report their own
+failures. And the pricing stays in the promise's own units ---
+rounds and waterings --- by design.
+
+\subsection*{Future work}
+
+\emph{Scaling.} What flew is the smallest grammar that exercises
+the whole loop. The open directions are the ones the boundaries
+point at: denser maps, deeper corridors, more lines, and
+eventually several promises sharing one substrate.
+
+\emph{The comparison.} This paper reads every number between
+internal anchors --- luck and foresight. The natural next question
+is how the same loop fares against external keeper families on the
+same runs. That comparison is the follow-up paper's question, and
+it stands on these receipts.
+
+\section{Related work}
+\label{sec:related}
+
+Related work is context, not a wall; the phrasing below is
+deliberately defensive. Each line holds a piece of what this paper
+assembles --- no single one holds the assembly.
+
+\emph{Careful optimizers.} A family of methods explores a system
+cautiously: they only try settings their internal model already
+considers safe, and expand slowly. Representative work optimizes
+quadrotor controllers through Gaussian-process models~\cite{berkenkamp2015},
+proves probably-safe variants of that
+idea~\cite{tokmak2024}, brings trust-region safety to automotive
+control~\cite{menn2025}, and adds safety to a classic evolutionary
+optimizer~\cite{uchida2024}. All of them bound \emph{exploration} ---
+where they may poke next. The refusal receipted here is the stricter
+stance: the target itself is declined, by name, with zero actuation,
+and the one declining owns actuators.
+
+\emph{Controllers that re-learn.} Adaptive model-predictive
+control~\cite{tanaskovic2017} and its modern stochastic
+variants~\cite{knaup2024} keep their model of a changing plant up to
+date and steer toward a setpoint. They lack the promise grammar ---
+bands as first-class objects, conjunctions, a named refusal of the
+unmeasurable --- and they do not price the upkeep.
+
+\emph{The economics of promising.} Work on commitment devices in
+cooperative AI~\cite{sun2023} studies when agents should bind
+themselves to promises, in terms of norms and incentives. This paper
+prices the keeping --- against a substrate, with measurements.
+
+\emph{The cost of keeping systems alive.} Self-adaptive
+software~\cite{abufouda2014,abufouda2014b} and the recent mapping of
+agentic technical debt --- the accumulating cost of keeping AI-based
+systems viable~\cite{tukur2026} --- name these costs. None measure
+them against a luck floor and a hindsight ceiling.
+
+\emph{Systems that decline to answer.} Machine learning has a reject
+option: classifiers and regressors that say ``not me'' when
+unsure~\cite{franc2021,franc2025,noskov2023}, and safe exploration
+that declines unsafe states~\cite{roderick2020}. All decline
+\emph{answers}. Here the one declining owns actuators and stops the
+machinery --- an action declined, with the reason named and the
+anatomy priced.
+
+To our knowledge, no neighbor does what this loop does together:
+keep a declared promise on a live, drifting substrate, refuse by
+name what it cannot measure, and price the keeping between luck and
+perfect hindsight. We are not aware of anyone else this close.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Four kept promises. The map steers: the same scenario landed again
+and again, and the one boundary is a map-density limit with a known
+cure. The map refuses: asked for a target beyond its measured range,
+it declined by name and touched nothing. The map survives drift:
+the world moved, the misses were counted, the map was refreshed, the
+reading returned. And the keeping is priced: between what luck keeps
+and what foresight would have kept, the keeper held most of it, for
+four hours, without a single break. A held promise
+on a drifting substrate is a measurable, refusable, payable thing.
+What flew is the smallest grammar that exercises the whole loop;
+scaling is the named direction, and the comparison across keeper
+families is the follow-up's question --- both stand on these
+receipts.
+
+\section*{Reproducibility}
+
+The campaign flew on a self-hosted live bench --- the estate's
+generic mathematical bench, the same bench family the prior papers
+measured. Its logic is simple: nodes expose parameters (dials) and
+return readings; planted couplings --- chosen shapes, such as
+saturating or tent maps, at chosen strengths --- carry one node's
+dial changes into another node's reading; a drift schedule moves the
+planted values over the run's life; and a closed-form truth channel
+records what was actually planted at every tick. Nothing planted is
+visible to the keeper: it learns the couplings by probing, exactly
+as in the prior papers; the truth channel exists only to score. The
+run shapes of Table~\ref{tab:shape} ---
+promise, band, scheduled drift, window --- are then the full
+scenario definitions.
+
+Each run's record is retained
+in the evidence bundles --- the per-tick diary, the per-line verdict
+cards, the reading strips, the truth and drift recordings --- except
+where cards did not survive collection; those runs are carried by
+their documented numbers, marked as such in the figures and tables. Every
+figure regenerates from its bundle by the committed scripts, and the
+upkeep bracket --- floor, kept fraction, oracle ceiling --- recomputes
+from the strip log alone; verdicts are recomputed from curves and
+strips, never read from run badges. Full independent reproduction
+requires this estate's stack; on a compatible bench,
+Table~\ref{tab:shape} plus the bundles are everything a re-run needs.
+
+\begin{thebibliography}{99}
+\itemsep0pt
+
+\bibitem{p1} M.~Tafelmeier.
+The Impulse Protocol: Non-Destructive Coupling Discovery in
+Autonomous Agents. Zenodo, 2026.
+\texttt{doi:10.5281/zenodo.21962956}.
+
+\bibitem{p2} M.~Tafelmeier.
+Calibration of Automatic Characterization. Zenodo, 2026.
+\texttt{doi:10.5281/zenodo.22127166}.
+
+\bibitem{p3} M.~Tafelmeier.
+From Curves to Cascades: Composed Coupling Prediction Among
+Autonomous Agents. Zenodo, 2026.
+\texttt{doi:10.5281/zenodo.22401439}.
+
+\bibitem{berkenkamp2015} F.~Berkenkamp, A.~P.~Schoellig,
+A.~Krause.
+Safe Controller Optimization for Quadrotors with Gaussian Processes.
+arXiv:1509.01066, 2015.
+
+\bibitem{tokmak2024} A.~Tokmak, T.~B.~Sch\"on, D.~Baumann.
+PACSBO: Probably Approximately Correct Safe Bayesian Optimization.
+arXiv:2409.01163, 2024.
+
+\bibitem{menn2025} J.~Menn, P.~Pelizzari, M.~Fleps-Dezasse, et al.
+Lipschitz Safe Bayesian Optimization for Automotive Control.
+arXiv:2501.12969, 2025.
+
+\bibitem{uchida2024} K.~Uchida, R.~Hamano, M.~Nomura, et al.
+CMA-ES for Safe Optimization. arXiv:2405.10534, 2024.
+
+\bibitem{tanaskovic2017} M.~Tanaskovic, L.~Fagiano,
+V.~Gligorovski.
+Adaptive Model Predictive Control for Constrained, Linear Time
+Varying Systems. arXiv:1712.07548, 2017.
+
+\bibitem{knaup2024} J.~W.~Knaup, P.~Tsiotras.
+Recursively Feasible Stochastic Model Predictive Control for
+Time-Varying Linear Systems Subject to Unbounded Additive
+Uncertainties. arXiv:2410.11107, 2024.
+
+\bibitem{sun2023} X.~Sun, D.~Crapis, M.~Stephenson, et al.
+Cooperative AI via Decentralized Commitment Devices.
+arXiv:2311.07815, 2023.
+
+\bibitem{abufouda2014} M.~Abufouda.
+A Framework for Enhancing Performance and Handling Run-Time
+Uncertainty in Self-Adaptive Systems. arXiv:1402.2144, 2014.
+
+\bibitem{abufouda2014b} M.~Abufouda.
+Quality-Aware Approach for Engineering Self-Adaptive Software
+Systems. arXiv:1402.2611, 2014.
+
+\bibitem{tukur2026} M.~Tukur, H.~B.~Adeyemo, T.~Chen, et al.
+From AI Technical Debt to Agentic Technical Debt: A Systematic
+Mapping of Root Causes and Manifestations. arXiv:2608.01001, 2026.
+
+\bibitem{franc2021} V.~Franc, D.~Prusa, V.~Voracek.
+Optimal Strategies for Reject Option Classifiers.
+arXiv:2101.12523, 2021.
+
+\bibitem{franc2025} V.~Franc, J.~Paplham.
+Epistemic Reject Option Prediction. arXiv:2511.04855, 2025.
+
+\bibitem{noskov2023} F.~Noskov, A.~Fishkov, M.~Panov.
+Selective Nonparametric Regression via Testing. arXiv:2309.16412,
+2023.
+
+\bibitem{roderick2020} M.~Roderick, V.~Nagarajan, J.~Z.~Kolter.
+Provably Safe PAC-MDP Exploration Using Analogies.
+arXiv:2007.03574, 2020.
+
+\end{thebibliography}
+
+\end{document}

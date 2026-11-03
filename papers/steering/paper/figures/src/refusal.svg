@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="300" font-family="Helvetica,Arial,sans-serif">
+<rect width="940" height="300" fill="white"/>
+<text x="470" y="30" font-size="17" fill="#222" text-anchor="middle" font-weight="bold">The refusal, in numbers</text>
+<line x1="90" y1="150" x2="850" y2="150" stroke="#999999" stroke-width="1.5"/>
+<line x1="90" y1="144" x2="90" y2="156" stroke="#999999"/>
+<text x="90" y="176" font-size="12" fill="#666" text-anchor="middle">0.0</text>
+<line x1="301" y1="144" x2="301" y2="156" stroke="#999999"/>
+<text x="301" y="176" font-size="12" fill="#666" text-anchor="middle">0.2</text>
+<line x1="512" y1="144" x2="512" y2="156" stroke="#999999"/>
+<text x="512" y="176" font-size="12" fill="#666" text-anchor="middle">0.4</text>
+<line x1="723" y1="144" x2="723" y2="156" stroke="#999999"/>
+<text x="723" y="176" font-size="12" fill="#666" text-anchor="middle">0.6</text>
+<line x1="90" y1="150" x2="215" y2="150" stroke="#3a6ea5" stroke-width="8" stroke-opacity="0.5"/>
+<text x="153" y="126" font-size="13" fill="#3a6ea5" text-anchor="middle">the measured world reaches 0.118</text>
+<line x1="144" y1="138" x2="144" y2="162" stroke="#888888" stroke-width="2"/>
+<text x="144" y="196" font-size="11" fill="#888" text-anchor="middle">noise gate 0.051</text>
+<path d="M 762,120 L 762,180" stroke="#c62828" stroke-width="3"/>
+<path d="M 754,120 L 770,120" stroke="#c62828" stroke-width="3"/>
+<text x="762" y="108" font-size="14" fill="#c62828" text-anchor="middle" font-weight="bold">asked: 0.636</text>
+<text x="488" y="220" font-size="13" fill="#c62828" text-anchor="middle">far beyond anything measured --- refused by name, zero actuation</text>
+<text x="16" y="292" font-size="12" fill="#555">The refusal receipt: the demanded shift sits far outside the measured reach; the engine declined and touched nothing.</text>
+</svg>

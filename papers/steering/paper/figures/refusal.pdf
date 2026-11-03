@@ -1,0 +1,51 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 940 300] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1588 >>
+stream
+1.000 1.000 1.000 rg 0.00 0.00 940.00 300.00 re f
+BT /F1 17.0 Tf 0.133 0.133 0.133 rg 380.72 270.00 Td (The refusal, in numbers) Tj ET
+0.600 0.600 0.600 RG 1.50 w [] 0 d 90.00 150.00 m 850.00 150.00 l S
+0.600 0.600 0.600 RG 1.00 w [] 0 d 90.00 156.00 m 90.00 144.00 l S
+BT /F1 12.0 Tf 0.400 0.400 0.400 rg 81.66 124.00 Td (0.0) Tj ET
+0.600 0.600 0.600 RG 1.00 w [] 0 d 301.00 156.00 m 301.00 144.00 l S
+BT /F1 12.0 Tf 0.400 0.400 0.400 rg 292.66 124.00 Td (0.2) Tj ET
+0.600 0.600 0.600 RG 1.00 w [] 0 d 512.00 156.00 m 512.00 144.00 l S
+BT /F1 12.0 Tf 0.400 0.400 0.400 rg 503.66 124.00 Td (0.4) Tj ET
+0.600 0.600 0.600 RG 1.00 w [] 0 d 723.00 156.00 m 723.00 144.00 l S
+BT /F1 12.0 Tf 0.400 0.400 0.400 rg 714.66 124.00 Td (0.6) Tj ET
+0.227 0.431 0.647 RG 8.00 w [] 0 d 90.00 150.00 m 215.00 150.00 l S
+BT /F1 13.0 Tf 0.227 0.431 0.647 rg 52.93 174.00 Td (the measured world reaches 0.118) Tj ET
+0.533 0.533 0.533 RG 2.00 w [] 0 d 144.00 162.00 m 144.00 138.00 l S
+BT /F1 11.0 Tf 0.533 0.533 0.533 rg 103.33 104.00 Td (noise gate 0.051) Tj ET
+0.776 0.157 0.157 RG 3.00 w [] 0 d 762.00 180.00 m 762.00 120.00 l 762.00 180.00 l S
+0.776 0.157 0.157 RG 3.00 w [] 0 d 754.00 180.00 m 770.00 180.00 l 754.00 180.00 l S
+BT /F1 14.0 Tf 0.776 0.157 0.157 rg 721.92 192.00 Td (asked: 0.636) Tj ET
+BT /F1 13.0 Tf 0.776 0.157 0.157 rg 297.24 80.00 Td (far beyond anything measured --- refused by name, zero actuation) Tj ET
+BT /F1 12.0 Tf 0.333 0.333 0.333 rg 16.00 8.00 Td (The refusal receipt: the demanded shift sits far outside the measured reach; the engine declined and touched nothing.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001881 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1951
+%%EOF
