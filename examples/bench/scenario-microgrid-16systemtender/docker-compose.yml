@@ -1,0 +1,160 @@
+services:
+  microgrid-1:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8090:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "42"
+      COUPLING_NEIGHBORS: "http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-2:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8091:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "123"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-3:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8092:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "256"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-4:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8093:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "512"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-5:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8094:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "789"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-6:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8095:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "1024"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-7:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8096:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "2048"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-8:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8097:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "4096"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-9:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8098:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "6144"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-10:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8099:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "8192"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-11:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8100:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "16384"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-12:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8101:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "32768"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-13:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8102:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "65536"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-14:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-14:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8103:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "131072"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-15:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-15:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8104:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "262144"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-16:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
+
+  microgrid-16:
+    image: ghcr.io/godon-dev/godon-bench-microgrid:0.4.0
+    ports:
+      - "8105:8090"
+    environment:
+      PORT: "8090"
+      MICROGRID_SEED: "524288"
+      COUPLING_NEIGHBORS: "http://microgrid-1:8090,http://microgrid-2:8090,http://microgrid-3:8090,http://microgrid-4:8090,http://microgrid-5:8090,http://microgrid-6:8090,http://microgrid-7:8090,http://microgrid-8:8090,http://microgrid-9:8090,http://microgrid-10:8090,http://microgrid-11:8090,http://microgrid-12:8090,http://microgrid-13:8090,http://microgrid-14:8090,http://microgrid-15:8090"
+      COUPLING_FACTOR: ${COUPLING_FACTOR:-0.1}
