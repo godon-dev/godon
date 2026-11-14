@@ -1,0 +1,16 @@
+distinct (levels_measured, refinement, state) in last 20m, with first/last seen:
+  levels= 38 ref=0 state=hold   n= 98  14:38:37 -> 14:40:35
+  levels= 40 ref=0 state=probe_pause n=  1  14:38:38 -> 14:38:38
+  levels=  0 ref=0 state=hold   n=176  14:38:38 -> 14:40:36
+  levels= 41 ref=0 state=probe_push n=  5  14:38:41 -> 14:38:44
+  levels=  0 ref=0 state=probe_push n=  1  14:38:51 -> 14:38:51
+  levels= 41 ref=0 state=probe_pause n=  5  14:38:51 -> 14:38:59
+  levels=  0 ref=0 state=probe_pause n=  1  14:38:58 -> 14:38:58
+  levels= 42 ref=0 state=cooldown n= 25  14:39:07 -> 14:40:22
+  levels=  0 ref=0 state=idle   n=  6  14:39:07 -> 14:40:36
+  levels= 38 ref=0 state=idle   n=  6  14:39:07 -> 14:40:36
+  levels= 42 ref=0 state=probe_push n= 85  14:39:09 -> 14:40:31
+  levels= 42 ref=0 state=probe_pause n= 90  14:39:11 -> 14:40:33
+  levels= 43 ref=0 state=cooldown n=  1  14:40:36 -> 14:40:36
+trials completed last 10m: 300
+CONVERGED lines: 0

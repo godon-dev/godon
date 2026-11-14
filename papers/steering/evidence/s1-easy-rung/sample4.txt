@@ -1,0 +1,28 @@
+distinct (levels_measured, refinement, state) in last 20m, with first/last seen:
+  levels=  2 ref=0 state=probe_push n= 17  15:43:57 -> 15:44:07
+  levels=  2 ref=0 state=probe_pause n= 18  15:43:58 -> 15:44:09
+  levels=  0 ref=0 state=hold   n=178  15:44:06 -> 15:45:45
+  levels= 27 ref=0 state=hold   n=101  15:44:06 -> 15:45:45
+  levels=  3 ref=0 state=cooldown n=  5  15:44:10 -> 15:44:12
+  levels=  0 ref=0 state=idle   n=  5  15:44:11 -> 15:45:24
+  levels= 27 ref=0 state=idle   n=  5  15:44:11 -> 15:45:24
+  levels=  3 ref=0 state=probe_push n= 17  15:44:12 -> 15:44:22
+  levels=  3 ref=0 state=probe_pause n= 18  15:44:13 -> 15:44:24
+  levels=  4 ref=0 state=cooldown n=  5  15:44:26 -> 15:44:27
+  levels=  4 ref=0 state=probe_push n= 17  15:44:28 -> 15:44:36
+  levels=  4 ref=0 state=probe_pause n= 18  15:44:29 -> 15:44:38
+  levels=  5 ref=0 state=cooldown n=  5  15:44:40 -> 15:44:41
+  levels=  5 ref=0 state=probe_push n= 17  15:44:41 -> 15:44:51
+  levels=  5 ref=0 state=probe_pause n= 18  15:44:43 -> 15:44:53
+  levels=  6 ref=0 state=cooldown n=  5  15:44:55 -> 15:44:57
+  levels=  6 ref=0 state=probe_push n= 10  15:44:58 -> 15:45:10
+  levels=  6 ref=0 state=probe_pause n= 12  15:44:59 -> 15:45:12
+  levels=  0 ref=0 state=probe_push n=  1  15:45:08 -> 15:45:08
+  levels=  7 ref=0 state=probe_push n=  6  15:45:15 -> 15:45:18
+  levels=  7 ref=0 state=probe_pause n=  6  15:45:20 -> 15:45:22
+  levels=  8 ref=0 state=cooldown n=  5  15:45:24 -> 15:45:25
+  levels=  8 ref=0 state=probe_push n=  5  15:45:25 -> 15:45:26
+  levels=  0 ref=0 state=probe_pause n=  1  15:45:36 -> 15:45:36
+  levels=  8 ref=0 state=probe_pause n=  5  15:45:38 -> 15:45:44
+trials completed last 10m: 300
+CONVERGED lines: 0
