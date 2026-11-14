@@ -1,0 +1,25 @@
+distinct (levels_measured, refinement, state) in last 20m, with first/last seen:
+  levels=  0 ref=0 state=hold   n=429  15:15:46 -> 15:16:19
+  levels= 27 ref=0 state=hold   n= 67  15:15:46 -> 15:16:22
+  levels=  0 ref=0 state=idle   n=  3  15:15:51 -> 15:16:19
+  levels= 27 ref=0 state=idle   n=  1  15:16:10 -> 15:16:10
+trials completed last 10m: 300
+CONVERGED lines: 0
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; [print(t["name"], t["status"]) for t in json.load(sys.stdin)]
+                                                             ~~~~~~~~~^^^^^^^^^^^
+  File "/nix/store/nwwhxhhn5l6ncq28ilq6pcq4rwbn9s8v-python3-3.13.17-env/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/nix/store/nwwhxhhn5l6ncq28ilq6pcq4rwbn9s8v-python3-3.13.17-env/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/nix/store/nwwhxhhn5l6ncq28ilq6pcq4rwbn9s8v-python3-3.13.17-env/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/nwwhxhhn5l6ncq28ilq6pcq4rwbn9s8v-python3-3.13.17-env/lib/python3.13/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
