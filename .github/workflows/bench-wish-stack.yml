@@ -15,6 +15,10 @@ on:
         description: "Coupling strength (0.0=none, 0.3=moderate, 0.7=strong)"
         required: false
         default: "0.7"
+      reverse_edge_strength:
+        description: "The back edge alone (node-3→node-1): override its strength; the loop gain is coupling_strength × this. Default 0.7 = the banked uniform shape."
+        required: false
+        default: "0.7"
       base_function:
         description: "linear | polynomial | threshold | saturation"
         required: false
@@ -100,6 +104,9 @@ jobs:
           cp examples/bench/scenario-wish-stack/topology.yaml /tmp/topology.yaml
 
           sed -i "s/strength: .*/strength: ${{ inputs.coupling_strength }}/" /tmp/topology.yaml
+          # The back edge (node-3→node-1) alone: its block is the only one
+          # with "from: node-3" — rewrite its strength after the global pass.
+          sed -i "/from: node-3/,/drift_rate:/ s/strength: .*/strength: ${{ inputs.reverse_edge_strength }}/" /tmp/topology.yaml
           sed -i "s/base: .*/base: ${{ inputs.base_function }}/" /tmp/topology.yaml
           sed -i "s/gaussian_sigma: .*/gaussian_sigma: ${{ inputs.noise_gaussian }}/" /tmp/topology.yaml
           sed -i "s/colored_sigma: .*/colored_sigma: ${{ inputs.noise_colored }}/" /tmp/topology.yaml
