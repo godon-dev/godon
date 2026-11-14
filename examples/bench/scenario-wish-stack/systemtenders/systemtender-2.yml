@@ -14,9 +14,11 @@ settings:
 run:
   parallel: 1
 interference_detection:
-  # walk retirement bar (default 0.02): the holder's relaxation lever —
-  # retire params on coarser certificates so walks conclude inside a room
-  convergence_threshold: 0.1
+  # Precision is NOT declared here: the estate's settings tree carries
+  # it (policy/convergence_fraction, frozen at spawn, moved between
+  # rooms). A convergence_threshold line in this block is refused at
+  # worker init since 0.187.5 (robots#310, the namespace's hygiene
+  # refusal) — the config stays SILENT on precision.
   group: bench-wish-stack
   mode: active
   min_optimize_trials: 15
