@@ -117,21 +117,21 @@ jobs:
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
-          mkdir -p /tmp/nt && rm -f /tmp/nt/target_*
+          mkdir -p nt && rm -f nt/target_*
           for i in $(seq 1 ${{ inputs.n }}); do
             NAME="bench-generic-n-node-${i}"
             EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             [ -n "${EXISTING}" ] && curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
             printf 'name: "bench-generic-n-node-%s"\ntargetType: "http"\nspec:\n  url: "%s/node-%s"\n  auth_type: "none"\n' \
-              "${i}" "${BENCH_URL}" "${i}" > /tmp/nt/target_${i}.yaml
-            OUT=$(docker run --rm --network host -v /tmp/nt:/work:ro -w /work \
+              "${i}" "${BENCH_URL}" "${i}" > nt/target_${i}.yaml
+            OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               target create --file=target_${i}.yaml 2>&1 || true)
             echo "${OUT}" >&2
             ID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
             [ -z "${ID}" ] && ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1)
             [ -z "${ID}" ] && { echo "target ${i} failed"; exit 1; }
-            echo "${ID}" > /tmp/nt/target_${i}.id
+            echo "${ID}" > nt/target_${i}.id
           done
           echo "created ${{ inputs.n }} targets"
 
@@ -155,22 +155,22 @@ jobs:
             done
             [ -n "${STILL}" ] && { echo "tender ${BID} still listed 180s after purge"; exit 1; }
           done
-          rm -f /tmp/nt/tender_*
+          rm -f nt/tender_*
           for i in $(seq 1 ${{ inputs.n }}); do
-            TID=$(cat /tmp/nt/target_${i}.id)
+            TID=$(cat nt/target_${i}.id)
             python3 examples/bench/scenario-generic-n/gen_tender.py \
               --recon-url "${BENCH_URL}/node-${i}" --target-id "${TID}" \
               --group bench-generic-n \
               --push ${{ inputs.push_block_size }} --pause ${{ inputs.pause_block_size }} \
-              > /tmp/nt/tender_${i}.yaml
-            [ -s /tmp/nt/tender_${i}.yaml ] || { echo "tender gen ${i} failed"; exit 1; }
-            OUT=$(docker run --rm --network host -v /tmp/nt:/work:ro -w /work \
+              > nt/tender_${i}.yaml
+            [ -s nt/tender_${i}.yaml ] || { echo "tender gen ${i} failed"; exit 1; }
+            OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               systemtender create --name="bench-generic-n-${i}" --file=tender_${i}.yaml 2>&1 || true)
             echo "${OUT}" >&2
             UUID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
             [ -z "${UUID}" ] && { echo "tender ${i} failed"; exit 1; }
-            echo "${UUID}" > /tmp/nt/tender_${i}.id
+            echo "${UUID}" > nt/tender_${i}.id
           done
           echo "created ${{ inputs.n }} tenders"
 
@@ -184,7 +184,7 @@ jobs:
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
             METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
             TOTAL=0; DONE=0
-            for f in /tmp/nt/tender_*.id; do
+            for f in nt/tender_*.id; do
               UUID=$(cat $f)
               T=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${UUID}\"" | grep -oP '\} \K[0-9]+' || echo 0)
               TOTAL=$((TOTAL+1))
@@ -202,7 +202,7 @@ jobs:
         run: |
           echo "=== per-tender trial counters ==="
           METRICS=$(kubectl exec -n godon deploy/godon-godon-observer -- wget -qO- 'http://localhost:8089/metrics' 2>/dev/null || echo "")
-          for f in /tmp/nt/tender_*.id; do
+          for f in nt/tender_*.id; do
             UUID=$(cat $f)
             T=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${UUID}\"" | grep -oP '\} \K[0-9]+' || echo 0)
             echo "$(basename $f .id) trials=${T}"
@@ -217,14 +217,14 @@ jobs:
         run: |
           API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
-          for f in /tmp/nt/tender_*.id; do
+          for f in nt/tender_*.id; do
             [ -f "$f" ] || continue
             BID=$(cat $f)
             docker run --rm --network host "${CLI_IMAGE}" \
               --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               systemtender purge --force --id="${BID}" 2>&1 || echo "purge ${BID} said: $?"
           done
-          for f in /tmp/nt/target_*.id; do
+          for f in nt/target_*.id; do
             [ -f "$f" ] || continue
             TID=$(cat $f)
             docker run --rm --network host "${CLI_IMAGE}" \
