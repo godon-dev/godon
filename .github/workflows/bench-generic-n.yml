@@ -122,13 +122,8 @@ jobs:
             NAME="bench-generic-n-node-${i}"
             EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
             [ -n "${EXISTING}" ] && curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
-            cat > /tmp/nt/target_${i}.yaml <<EOF
-          name: "${NAME}"
-          targetType: "http"
-          spec:
-            url: "${BENCH_URL}/node-${i}"
-            auth_type: "none"
-          EOF
+            printf 'name: "bench-generic-n-node-%s"\ntargetType: "http"\nspec:\n  url: "%s/node-%s"\n  auth_type: "none"\n' \
+              "${i}" "${BENCH_URL}" "${i}" > /tmp/nt/target_${i}.yaml
             OUT=$(docker run --rm --network host -v /tmp/nt:/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               target create --file=target_${i}.yaml 2>&1 || true)
@@ -163,64 +158,12 @@ jobs:
           rm -f /tmp/nt/tender_*
           for i in $(seq 1 ${{ inputs.n }}); do
             TID=$(cat /tmp/nt/target_${i}.id)
-            cat > /tmp/nt/tender_${i}.yaml <<EOF
-          meta:
-            configVersion: "0.3"
-            strict_validation: false
-          systemtender:
-            type: "bench_generic"
-          settings:
-            generic:
-              param_0:
-                constraints:
-                  - {step: 25.0, lower: 0.0, upper: 100.0}
-          run:
-            parallel: 1
-          interference_detection:
-            # precision is NOT declared here: the estate's settings tree carries it
-            # (policy/convergence_fraction, frozen at spawn). SILENT by design.
-            group: bench-generic-n
-            mode: active
-            min_optimize_trials: 15
-            hold_calib_trials: 5
-            push_block_size: ${{ inputs.push_block_size }}
-            pause_block_size: ${{ inputs.pause_block_size }}
-            cooldown_trials: 5
-            hold_params:
-              param_0: 50.0
-          reconnaissance:
-            type: http
-            http:
-              url: "${BENCH_URL}/node-${i}"
-          objectives:
-            - name: "objective_0"
-              direction: maximize
-              reconnaissance:
-                service: http
-                path: /metrics/json
-                key: objective_0
-                stabilization_seconds: 0
-                samples: 3
-                interval: 0
-                aggregation: median
-          rollback_strategies:
-            standard:
-              consecutive_failures: 10
-              target_state: "previous"
-              max_attempts: 3
-              on_failure: "continue"
-              timeout_seconds: 60
-              after:
-                action: continue
-          effectuation:
-            type: http
-            targetRefs:
-              - "${TID}"
-            endpoint_config:
-              method: POST
-              path: /apply
-              timeout_seconds: 30
-          EOF
+            python3 examples/bench/scenario-generic-n/gen_tender.py \
+              --recon-url "${BENCH_URL}/node-${i}" --target-id "${TID}" \
+              --group bench-generic-n \
+              --push ${{ inputs.push_block_size }} --pause ${{ inputs.pause_block_size }} \
+              > /tmp/nt/tender_${i}.yaml
+            [ -s /tmp/nt/tender_${i}.yaml ] || { echo "tender gen ${i} failed"; exit 1; }
             OUT=$(docker run --rm --network host -v /tmp/nt:/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               systemtender create --name="bench-generic-n-${i}" --file=tender_${i}.yaml 2>&1 || true)
