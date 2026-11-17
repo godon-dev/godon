@@ -229,6 +229,20 @@ jobs:
             [ "${LEFT}" = "0" ] && break
             sleep 5
           done
+          if [ "${LEFT}" != "0" ]; then
+            # the known quiet-tender delete-wedge: re-DELETE clears it in ~40s
+            # (banked pitfall — always the walked one). One more purge each.
+            echo "${LEFT} wedged — re-deleting each once"
+            for BID in $(curl -s -m 15 ${API_URL}/systemtenders | jq -r '.[] | select(.name | startswith("bench-generic-n")) | .id' 2>/dev/null); do
+              docker run --rm --network host "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
+                systemtender purge --force --id="${BID}" 2>&1 || echo "re-delete ${BID} errored"
+            done
+            for i in $(seq 1 24); do
+              LEFT=$(curl -s -m 15 ${API_URL}/systemtenders | jq -r '[.[] | select(.name | startswith("bench-generic-n"))] | length' 2>/dev/null || echo "?")
+              [ "${LEFT}" = "0" ] && break
+              sleep 5
+            done
+          fi
           [ "${LEFT}" = "0" ] || { echo "::error::${LEFT} tenders of this family still listed after cleanup — residue survives, job goes red"; exit 1; }
           for f in nt/target_*.id; do
             [ -f "$f" ] || continue
