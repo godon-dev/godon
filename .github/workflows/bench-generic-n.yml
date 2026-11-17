@@ -135,6 +135,9 @@ jobs:
                 "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
                 target create --file=target_${i}.yaml 2>&1 || true)
               ID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              # async-accept prints no id; a 409 means an earlier attempt WON —
+              # the list-by-name fallback adopts our own row either way
+              [ -z "${ID}" ] && ID=$(curl -s -m 10 ${API_URL}/targets | jq -r ".[] | select(.name==\"bench-generic-n-node-${i}\") | .id" 2>/dev/null | head -1)
               [ -n "${ID}" ] && break
               echo "target ${i} attempt ${ATTEMPT} failed: ${OUT}" >&2
               sleep 5
@@ -160,7 +163,11 @@ jobs:
               OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
                 "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
                 systemtender create --name="bench-generic-n-${i}" --file=tender_${i}.yaml 2>&1 || true)
-              UUID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              UUID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              # async-accept prints no id; a 409 means an earlier attempt WON —
+              # adopt our own row by name (the gate proved the estate clean
+              # before we started, so a name hit here is ours)
+              [ -z "${UUID}" ] && UUID=$(curl -s -m 10 http://127.0.0.1:32002/systemtenders | jq -r ".[] | select(.name==\"bench-generic-n-${i}\") | .id" 2>/dev/null | head -1)
               [ -n "${UUID}" ] && break
               echo "tender ${i} attempt ${ATTEMPT} failed: ${OUT}" >&2
               sleep 5
