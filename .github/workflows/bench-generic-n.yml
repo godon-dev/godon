@@ -124,6 +124,8 @@ jobs:
             [ -n "${EXISTING}" ] && curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
             printf 'name: "bench-generic-n-node-%s"\ntargetType: "http"\nspec:\n  url: "%s/node-%s"\n  auth_type: "none"\n' \
               "${i}" "${BENCH_URL}" "${i}" > nt/target_${i}.yaml
+            [ -s nt/target_${i}.yaml ] || { echo "target gen ${i} failed"; exit 1; }
+            chmod 644 nt/target_${i}.yaml
             OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               target create --file=target_${i}.yaml 2>&1 || true)
@@ -164,6 +166,7 @@ jobs:
               --push ${{ inputs.push_block_size }} --pause ${{ inputs.pause_block_size }} \
               > nt/tender_${i}.yaml
             [ -s nt/tender_${i}.yaml ] || { echo "tender gen ${i} failed"; exit 1; }
+            chmod 644 nt/tender_${i}.yaml
             OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
               "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
               systemtender create --name="bench-generic-n-${i}" --file=tender_${i}.yaml 2>&1 || true)
