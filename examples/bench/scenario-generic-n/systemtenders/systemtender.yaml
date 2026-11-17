@@ -1,0 +1,57 @@
+meta:
+  configVersion: "0.3"
+  strict_validation: false
+systemtender:
+  type: "bench_generic"
+settings:
+  generic:
+    param_0:
+      constraints:
+        - {step: 25.0, lower: 0.0, upper: 100.0}
+run:
+  parallel: 1
+interference_detection:
+  # Precision is NOT declared here: the estate's settings tree carries it
+  # (policy/convergence_fraction, frozen at spawn). SILENT by design —
+  # a convergence_threshold line is refused at worker init since 0.187.5.
+  group: bench-generic-n
+  mode: active
+  min_optimize_trials: 15
+  hold_calib_trials: 5
+  push_block_size: __PUSH__
+  pause_block_size: __PAUSE__
+  cooldown_trials: 5
+  hold_params:
+    param_0: 50.0
+reconnaissance:
+  type: http
+  http:
+    url: "__BENCH_URL__/node-__I__"
+objectives:
+  - name: "objective_0"
+    direction: maximize
+    reconnaissance:
+      service: http
+      path: /metrics/json
+      key: objective_0
+      stabilization_seconds: 0
+      samples: 3
+      interval: 0
+      aggregation: median
+rollback_strategies:
+  standard:
+    consecutive_failures: 10
+    target_state: "previous"
+    max_attempts: 3
+    on_failure: "continue"
+    timeout_seconds: 60
+    after:
+      action: continue
+effectuation:
+  type: http
+  targetRefs:
+    - "__TARGET_ID__"
+  endpoint_config:
+    method: POST
+    path: /apply
+    timeout_seconds: 30

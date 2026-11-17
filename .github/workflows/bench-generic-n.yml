@@ -4,25 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       n:
-        description: "Number of nodes/tenders (6, 10, 16, 20, 30...)"
+        description: "Number of nodes/tenders (6, 10, 16)"
         required: false
         default: "6"
       family:
-        description: "Topology family: mesh (fully-coupled DAG) | chain (sparse) | fork (hub+receivers) | none (uncoupled control)"
+        description: "Topology family: mesh | none (uncoupled control) — must match a checked-in topology file"
         required: false
-        default: "mesh"
+        default: "none"
       coupling_strength:
-        description: "Edge strength (default 0.7)"
+        description: "Edge strength (0.0 | 0.3 | 0.7) — selects the checked-in topology with the family"
         required: false
-        default: "0.7"
-      noise_gaussian:
-        description: "Gaussian noise sigma"
-        required: false
-        default: "0.02"
-      dials_per_node:
-        description: "Dials per node (map size per tender)"
-        required: false
-        default: "1"
+        default: "0.0"
       min_trials:
         description: "Trials per tender before the room concludes (meters, not maps)"
         required: false
@@ -30,7 +22,7 @@ on:
       max_wait_minutes:
         description: "Room window"
         required: false
-        default: "40"
+        default: "45"
       push_block_size:
         description: "Push block size"
         required: false
@@ -42,7 +34,7 @@ on:
 
 jobs:
   bench-generic-n:
-    name: "Generic-N load room: ${{ inputs.n }} nodes, ${{ inputs.family }}"
+    name: "Generic-N load room: ${{ inputs.n }} nodes, ${{ inputs.family }} ${{ inputs.coupling_strength }}"
     runs-on: [self-hosted, linux]
     timeout-minutes: ${{ fromJSON(inputs.max_wait_minutes) }}
     steps:
@@ -66,15 +58,41 @@ jobs:
             echo "Godon stack not found."; exit 1
           fi
           kubectl wait --for=condition=ready pod -l component=api -n godon --timeout=300s
+          # the estate doors must answer at all (the 2026-11-17 auth wedge
+          # class: everything downstream 500s while the doors are broken)
+          curl -s -m 10 http://127.0.0.1:32002/systemtenders >/dev/null || {
+            echo "::error::the api's systemtenders door does not answer — estate wedged, refusing to fly"; exit 1;
+          }
 
-      - name: Generate Topology
+      - name: Select Topology (checked-in)
         run: |
-          python3 examples/bench/scenario-generic-n/gen_topology.py \
-            --n ${{ inputs.n }} --family ${{ inputs.family }} \
-            --coupling ${{ inputs.coupling_strength }} --dials ${{ inputs.dials_per_node }} \
-            --sigma ${{ inputs.noise_gaussian }} > /tmp/topology.yaml
-          echo "=== Effective topology (N=${{ inputs.n }}, family=${{ inputs.family }}) ==="
+          TOPO="examples/bench/scenario-generic-n/topologies/${{ inputs.family }}-${{ inputs.coupling_strength }}-n${{ inputs.n }}.yaml"
+          [ -f "$TOPO" ] || { echo "::error::no checked-in topology at $TOPO"; exit 1; }
+          cp "$TOPO" /tmp/topology.yaml
+          echo "=== Room topology: $TOPO ==="
           cat /tmp/topology.yaml
+
+      - name: Purge Stale Rooms, Proven Gone (FIRST — the gate room 2 never reached)
+        run: |
+          API_URL="http://127.0.0.1:32002"
+          CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          EXISTING=$(curl -s ${API_URL}/systemtenders | jq -r '.[] | select(.name | startswith("bench-generic-n")) | .id' 2>/dev/null || echo "")
+          for BID in ${EXISTING}; do
+            echo "purging stale ${BID}" >&2
+            docker run --rm --network host "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
+              systemtender purge --force --id="${BID}" 2>&1 || { echo "::error::purge of ${BID} failed"; exit 1; }
+            for i in $(seq 1 36); do
+              STILL=$(curl -s ${API_URL}/systemtenders | jq -r --arg id "${BID}" '.[] | select(.id==$id) | .id' 2>/dev/null || echo "")
+              [ -z "${STILL}" ] && break
+              sleep 5
+            done
+            [ -n "${STILL}" ] && { echo "::error::tender ${BID} still listed 180s after purge — residue refuses to die"; exit 1; }
+          done
+          for TID in $(curl -s ${API_URL}/targets | jq -r '.[] | select(.name | startswith("bench-generic-n")) | .id' 2>/dev/null || echo ""); do
+            docker run --rm --network host "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
+              target delete --id="${TID}" 2>&1 || true
+          done
+          echo "estate clean of this family"
 
       - name: Start Generic Bench
         run: |
@@ -101,78 +119,53 @@ jobs:
           echo "BENCH_IP=${BENCH_IP}" >> $GITHUB_ENV
           curl -s http://127.0.0.1:8090/config | python3 -c "import json,sys; c=json.load(sys.stdin); print('nodes:', len(c['nodes']), 'edges:', len(c['edges']))"
 
-      - name: Point the CLI at the API node port
+      - name: Create Targets (template seds, retried)
         run: |
-          echo "API_HOST=127.0.0.1" >> $GITHUB_ENV
-          echo "API_PORT=32002" >> $GITHUB_ENV
-          for i in $(seq 1 15); do
-            if curl -s -f --connect-timeout 2 http://127.0.0.1:32002/health >/dev/null 2>&1; then
-              echo "API reachable"; break
-            fi
-            sleep 2
-          done
-
-      - name: Create Targets
-        run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          API_URL="http://127.0.0.1:32002"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
-          mkdir -p nt && rm -f nt/target_*
+          mkdir -p nt && rm -f nt/*
           for i in $(seq 1 ${{ inputs.n }}); do
-            NAME="bench-generic-n-node-${i}"
-            EXISTING=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null || echo "")
-            [ -n "${EXISTING}" ] && curl -s -X DELETE ${API_URL}/targets/${EXISTING} >/dev/null 2>&1 || true
-            printf 'name: "bench-generic-n-node-%s"\ntargetType: "http"\nspec:\n  url: "%s/node-%s"\n  auth_type: "none"\n' \
-              "${i}" "${BENCH_URL}" "${i}" > nt/target_${i}.yaml
-            [ -s nt/target_${i}.yaml ] || { echo "target gen ${i} failed"; exit 1; }
+            sed -e "s|__BENCH_URL__|${BENCH_URL}|g" -e "s|__I__|${i}|g" \
+              examples/bench/scenario-generic-n/targets/node.yaml > nt/target_${i}.yaml
             chmod 644 nt/target_${i}.yaml
-            OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
-              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              target create --file=target_${i}.yaml 2>&1 || true)
-            echo "${OUT}" >&2
-            ID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
-            [ -z "${ID}" ] && ID=$(curl -s ${API_URL}/targets | jq -r ".[] | select(.name==\"${NAME}\") | .id" 2>/dev/null | head -1)
-            [ -z "${ID}" ] && { echo "target ${i} failed"; exit 1; }
+            ID=""
+            for ATTEMPT in 1 2 3; do
+              OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
+                "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
+                target create --file=target_${i}.yaml 2>&1 || true)
+              ID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              [ -n "${ID}" ] && break
+              echo "target ${i} attempt ${ATTEMPT} failed: ${OUT}" >&2
+              sleep 5
+            done
+            [ -z "${ID}" ] && { echo "::error::target ${i} failed after 3 attempts"; exit 1; }
             echo "${ID}" > nt/target_${i}.id
           done
           echo "created ${{ inputs.n }} targets"
 
-      - name: Create Systemtenders
-        env:
-          KUBECONFIG: /tmp/kind_kubeconfig.yaml
+      - name: Create Systemtenders (template seds, retried)
         run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
           BENCH_URL="http://${{ env.BENCH_IP }}:8090"
-          # Purge stale rooms of this family, proven gone (godon#409 class)
-          EXISTING=$(curl -s ${API_URL}/systemtenders | jq -r '.[] | select(.name | startswith("bench-generic-n")) | .id' 2>/dev/null || echo "")
-          for BID in ${EXISTING}; do
-            docker run --rm --network host "${CLI_IMAGE}" \
-              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              systemtender purge --force --id="${BID}" 2>&1 || { echo "purge failed ${BID}"; exit 1; }
-            for i in $(seq 1 36); do
-              STILL=$(curl -s ${API_URL}/systemtenders | jq -r --arg id "${BID}" '.[] | select(.id==$id) | .id' 2>/dev/null || echo "")
-              [ -z "${STILL}" ] && break
-              sleep 5
-            done
-            [ -n "${STILL}" ] && { echo "tender ${BID} still listed 180s after purge"; exit 1; }
-          done
-          rm -f nt/tender_*
           for i in $(seq 1 ${{ inputs.n }}); do
             TID=$(cat nt/target_${i}.id)
-            python3 examples/bench/scenario-generic-n/gen_tender.py \
-              --recon-url "${BENCH_URL}/node-${i}" --target-id "${TID}" \
-              --group bench-generic-n \
-              --push ${{ inputs.push_block_size }} --pause ${{ inputs.pause_block_size }} \
-              > nt/tender_${i}.yaml
-            [ -s nt/tender_${i}.yaml ] || { echo "tender gen ${i} failed"; exit 1; }
+            sed -e "s|__BENCH_URL__|${BENCH_URL}|g" -e "s|__I__|${i}|g" \
+                -e "s|__TARGET_ID__|${TID}|g" \
+                -e "s|__PUSH__|${{ inputs.push_block_size }}|" -e "s|__PAUSE__|${{ inputs.pause_block_size }}|" \
+                examples/bench/scenario-generic-n/systemtenders/systemtender.yaml > nt/tender_${i}.yaml
             chmod 644 nt/tender_${i}.yaml
-            OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
-              "${CLI_IMAGE}" --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              systemtender create --name="bench-generic-n-${i}" --file=tender_${i}.yaml 2>&1 || true)
-            echo "${OUT}" >&2
-            UUID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
-            [ -z "${UUID}" ] && { echo "tender ${i} failed"; exit 1; }
+            UUID=""
+            for ATTEMPT in 1 2 3; do
+              OUT=$(docker run --rm --network host -v $(pwd)/nt:/work:ro -w /work \
+                "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
+                systemtender create --name="bench-generic-n-${i}" --file=tender_${i}.yaml 2>&1 || true)
+              UUID=$(echo "${OUT}" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+              [ -n "${UUID}" ] && break
+              echo "tender ${i} attempt ${ATTEMPT} failed: ${OUT}" >&2
+              sleep 5
+            done
+            [ -z "${UUID}" ] && { echo "::error::tender ${i} failed after 3 attempts"; exit 1; }
             echo "${UUID}" > nt/tender_${i}.id
           done
           echo "created ${{ inputs.n }} tenders"
@@ -210,29 +203,30 @@ jobs:
             T=$(echo "${METRICS}" | grep "godon_systemtender_total_trials{.*systemtender_id=\"${UUID}\"" | grep -oP '\} \K[0-9]+' || echo 0)
             echo "$(basename $f .id) trials=${T}"
           done
-          echo "=== worker memory/CPU (crictl) ==="
-          K=/tmp/kubectl
-          $K get pods -n godon --kubeconfig /tmp/kind_kubeconfig.yaml --no-headers 2>/dev/null | grep windmill-workers-robot | grep Running | wc -l | xargs echo "robot workers running:"
-          crictl stats 2>/dev/null | head -25 || docker stats --no-stream --format "{{.Name}} {{.MemUsage}} {{.CPUPerc}}" 2>/dev/null | head -25 || true
 
-      - name: Cleanup
+      - name: Cleanup (verified gone, fails red)
         if: always()
         run: |
-          API_URL="http://${{ env.API_HOST }}:${{ env.API_PORT }}"
+          API_URL="http://127.0.0.1:32002"
           CLI_IMAGE="ghcr.io/godon-dev/godon-cli:latest"
+          docker rm -f bench-generic-n 2>/dev/null || true
           for f in nt/tender_*.id; do
             [ -f "$f" ] || continue
             BID=$(cat $f)
-            docker run --rm --network host "${CLI_IMAGE}" \
-              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
-              systemtender purge --force --id="${BID}" 2>&1 || echo "purge ${BID} said: $?"
+            docker run --rm --network host "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
+              systemtender purge --force --id="${BID}" 2>&1 || echo "purge ${BID} errored (continuing to verify)"
           done
+          sleep 12
+          for i in $(seq 1 36); do
+            LEFT=$(curl -s -m 15 ${API_URL}/systemtenders | jq -r '[.[] | select(.name | startswith("bench-generic-n"))] | length' 2>/dev/null || echo "?")
+            [ "${LEFT}" = "0" ] && break
+            sleep 5
+          done
+          [ "${LEFT}" = "0" ] || { echo "::error::${LEFT} tenders of this family still listed after cleanup — residue survives, job goes red"; exit 1; }
           for f in nt/target_*.id; do
             [ -f "$f" ] || continue
             TID=$(cat $f)
-            docker run --rm --network host "${CLI_IMAGE}" \
-              --hostname=${{ env.API_HOST }} --port=${{ env.API_PORT }} --insecure \
+            docker run --rm --network host "${CLI_IMAGE}" --hostname=127.0.0.1 --port=32002 --insecure \
               target delete --id="${TID}" 2>&1 || true
           done
-          docker rm -f bench-generic-n 2>/dev/null || true
-          echo "room torn down"
+          echo "room torn down, verified clean"
