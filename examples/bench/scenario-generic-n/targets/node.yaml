@@ -1,0 +1,5 @@
+name: "bench-generic-n-node-__I__"
+targetType: "http"
+spec:
+  url: "__BENCH_URL__/node-__I__"
+  auth_type: "none"
