@@ -1,0 +1,7 @@
+# Internal docs — strategy, funding, positioning, session notes
+# These must NEVER be committed to the public repo
+docs/
+
+# Local experiment artifacts
+*.log
+*.tmp
