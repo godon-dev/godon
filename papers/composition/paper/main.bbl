@@ -1,0 +1,52 @@
+\begin{thebibliography}{1}
+
+\bibitem{demers1990}
+Alan Demers, Srinivasan Keshav, and Scott Shenker.
+\newblock Analysis and simulation of a fair queueing algorithm.
+\newblock {\em IEEE/ACM Transactions on Networking}, 1(1):3--26, 1990.
+
+\bibitem{giri2010}
+Fouad Giri and Er-Wei Bai, editors.
+\newblock {\em Block-oriented Nonlinear System Identification}, volume 404 of
+  {\em Lecture Notes in Control and Information Sciences}.
+\newblock Springer, 2010.
+
+\bibitem{ljung1999sid}
+Lennart Ljung.
+\newblock {\em System Identification: Theory for the User}.
+\newblock Prentice Hall, 2 edition, 1999.
+
+\bibitem{pearl2009causality}
+Judea Pearl.
+\newblock {\em Causality: Models, Reasoning, and Inference}.
+\newblock Cambridge University Press, 2 edition, 2009.
+
+\bibitem{shreedhar1995}
+M.~Shreedhar and George Varghese.
+\newblock Efficient fair queuing using deficit round-robin.
+\newblock {\em IEEE/ACM Transactions on Networking}, 4(3):375--385, 1996.
+
+\bibitem{sugihara2012ccm}
+George Sugihara, Robert May, Hao Ye, Chih-hao Hsieh, Ethan Deyle, Michael
+  Fogarty, and Stephan Munch.
+\newblock Detecting causality in complex ecosystems.
+\newblock {\em Science}, 338(6106):496--500, 2012.
+
+\bibitem{p2}
+Matthias Tafelmeier.
+\newblock From edges to curves: Calibration of autonomous coupling
+  characterization in live systems, 2026.
+\newblock Zenodo.
+
+\bibitem{p1}
+Matthias Tafelmeier.
+\newblock The impulse protocol: Non-destructive coupling discovery in
+  autonomous agents, 2026.
+\newblock Zenodo.
+
+\bibitem{wiener1958}
+Norbert Wiener.
+\newblock {\em Nonlinear Problems in Random Theory}.
+\newblock The Technology Press, John Wiley \& Sons, 1958.
+
+\end{thebibliography}
