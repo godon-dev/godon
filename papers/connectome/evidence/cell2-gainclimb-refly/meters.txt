@@ -1,0 +1,69 @@
+2026-11-20T21:27:11.4340935Z [36;1m  echo "::error::the api's systemtenders door does not answer — estate wedged, refusing to fly"; exit 1;[0m
+2026-11-20T21:27:12.8775571Z [36;1m[ -f "$TOPO" ] || { echo "::error::no checked-in topology at $TOPO"; exit 1; }[0m
+2026-11-20T21:27:12.8876016Z nodes:
+2026-11-20T21:27:12.9044797Z [36;1m    systemtender purge --force --id="${BID}" 2>&1 || { echo "::error::purge of ${BID} failed"; exit 1; }[0m
+2026-11-20T21:27:12.9051385Z [36;1m  [ -n "${STILL}" ] && { echo "::error::tender ${BID} still listed 180s after purge — residue refuses to die"; exit 1; }[0m
+2026-11-20T21:27:15.1000550Z [36;1m    echo "Bench healthy"; break[0m
+2026-11-20T21:27:15.1005005Z [36;1mcurl -s http://127.0.0.1:8090/config | python3 -c "import json,sys; c=json.load(sys.stdin); print('nodes:', len(c['nodes']), 'edges:', len(c['edges']))"[0m
+2026-11-20T21:27:17.1737947Z Bench healthy
+2026-11-20T21:27:17.5057556Z nodes: 6 edges: 15
+2026-11-20T21:27:17.5180812Z [36;1m    echo "target ${i} attempt ${ATTEMPT} failed: ${OUT}" >&2[0m
+2026-11-20T21:27:17.5182074Z [36;1m  [ -z "${ID}" ] && { echo "::error::target ${i} failed after 3 attempts"; exit 1; }[0m
+2026-11-20T21:27:33.1608260Z [36;1m    echo "tender ${i} attempt ${ATTEMPT} failed: ${OUT}" >&2[0m
+2026-11-20T21:27:33.1611117Z [36;1m  [ -z "${UUID}" ] && { echo "::error::tender ${i} failed after 3 attempts"; exit 1; }[0m
+2026-11-20T21:27:49.1605633Z [36;1m  echo "[${ELAPSED}s] tenders at target: ${DONE}/${TOTAL}"[0m
+2026-11-20T21:27:49.1606625Z [36;1m  [ "${DONE}" -eq "${TOTAL}" ] && { echo "ALL REACHED ${MIN_TRIALS}"; break; }[0m
+2026-11-20T21:27:49.1607583Z [36;1m  [ ${ELAPSED} -ge ${POLL_DEADLINE} ] && { echo "STORY WINDOW CLOSED at ${ELAPSED}s (meters+cleanup reserve 300s)"; break; }[0m
+2026-11-20T21:27:49.4453962Z [0s] tenders at target: 0/6
+2026-11-20T21:28:04.6822134Z [15s] tenders at target: 0/6
+2026-11-20T21:28:19.9482371Z [30s] tenders at target: 0/6
+2026-11-20T21:28:35.2082961Z [45s] tenders at target: 0/6
+2026-11-20T21:28:50.5215454Z [60s] tenders at target: 0/6
+2026-11-20T21:29:05.7387549Z [75s] tenders at target: 0/6
+2026-11-20T21:29:20.9887222Z [90s] tenders at target: 0/6
+2026-11-20T21:29:36.2195381Z [105s] tenders at target: 0/6
+2026-11-20T21:29:51.4742675Z [120s] tenders at target: 0/6
+2026-11-20T21:30:06.7251745Z [135s] tenders at target: 0/6
+2026-11-20T21:30:21.9924086Z [150s] tenders at target: 0/6
+2026-11-20T21:30:37.2485596Z [165s] tenders at target: 0/6
+2026-11-20T21:30:52.5033651Z [180s] tenders at target: 0/6
+2026-11-20T21:31:07.7609293Z [195s] tenders at target: 0/6
+2026-11-20T21:31:22.9799852Z [210s] tenders at target: 0/6
+2026-11-20T21:31:38.2312796Z [225s] tenders at target: 0/6
+2026-11-20T21:31:54.0451861Z [240s] tenders at target: 0/6
+2026-11-20T21:32:09.2543861Z [255s] tenders at target: 0/6
+2026-11-20T21:32:24.5235670Z [270s] tenders at target: 0/6
+2026-11-20T21:32:45.8468247Z [285s] tenders at target: 0/6
+2026-11-20T21:33:01.2010542Z [300s] tenders at target: 0/6
+2026-11-20T21:33:21.9583663Z [315s] tenders at target: 0/6
+2026-11-20T21:33:37.6366576Z [330s] tenders at target: 0/6
+2026-11-20T21:33:52.8945468Z [345s] tenders at target: 0/6
+2026-11-20T21:34:08.1151105Z [360s] tenders at target: 0/6
+2026-11-20T21:34:23.3197563Z [375s] tenders at target: 0/6
+2026-11-20T21:34:38.5502569Z [390s] tenders at target: 0/6
+2026-11-20T21:34:53.7777542Z [405s] tenders at target: 0/6
+2026-11-20T21:35:09.0137658Z [420s] tenders at target: 0/6
+2026-11-20T21:35:24.2513179Z [435s] tenders at target: 0/6
+2026-11-20T21:35:39.4877466Z [450s] tenders at target: 0/6
+2026-11-20T21:35:54.7024853Z [465s] tenders at target: 0/6
+2026-11-20T21:36:09.9233861Z [480s] tenders at target: 0/6
+2026-11-20T21:36:25.1211329Z [495s] tenders at target: 0/6
+2026-11-20T21:36:40.3564373Z [510s] tenders at target: 0/6
+2026-11-20T21:36:55.5769766Z [525s] tenders at target: 0/6
+2026-11-20T21:37:10.8089669Z [540s] tenders at target: 0/6
+2026-11-20T21:37:26.0569962Z [555s] tenders at target: 0/6
+2026-11-20T21:37:41.3082091Z [570s] tenders at target: 0/6
+2026-11-20T21:37:56.5273663Z [585s] tenders at target: 0/6
+2026-11-20T21:38:11.7775653Z [600s] tenders at target: 0/6
+2026-11-20T21:38:11.7776513Z STORY WINDOW CLOSED at 600s (meters+cleanup reserve 300s)
+2026-11-20T21:38:11.7887391Z [36;1m  echo "$(basename $f .id) trials=${T}"[0m
+2026-11-20T21:38:12.0125039Z tender_1 trials=3185
+2026-11-20T21:38:12.0257950Z tender_2 trials=480
+2026-11-20T21:38:12.0385521Z tender_3 trials=1190
+2026-11-20T21:38:12.0520891Z tender_4 trials=1940
+2026-11-20T21:38:12.0703228Z tender_5 trials=3175
+2026-11-20T21:38:12.0881360Z tender_6 trials=3155
+2026-11-20T21:38:13.7062075Z (node:2052320) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-20T21:38:14.5341187Z [36;1m    systemtender purge --force --id="${BID}" 2>&1 || echo "purge ${BID} errored (continuing to verify)"[0m
+2026-11-20T21:38:14.5353122Z [36;1m      systemtender purge --force --id="${BID}" 2>&1 || echo "re-delete ${BID} errored"[0m
+2026-11-20T21:38:14.5358581Z [36;1m[ "${LEFT}" = "0" ] || { echo "::error::${LEFT} tenders of this family still listed after cleanup — residue survives, job goes red"; exit 1; }[0m
