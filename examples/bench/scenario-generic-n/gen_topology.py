@@ -22,16 +22,6 @@ p.add_argument("--family", choices=["mesh", "chain", "fork", "none"], default="m
 p.add_argument("--coupling", type=float, default=0.7)
 p.add_argument("--dials", type=int, default=1)
 p.add_argument("--sigma", type=float, default=0.02)
-p.add_argument("--drift-node", type=int, default=0,
-               help="1-based node index receiving the offset-slide (0 = none). "
-                    "Legacy tick-clocked fields — story-aligned: the readout "
-                    "starts sliding at start_tick, i.e. after the map builds.")
-p.add_argument("--drift-rate", type=float, default=0.003,
-               help="offset units per tick (the battery's own term)")
-p.add_argument("--drift-cap", type=float, default=1.0,
-               help="the slide's destination — it settles here and holds")
-p.add_argument("--drift-start-tick", type=int, default=360,
-               help="global tick at which the slide cues (the battery's own term)")
 a = p.parse_args()
 
 lines = ["nodes:"]
@@ -47,12 +37,6 @@ for i in range(1, a.n + 1):
     ]
     for _ in range(1):  # one objective row
         lines.append("      - [" + ", ".join("1.0" for _ in range(a.dials)) + "]")
-    if a.drift_node == i:
-        lines += [
-            f"    offset_drift_rate: {a.drift_rate}",
-            f"    offset_drift_cap: {a.drift_cap}",
-            f"    offset_drift_start_tick: {a.drift_start_tick}",
-        ]
 
 edges = []
 if a.family == "mesh":

@@ -1,0 +1,46 @@
+# The P5 sweep worlds (the campaign's declared materials)
+
+Six checked-in topologies, one per cell, one naming rule:
+`sweep-<kind>-0.7-n6.yaml` — dispatch as `family=sweep-<kind>,
+coupling_strength=0.7, n=6` on the bench-generic-n room (pinned
+godon-bench-generic:0.6.2, frozen for the campaign). Written out by
+hand, checked in before flight — the file at the dispatch SHA is what
+flew; the PR diff is the receipt. The generator is NOT used here: P5's
+cells are bespoke worlds, not a systematic grid (holder's word,
+2026-11-20); the base derives from gen_topology.py's mesh-0.7-n6
+output, terms from the receipts named below.
+
+## The base world (identical in all six unless the event says otherwise)
+
+6 nodes · 1 dial + 1 objective per node · base linear · weights [1.0]
+· edges all-pairs i→j (i<j) at strength 0.7 — 15 edges · noise
+gaussian_sigma 0.02. Reference N=6 on the quiet bench (separation
+discipline: never the N-ladder rooms). The ONLY difference between
+cells is the event block — the controlled variable is the base.
+
+## The cells, in risk order
+
+| file | cell / kind | the event (declared) | clock | first flight? |
+|---|---|---|---|---|
+| sweep-offsetslide-0.7-n6.yaml | 1 — offset-slide (integration sounding) | node-6 readout: rate 0.003/tick, cap 1.0, start_tick 360 — the battery's own terms (scenario-characterization-offsetstep) | tick | flown for years; first on 0.6.2 |
+| sweep-gainclimb-0.7-n6.yaml | 2 — gain-climb | node-6 weights 1.0→[[2.0]], at_tick 360, travel_ticks 120, then HOLD | tick | YES — terms declared, nothing to cite |
+| sweep-kneemorph-0.7-n6.yaml | 3 — knee-morph | node-6 base linear→saturation, at_tick 360, travel_ticks 120 | tick | YES — the bench's own blend test names this pair |
+| sweep-inversion-0.7-n6.yaml | 4 — inversion | edge node-1→node-6 strength +0.7→−0.7 (through zero, settles inverted), at_tick 360, travel_ticks 120 | tick | YES |
+| sweep-evening-0.7-n6.yaml | 5 — multi-event (PRICE, ruled in 2026-11-20) | slide rate_per_second 0.006 cap 1.0 cued at uptime 300s (= the battery's 0.003/tick at the grid's ~2 ticks/sec, declared) · wall weight morph 1.0→1.6 at_secs 600 travel_secs 120 · exogenous step amplitude 0.15 over 60 ticks · officer door-pushes at flight | wall (agent-independent) | YES |
+| sweep-transfer-0.7-n6.yaml | 6 — transfer | regime B on ALL nodes at_tick 360 travel 120: weights →[[1.5]] + base →saturation; map built under A serves under B — whatever happens is the receipt | tick | YES |
+
+Story alignment: every tick-cued event sits at tick 360 — after the
+map builds. The tick↔wall relation is receipted at flight time from
+truth (`total_ticks` + `uptime_secs`; the README-generic clock rule).
+
+## Standing declarations (every room, no silent defaults)
+
+- Uniform bars: the estate settings tree, frozen at spawn (the
+  SETTINGS FREEZE line cited in every receipt; convergence guard
+  still unbuilt — declared explicitly).
+- Truth grades, never self-grading; close-out stamps ride the room.
+- Terms in cells 2-6 are the PROPOSED declarations as of 2026-11-20 —
+  first flights, nothing to cite; a cell's terms may be amended at
+  its turn (one commit, the diff is the receipt), never mid-flight.
+- Honest-close rule: a bench anomaly in any cell = receipt + fix +
+  re-fly of that cell only.

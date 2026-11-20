@@ -1,0 +1,167 @@
+# The P5 sweep world: evening multi-event (cell 5 — PRICE, ruled in 2026-11-20) — mesh-0.7-n6 base, one declared event.
+# Base (identical in every sweep file unless the event says otherwise):
+# 6 nodes, 1 dial + 1 objective each, linear base, weights [1.0], edges
+# all-pairs i<j at strength 0.7 (15 edges), noise sigma 0.02. The event
+# block is the cell's whole subject; the story point (tick 360 / secs
+# cues) sits after the map builds. Terms: slide rate_per_second 0.006 (= the battery's 0.003/tick at the grid's ~2 ticks/sec, declared), cued at uptime 300s; wall weight morph 1.0->1.6 at_secs 600 travel_secs 120; exogenous step amplitude 0.15 settling over 60 ticks; officer's door pushes at flight — wall clock = agent-independent
+nodes:
+  - id: node-1
+    params: 1
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [1.0]
+  - id: node-2
+    params: 1
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [1.0]
+  - id: node-3
+    params: 1
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [1.0]
+  - id: node-4
+    params: 1
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [1.0]
+  - id: node-5
+    params: 1
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [1.0]
+  - id: node-6
+    params: 1
+    objectives: 1
+    base: linear
+    param_lower: 0.0
+    param_upper: 100.0
+    weights:
+      - [1.0]
+    drifts:
+      - name: evening-slide
+        rate_per_second: 0.006
+        cap: 1.0
+        when:
+          seconds: 300
+    morphs:
+      - clock: wall
+        at_secs: 600.0
+        travel_secs: 120.0
+        target_weights: [[1.6]]
+    exogenous:
+      - kind: step
+        amplitude: 0.15
+        objective: 0
+        at_tick: 0
+        travel_ticks: 60
+edges:
+  - from: node-1
+    from_channel: 0
+    to: node-2
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-1
+    from_channel: 0
+    to: node-3
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-1
+    from_channel: 0
+    to: node-4
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-1
+    from_channel: 0
+    to: node-5
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-1
+    from_channel: 0
+    to: node-6
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-2
+    from_channel: 0
+    to: node-3
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-2
+    from_channel: 0
+    to: node-4
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-2
+    from_channel: 0
+    to: node-5
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-2
+    from_channel: 0
+    to: node-6
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-3
+    from_channel: 0
+    to: node-4
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-3
+    from_channel: 0
+    to: node-5
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-3
+    from_channel: 0
+    to: node-6
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-4
+    from_channel: 0
+    to: node-5
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-4
+    from_channel: 0
+    to: node-6
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+  - from: node-5
+    from_channel: 0
+    to: node-6
+    to_channel: 0
+    strength: 0.7
+    drift_rate: 0.0
+noise:
+  gaussian_sigma: 0.02
+  colored_sigma: 0.0
+  drift_rate: 0.0
