@@ -8,7 +8,7 @@ on:
         required: false
         default: "6"
       family:
-        description: "Topology family: mesh | none (uncoupled control) | sweep (drift-carrying, P5 cells) — must match a checked-in topology file"
+        description: "Topology family: mesh | none (uncoupled control) | sweep-<kind> (P5 cells — see topologies/sweep.md) — must match a checked-in topology file"
         required: false
         default: "none"
       coupling_strength:
