@@ -14,8 +14,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
   - id: node-2
@@ -27,8 +28,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
   - id: node-3
@@ -40,8 +42,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
   - id: node-4
@@ -53,8 +56,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
   - id: node-5
@@ -66,8 +70,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
   - id: node-6
@@ -79,8 +84,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
 edges:
