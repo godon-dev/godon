@@ -54,8 +54,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 240.0
+        travel_secs: 60.0
         target_base: saturation
 edges:
   - from: node-1

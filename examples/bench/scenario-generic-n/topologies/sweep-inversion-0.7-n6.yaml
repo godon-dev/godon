@@ -62,8 +62,9 @@ edges:
     strength: 0.7
     drift_rate: 0.0
     target_strength: -0.7
-    at_tick: 360
-    travel_ticks: 120
+    clock: wall
+    at_secs: 240.0
+    travel_secs: 60.0
   - from: node-1
     from_channel: 0
     to: node-3
