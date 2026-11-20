@@ -182,6 +182,11 @@ jobs:
           KUBECONFIG: /tmp/kind_kubeconfig.yaml
         run: |
           MAX_WAIT=$((${{ fromJSON(inputs.max_wait_minutes) }} * 60))
+          # story-window rooms (min_trials unreachable): end the poll
+          # BEFORE the job timeout so meters + cleanup run inside the
+          # window — a timeout-cancel kills them and wedges the estate
+          # (receipt: cell 4, run 44802413568). 300s teardown reserve.
+          POLL_DEADLINE=$((MAX_WAIT - 300))
           ELAPSED=0
           MIN_TRIALS=${{ inputs.min_trials }}
           while [ ${ELAPSED} -lt ${MAX_WAIT} ]; do
@@ -195,6 +200,7 @@ jobs:
             done
             echo "[${ELAPSED}s] tenders at target: ${DONE}/${TOTAL}"
             [ "${DONE}" -eq "${TOTAL}" ] && { echo "ALL REACHED ${MIN_TRIALS}"; break; }
+            [ ${ELAPSED} -ge ${POLL_DEADLINE} ] && { echo "STORY WINDOW CLOSED at ${ELAPSED}s (meters+cleanup reserve 300s)"; break; }
             sleep 15
             ELAPSED=$((ELAPSED+15))
           done
