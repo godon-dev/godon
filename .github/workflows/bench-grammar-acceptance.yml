@@ -1,0 +1,207 @@
+name: "bench grammar acceptance cell"
+
+# The event grammar's estate receipt (2026-11-20): one bench deployment,
+# every new behaviour flown once, graded by the truth channel. Not a room
+# — no engine, no tenders; the bench alone on the runner. Fails red on any
+# violated assertion; receipts land in the job log and an uploaded file.
+# Pinned to 0.6.0; re-fly on deliberate grammar changes only.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  acceptance:
+    runs-on: [self-hosted, godon]
+    timeout-minutes: 15
+    steps:
+      - name: Deploy the acceptance bench (0.6.0)
+        run: |
+          cat > /tmp/grammar-acceptance.yaml <<'EOF'
+          nodes:
+            - id: a
+              params: 1
+              objectives: 1
+              base: linear
+              param_lower: 0.0
+              param_upper: 100.0
+              weights: [[1.0]]
+              morphs:
+                # wall-clocked weight morph: travels on UPTIME, not ticks
+                - at_tick: 0
+                  at_secs: 8.0
+                  travel_secs: 12.0
+                  clock: wall
+                  target_weights: [[0.5]]
+              exogenous:
+                # windowed sine on the tick clock — bounded forever
+                - kind: sine
+                  amplitude: 0.1
+                  objective: 0
+                  at_tick: 0
+                  travel_ticks: 25
+            - id: b
+              params: 1
+              objectives: 1
+              base: linear
+              param_lower: 0.0
+              param_upper: 100.0
+              weights: [[0.0]]
+          edges:
+            - from: a
+              from_channel: 0
+              to: b
+              to_channel: 0
+              strength: 0.3
+              # destination through zero: settles INVERTED
+              target_strength: -0.3
+              at_tick: 20
+              travel_ticks: 20
+          noise:
+            gaussian_sigma: 0.02
+            # the world gets fuzzier, then stops
+            target_gaussian_sigma: 0.05
+            sigma_at_tick: 10
+            sigma_travel_ticks: 20
+          EOF
+          docker rm -f grammar-acceptance >/dev/null 2>&1 || true
+          docker create --name grammar-acceptance --user 0:0 -p 8091:8090 \
+            -e CONFIG_PATH=/config.yaml -e PORT=8090 -e GENERIC_SEED=42 -e RUST_LOG=info \
+            ghcr.io/godon-dev/godon-bench-generic:0.6.0
+          docker cp /tmp/grammar-acceptance.yaml grammar-acceptance:/config.yaml
+          docker start grammar-acceptance
+          for i in $(seq 1 30); do
+            curl -s -f --connect-timeout 2 http://127.0.0.1:8091/health >/dev/null 2>&1 && break
+            sleep 2
+          done
+          curl -s -f http://127.0.0.1:8091/health
+
+      - name: Receipt 1 — edge destination through zero, settles inverted
+        run: |
+          apply() { curl -s -X POST http://127.0.0.1:8091/a/apply \
+            -H 'Content-Type: application/json' -d '[100.0]' >/dev/null; }
+          apply   # one tick: before the cue at tick 20
+          curl -s http://127.0.0.1:8091/b/truth | python3 -c "
+          import json,sys
+          t=json.load(sys.stdin)
+          e=[x for x in t['edges'] if x['from']=='a'][0]
+          assert abs(e['strength_effective'] - 0.3) < 1e-6, e
+          print('PASS declared coupling 0.3 before cue')"
+          for i in $(seq 1 45); do apply; done   # past cue(20)+travel(20)
+          curl -s http://127.0.0.1:8091/b/truth | python3 -c "
+          import json,sys
+          t=json.load(sys.stdin)
+          e=[x for x in t['edges'] if x['from']=='a'][0]
+          assert abs(e['strength_effective'] - (-0.3)) < 1e-6, e
+          assert t['objectives'][0] < 0, 'b settles inverted-negative'
+          print('PASS settles inverted at -0.3; b objective %.4f' % t['objectives'][0])"
+
+      - name: Receipt 2 — wall morph travels on uptime while ticks stall
+        run: |
+          # no applies between samples: ticks frozen, wall clock still runs
+          curl -s http://127.0.0.1:8091/a/truth > /tmp/w0.json
+          sleep 14
+          curl -s http://127.0.0.1:8091/a/truth > /tmp/w1.json
+          python3 - <<'PY'
+          import json
+          a = json.load(open('/tmp/w0.json'))
+          b = json.load(open('/tmp/w1.json'))
+          pa = a['base_progress']; pb = b['base_progress']
+          wa = a['effective_weights'][0][0]; wb = b['effective_weights'][0][0]
+          assert b['total_ticks'] == a['total_ticks'], 'ticks must be frozen'
+          assert pb > pa, f'wall progress must advance while ticks stall: {pa} -> {pb}'
+          assert wb != wa, 'weight must be traveling'
+          print(f'PASS wall morph advanced on uptime (progress {pa:.3f} -> {pb:.3f}) with ticks frozen at {b["total_ticks"]}')
+          PY
+          sleep 10
+          curl -s http://127.0.0.1:8091/a/truth | python3 -c "
+          import json,sys
+          t=json.load(sys.stdin)
+          w=t['effective_weights'][0][0]
+          assert abs(w - 0.5) < 0.02, f'wall morph settles at 0.5, got {w}'
+          print('PASS wall morph settled: weight %.3f' % w)"
+
+      - name: Receipt 3 — noise sigma settles at target
+        run: |
+          curl -s http://127.0.0.1:8091/a/truth | python3 -c "
+          import json,sys
+          t=json.load(sys.stdin)
+          n=t['noise_effective']
+          assert abs(n - 0.05) < 0.005, f'sigma settles at 0.05, got {n}'
+          print('PASS sigma settled: %.4f' % n)"
+
+      - name: Receipt 4 — declared sine bounded forever
+        run: |
+          curl -s http://127.0.0.1:8091/a/truth | python3 -c "
+          import json,sys
+          t=json.load(sys.stdin)
+          x=t['exogenous_effective'][0]
+          assert abs(x) <= 0.1 + 1e-9, f'sine bounded ±0.1, got {x}'
+          print('PASS sine in bounds: %.4f (samples vary; the bound is the receipt)' % x)"
+
+      - name: Receipt 5 — the door cues a step mid-run, and refuses junk
+        run: |
+          curl -s -X POST http://127.0.0.1:8091/b/exogenous/start \
+            -H 'Content-Type: application/json' \
+            -d '{"kind":"step","amplitude":0.15,"objective":0,"travel_secs":2.0}'
+          echo; sleep 4
+          curl -s http://127.0.0.1:8091/b/truth | python3 -c "
+          import json,sys
+          t=json.load(sys.stdin)
+          x=t['exogenous_effective'][0]
+          assert abs(x - 0.15) < 0.01, f'door push settled 0.15, got {x}'
+          print('PASS door push settled: %.4f' % x)"
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8091/b/exogenous/start \
+            -H 'Content-Type: application/json' -d '{"kind":"sine","amplitude":0.3}')
+          echo "windowless sine -> HTTP $CODE"
+          [ "$CODE" = "400" ] && echo "PASS door refuses windowless sine"
+
+      - name: Receipt 6 — bad config fails loud at boot
+        run: |
+          cat > /tmp/grammar-bad.yaml <<'EOF'
+          nodes:
+            - id: a
+              params: 1
+              objectives: 1
+              base: linear
+              param_lower: 0.0
+              param_upper: 100.0
+              weights: [[1.0]]
+              morphs:
+                # wall clock with NO at_secs — the silent-start trap
+                - at_tick: 5
+                  clock: wall
+                  travel_secs: 3.0
+                  target_weights: [[0.5]]
+          EOF
+          docker rm -f grammar-bad >/dev/null 2>&1 || true
+          docker create --name grammar-bad --user 0:0 \
+            -e CONFIG_PATH=/config.yaml -e PORT=8090 \
+            ghcr.io/godon-dev/godon-bench-generic:0.6.0 >/dev/null
+          docker cp /tmp/grammar-bad.yaml grammar-bad:/config.yaml
+          docker start grammar-bad >/dev/null
+          sleep 3
+          docker logs grammar-bad 2>&1 | grep -q "wall-clocked morph requires at_secs" \
+            && echo "PASS boot fails loud: at_secs required on wall clock" \
+            || { docker logs grammar-bad 2>&1 | tail -5; exit 1; }
+
+      - name: Collect receipts
+        if: always()
+        run: |
+          {
+            echo "# grammar acceptance receipts — $(date -u +%FT%TZ)"
+            echo "image: ghcr.io/godon-dev/godon-bench-generic:0.6.0"
+            docker inspect grammar-acceptance --format 'bench restarts: {{.RestartCount}}' 2>/dev/null || true
+            echo "bench boot lines: $(docker logs grammar-acceptance 2>&1 | grep -c 'Listening')"
+          } > grammar-acceptance-receipts.txt
+          cat grammar-acceptance-receipts.txt
+
+      - name: Upload receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grammar-acceptance-receipts
+          path: grammar-acceptance-receipts.txt
+
+      - name: Teardown
+        if: always()
+        run: docker rm -f grammar-acceptance grammar-bad >/dev/null 2>&1 || true
