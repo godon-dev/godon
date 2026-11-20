@@ -11,7 +11,7 @@ on:
 
 jobs:
   acceptance:
-    runs-on: [self-hosted, godon]
+    runs-on: [self-hosted, linux]
     timeout-minutes: 15
     steps:
       - name: Deploy the acceptance bench (0.6.0)
