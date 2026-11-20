@@ -1,0 +1,9 @@
+{
+ "bench-generic-n-1": 2825,
+ "bench-generic-n-2": 3756,
+ "bench-generic-n-3": 2686,
+ "bench-generic-n-4": 3711,
+ "bench-generic-n-5": 0,
+ "bench-generic-n-6": 0,
+ "note": "observer total_trials at close; 5-6 absent from registry"
+}
