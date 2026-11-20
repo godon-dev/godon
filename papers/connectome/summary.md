@@ -1,21 +1,32 @@
-# Paper 5 — the living map (DRAFT SPEC — PROPOSED, UNSEALED)
+# Paper 5 — "The Connectome — A Living Empirical Causal Model of
+# Changing Substrates" (DRAFT SPEC — title and price ruled 2026-11-20;
+# seals at publication with the full evidence table)
 
-Status: drafted 2026-11-19 from the records; nothing here is sealed until
-the holder's word. Directory name and title are defaults, holder's call.
+Status: drafted 2026-11-19 from the records; ruled 2026-11-20 by the
+holder: PRICE IN (both halves; the evening room exists as its cell),
+name `connectome/`, working title "The Connectome — A Living Empirical
+Causal Model of Changing Substrates" (seals at publication, when the
+evidence table is full). Still open: the tender's orientation
+paragraph (prose-time, gates no room).
 Sealing motions at the bottom. Canonical companions: the P5+N campaign
 workorder (mind-chime sessions/2026-11-10), paper-status.md, and the
 2026-11-19 session that cut the flight list to its honest minimum.
 
 ## The claim (one sentence, two halves)
 
-"A measured map of a changing machine has a whole life — it is born at a
-cost, decays measurably as the world changes, notices its own staleness,
-heals at a price, endures load, and carries into new regimes — and every
-stage of that life is measurable."
+"A measured map of a changing substrate has a whole life — it is born
+at a cost, decays measurably as the world changes, notices its own
+staleness, heals at a price, endures load, and carries into new
+regimes — and every stage of that life is measurable."
 
-Second half, ONLY if the price ruling comes in: "— and its knowledge is
-priced: cheaper than guessing, luck, or hindsight where it is cheaper,
-and honestly not where it is not."
+(2026-11-20 vocabulary receipt: "machine" never printed by the
+lineage for the tended thing — 6 hits, all "machinery"/"machine
+learning"/"state machine"; "substrate" is the house word, 63 hits
+from P1 through P4. Title ruled the same day.)
+
+Second half, RULED IN 2026-11-20: "— and its knowledge is priced:
+cheaper than guessing, luck, or hindsight where it is cheaper, and
+honestly not where it is not."
 
 ## What this paper is NOT (scope, stated once)
 
@@ -89,12 +100,18 @@ and honestly not where it is not."
 
 ## Sealing motions (the holder's word needed)
 
-1. The claim, one half or two (the price ruling — PROPOSED 2026-11-06,
-   open since). Decides the evening room's fate with it.
+1. The claim, one half or two (the price ruling) — RESOLVED 2026-11-20:
+   PRICE IN, both halves. The evening multi-event room exists as its
+   one legitimate slot (cell 5 of the sweep).
 2. The tender's orientation paragraph — one plain paragraph, PROPOSED
-   2026-11-06, still open.
-3. Directory name (default: living-map) and title (working: "The Living
-   Map"; alternates at sealing).
+   2026-11-06, STILL OPEN (prose-time; gates no room). Standing
+   recommendation: it rides P5, cited from P4; a tender paper, if
+   ever, opens later with its own receipts.
+3. Directory name and title — RESOLVED 2026-11-20: `connectome/`;
+   working title "The Connectome — A Living Empirical Causal Model of
+   Changing Substrates" (holder's word after deliberation; the plural
+   leans on P1/P3's cited substrate class + the transfer cell; seals
+   at publication with the full evidence table).
 
 RESOLVED since drafting: the terminology versions LANDED 2026-11-19
 (P1 v2 = zenodo.24368959, P3 v2 = zenodo.24369057, holder deposits;
