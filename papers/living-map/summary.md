@@ -90,14 +90,30 @@ and honestly not where it is not."
 ## Sealing motions (the holder's word needed)
 
 1. The claim, one half or two (the price ruling — PROPOSED 2026-11-06,
-   open since).
-2. The optional fifth drift kind (new edge) — in or out.
-3. The tender's orientation paragraph — one plain paragraph, PROPOSED
+   open since). Decides the evening room's fate with it.
+2. The tender's orientation paragraph — one plain paragraph, PROPOSED
    2026-11-06, still open.
-4. Terminology versions P1–P3 (breeder → systemtender) before P5 lands,
-   with P4's Figure-1 erratum riding the same motion — PROPOSED, open.
-5. Directory name (default: living-map) and title (working: "The Living
+3. Directory name (default: living-map) and title (working: "The Living
    Map"; alternates at sealing).
+
+RESOLVED since drafting: the terminology versions LANDED 2026-11-19
+(P1 v2 = zenodo.24368959, P3 v2 = zenodo.24369057, holder deposits;
+P2 zero occurrences, no version owed; P4 untouched). The optional
+fifth drift kind (new edge appears) — its bench window CLOSED with the
+0.6.2 campaign freeze; ruling it in later is a future bench motion
+(topology events, ~a day + ladder), never a P5 dependency.
+
+## The bench (frozen and receipted — 2026-11-20)
+
+The sweep flies on godon-bench-generic:0.6.2 (the event grammar: all
+four kinds with destinations and declared clocks, the exogenous door,
+effective truth; 47 tests + 6 wire tests; the acceptance cell's 9
+estate receipts; close-out stamps in every room's evidence). Risk
+order for the cells: offset-slide FIRST as the room-integration
+sounding on the new image (known kind, new bench — surprises attribute
+to the seam), then gain-climb, knee-morph, inversion. Honest-close
+rule pre-declared: a bench anomaly in any cell is a receipt, a fix,
+and a re-fly of that cell.
 
 ## Writing gates (unchanged from the P4 pattern)
 
