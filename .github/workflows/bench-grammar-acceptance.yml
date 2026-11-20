@@ -66,7 +66,7 @@ jobs:
           docker rm -f grammar-acceptance >/dev/null 2>&1 || true
           docker create --name grammar-acceptance --user 0:0 -p 8091:8090 \
             -e CONFIG_PATH=/config.yaml -e PORT=8090 -e GENERIC_SEED=42 -e RUST_LOG=info \
-            ghcr.io/godon-dev/godon-bench-generic:0.6.1
+            ghcr.io/godon-dev/godon-bench-generic:0.6.2
           docker cp /tmp/grammar-acceptance.yaml grammar-acceptance:/config.yaml
           docker start grammar-acceptance
           for i in $(seq 1 30); do
@@ -176,7 +176,7 @@ jobs:
           docker rm -f grammar-bad >/dev/null 2>&1 || true
           docker create --name grammar-bad --user 0:0 \
             -e CONFIG_PATH=/config.yaml -e PORT=8090 \
-            ghcr.io/godon-dev/godon-bench-generic:0.6.1 >/dev/null
+            ghcr.io/godon-dev/godon-bench-generic:0.6.2 >/dev/null
           docker cp /tmp/grammar-bad.yaml grammar-bad:/config.yaml
           docker start grammar-bad >/dev/null
           sleep 3
@@ -189,7 +189,7 @@ jobs:
         run: |
           {
             echo "# grammar acceptance receipts — $(date -u +%FT%TZ)"
-            echo "image: ghcr.io/godon-dev/godon-bench-generic:0.6.1"
+            echo "image: ghcr.io/godon-dev/godon-bench-generic:0.6.2"
             docker inspect grammar-acceptance --format 'bench restarts: {{.RestartCount}}' 2>/dev/null || true
             echo "bench boot lines: $(docker logs grammar-acceptance 2>&1 | grep -c 'Listening')"
           } > grammar-acceptance-receipts.txt
