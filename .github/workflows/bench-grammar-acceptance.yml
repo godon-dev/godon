@@ -77,8 +77,8 @@ jobs:
 
       - name: Receipt 1 — edge destination through zero, settles inverted
         run: |
-          apply() { curl -s -X POST http://127.0.0.1:8091/a/apply \
-            -H 'Content-Type: application/json' -d '[100.0]' >/dev/null; }
+          apply() { curl -s -f -X POST http://127.0.0.1:8091/a/apply \
+            -H 'Content-Type: application/json' -d '{"param_0":100.0}' >/dev/null; }
           apply   # one tick: before the cue at tick 20
           curl -s http://127.0.0.1:8091/b/truth | python3 -c "
           import json,sys
