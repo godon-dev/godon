@@ -5,3 +5,13 @@ docs/
 # Local experiment artifacts
 *.log
 *.tmp
+
+# leaked-once secrets - never commit again (2026-11-21 purge)
+osl-cred.txt
+openstack
+openstack.pub
+godon-openrc.sh
+*-pre-drop.tar
+*.env
+env_vars/
+testing/infra/credentials/
