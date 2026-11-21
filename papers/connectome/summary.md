@@ -88,6 +88,21 @@ honestly not where it is not."
 
 ## Boundaries to state in print
 
+- CAUSAL SCOPE (settled 2026-11-21, the holder's word): the connectome
+  is a causal model on the three constitutive ingredients — variables
+  (dials/readings), directed structure (curves measured by asymmetric
+  intervention; measured nulls = absent arrows; sign-flips tracked),
+  interventional semantics (built by doing, answers doing, refuses
+  when uncertain, every arrow carrying its uncertainty bar). NOT
+  claimed: counterfactual queries (rung three) and identification
+  theory. COUNTERFACTUAL IMAGINATION IS THE NAMED OUTLOOK, with a
+  concrete path: forecast from the conditioned map — observe, narrow
+  the bars by what was seen (abduction over the map's own
+  uncertainty), re-forecast the alternative action. The price
+  baselines already compute alternative worlds post-hoc (analyst-side,
+  on the pure substrate arithmetic); the outlook moves that into the
+  map itself.
+
 - Three of the four drift kinds have never been flown until the sweep
   flies them; if the bench lacks a kind, that lack is itself printed.
 - Composition, wherever used, inherits P3's measured boundary (~2
