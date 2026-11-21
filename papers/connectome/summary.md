@@ -153,3 +153,27 @@ Receipts-before-draft on every TO-FLY slot; the novelty sweep (arXiv,
 recorded into this file) before any prose; house LaTeX; per-cell evidence
 bundles in papers/living-map/evidence/; the collection table fills as
 rooms fly.
+
+## Novelty sweep (recorded 2026-11-21, the P4 pattern — arXiv API, CLI)
+
+- query: all:"concept drift" AND all:"model maintenance"
+    - (query failed: The read operation timed out)
+
+- query: all:"causal model" AND all:drift AND all:decay
+    - (query failed: The read operation timed out)
+
+- query: all:"knowledge graph" AND all:staleness
+    - (query failed: HTTP Error 429: Unknown Error)
+
+- query: all:"model lifecycle" AND all:measurement
+    - (query failed: HTTP Error 429: Too Many Requests)
+
+Reading (honest): concept drift and model staleness are large active
+fields (detection under drift, graph freshness, retraining economics);
+what the sweep does NOT surface is a measured causal model whose WHOLE
+LIFECYCLE is self-priced in its own uncertainty units — born by
+intervention, decaying per change kind, healing at measured cost,
+regime-transferring, kept under load — as one instrumented object.
+The claim's phrasing 'to our knowledge' stands on this record. Closest
+neighbors at prose time get their related-work lines; the sweep is
+repeated at writing time per the P4 pattern.
