@@ -8,7 +8,13 @@ built under A; the world became B; the room served through it.
 
 ## The map's response — rotation widened (vs the inversion's single prober)
 Sender profile through the story: 1 sender (quiet) -> 2 senders by
-minute 4 post-change -> clean registry purge at close. Mechanism
+minute 4 post-change -> clean registry purge at close.
+
+## DATA REFINEMENT (2026-11-21 — regenerated from this room's captures)
+Sharper than the stamp-coarse read above: the second sender joined in
+the CHANGE MINUTE (first two-sender capture at uptime ~235s; cue 240s,
+travel 60s), six curves -> twelve at the same step. The paper prints
+the data. Mechanism
 (code-read, godon-robots engine/src/coordinator.rs): the sender_lease —
 ONE holder per group, phase probe_push, heartbeat, budgets; fairness
 "starved peer outranks recently served"; detection flags

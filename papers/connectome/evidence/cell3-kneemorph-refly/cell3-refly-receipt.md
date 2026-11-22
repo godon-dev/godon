@@ -11,6 +11,19 @@ pre AND post; two TIGHTENED (0.069->0.038, 0.080->0.045 — the map
 refined under the new shape without flagging). The knee-morph passes
 QUIETLY at this measurement depth.
 
+## CORRECTION (2026-11-21 — holder's word: the data is authoritative)
+The QUIET reading above is wrong; the summary read the curves' bulk and
+missed the knee. Re-derived at gap level (make_figures.py, this room's
+own captures): on one relationship the gaps AT THE KNEE — levels 25-32,
+exactly where the response bent — jumped at the morph to 0.529/0.540
+(~27x the frozen bar) and HELD to the close (the 27-gap structure frozen
+after 460s). The rest of that curve stayed <= 0.13, the two tightenings
+(0.038, 0.045) are real, and all sister curves stayed low. The flag
+never healed because the re-walker starved (meters row 1: 40 trials —
+the load split already noted above). The knee-morph is the NARROW kind:
+a sharp, precise, persistent flag at the bend. The paper prints the
+data.
+
 THE FOUR-KIND TABLE — CORRECTED (the morning session's first pass
 misread cell 2; the overnight officer's receipt f1733cb corrects it —
 the tick-compressed event preceded the morning divider, so the break
