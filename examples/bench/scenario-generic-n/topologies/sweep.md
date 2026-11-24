@@ -27,7 +27,7 @@ cells is the event block — the controlled variable is the base.
 | sweep-kneemorph-0.7-n6.yaml | 3 — knee-morph | node-6 base linear→saturation, at_tick 360, travel_ticks 120 | tick | YES — the bench's own blend test names this pair |
 | sweep-inversion-0.7-n6.yaml | 4 — inversion | edge node-1→node-6 strength +0.7→−0.7 (through zero, settles inverted), at_tick 360, travel_ticks 120 | tick | YES |
 | sweep-evening-0.7-n6.yaml | 5 — multi-event (PRICE, ruled in 2026-11-20) | slide rate_per_second 0.006 cap 1.0 cued at uptime 300s (= the battery's 0.003/tick at the grid's ~2 ticks/sec, declared) · wall weight morph 1.0→1.6 at_secs 600 travel_secs 120 · exogenous step amplitude 0.15 over 60 ticks · officer door-pushes at flight | wall (agent-independent) | YES |
-| sweep-transfer-0.7-n6.yaml | 6 — transfer | regime B on ALL nodes at_tick 360 travel 120: weights →[[1.5]] + base →saturation; map built under A serves under B — whatever happens is the receipt | tick | YES |
+| sweep-transfer-0.7-n6.yaml | 6 — transfer | regime B on ALL nodes, wall clock at_secs 360 travel_secs 60 (amended 2026-11-24 from 240 s: on the bench clock the walkers come up ~101 s after the bench, first reading 108 s, first pass ends 289 s — one clean pass under A needs ~290 s, room 45403001197): weights →[[1.5]] + base →saturation; map built under A serves under B — whatever happens is the receipt | wall | YES |
 
 Story alignment: every tick-cued event sits at tick 360 — after the
 map builds. The tick↔wall relation is receipted at flight time from
