@@ -3,7 +3,14 @@
 # 6 nodes, 1 dial + 1 objective each, linear base, weights [1.0], edges
 # all-pairs i<j at strength 0.7 (15 edges), noise sigma 0.02. The event
 # block is the cell's whole subject; the story point (tick 360 / secs
-# cues) sits after the map builds. Terms: regime B = all nodes: target_weights [[1.5]] + target_base saturation, at_tick 360, travel_ticks 120 — map built under A serves under B; whatever happens is the receipt
+# cues) sits after the map builds. Terms: regime B = all nodes: target_weights [[1.5]] + target_base saturation, wall clock,
+# at_secs 360, travel_secs 60 — map built under A serves under B; whatever happens is the
+# receipt. Amended 2026-11-24 (one commit, the diff is the receipt): the cue sat at 240 s.
+# From room 45403001197's diary, on the bench clock: the walkers' engines come up ~101 s
+# after the bench (no apply before 101 s, first reading at 108 s), the first pass over 9
+# levels ends at 289 s (one level, 12 trials + its reading: median 6 s, 3-45 s). One clean
+# pass under A needs ~290 s; at 240 s it had 7 of 9 levels, its last two inside the change.
+# 360 s lets it finish with ~70 s to spare.
 nodes:
   - id: node-1
     params: 1
@@ -15,7 +22,7 @@ nodes:
       - [1.0]
     morphs:
       - clock: wall
-        at_secs: 240.0
+        at_secs: 360.0
         travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
@@ -29,7 +36,7 @@ nodes:
       - [1.0]
     morphs:
       - clock: wall
-        at_secs: 240.0
+        at_secs: 360.0
         travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
@@ -43,7 +50,7 @@ nodes:
       - [1.0]
     morphs:
       - clock: wall
-        at_secs: 240.0
+        at_secs: 360.0
         travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
@@ -57,7 +64,7 @@ nodes:
       - [1.0]
     morphs:
       - clock: wall
-        at_secs: 240.0
+        at_secs: 360.0
         travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
@@ -71,7 +78,7 @@ nodes:
       - [1.0]
     morphs:
       - clock: wall
-        at_secs: 240.0
+        at_secs: 360.0
         travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
@@ -85,7 +92,7 @@ nodes:
       - [1.0]
     morphs:
       - clock: wall
-        at_secs: 240.0
+        at_secs: 360.0
         travel_secs: 60.0
         target_weights: [[1.5]]
         target_base: saturation
