@@ -12,6 +12,7 @@
 \usepackage{titlesec}
 \usepackage{parskip}
 \usepackage{hyperref}
+\hypersetup{hidelinks}
 \usepackage[margin=2.6cm]{geometry}
 
 % Draft-v2 (holder's word 2026-11-21: the data is authoritative): all
@@ -52,7 +53,7 @@ It \emph{carries} into a new regime, the widening of its survey fitted
 to the blast radius of the change. And its knowledge is \emph{priced}:
 held at fresh level through a busy evening of scheduled and unscheduled
 change, at a cost that fell unevenly across the tending group ---
-cheaper than a frozen map's calm ignorance where it is cheaper, and
+cheaper than an un-updated map's calm ignorance where it is cheaper, and
 honestly not where it is not. One claim, carried by receipts from a
 live measurement campaign; every boundary printed as a boundary.
 \end{abstract}
@@ -95,8 +96,8 @@ The stages, in the order the campaign receipts them:
 
 \begin{enumerate}
 \item \textbf{Birth.} Building the model costs real, honest units: a
-full response ladder prices one relationship to the frozen bar in
-amortized room time, the probing lease rotating among the members
+full response ladder prices one relationship to the fixed bar in
+amortized running time, the measuring turn rotating among the members
 (\S\ref{sec:birth}).
 \item \textbf{Decay, and noticing.} The model goes stale per
 \emph{kind} of change --- a readout slides, an influence doubles, a
@@ -116,21 +117,21 @@ radius, the protocol unchanged (\S\ref{sec:carry}).
 \item \textbf{The price.} One busy evening: three scheduled changes
 and one unscheduled push, seventeen minutes, the knowledge held at
 fresh level, the cost distributed unevenly across the group, and every
-price read absolutely between what a frozen model buys (calm
+price read absolutely between what a never-updated model buys (calm
 ignorance) and what unlimited hindsight would buy
 (\S\ref{sec:price}).
 \end{enumerate}
 
 One containment rules everything below, as in the predecessor. The
 comparison is contained: no external model family appears. The honesty
-of every price is carried by anchors computed from the same rooms ---
-a frozen model (do nothing: keep the build-time bars while the world
+of every price is carried by anchors computed from the same runs ---
+a never-updated model (do nothing: keep the build-time bars while the world
 moves), a random arm (declared analytically from the bench's dial
 geometry), and an oracle (unlimited hindsight, computed after the fact
 from the recorded truth). Every number in this paper reads absolutely
 between those anchors or is declared as owed.
 
-\emph{What flew is the smallest set of rooms that exercises the whole
+\emph{What flew is the smallest set of runs that exercises the whole
 life.} The reference group on a quiet bench, the four change kinds of
 the bench's event grammar, one multi-change evening, and one regime
 change --- a proof of concept, deliberately small, in the lineage's
@@ -171,7 +172,7 @@ predecessor paper called this picture simply \emph{the
 map}~\cite{p4}; wherever the word map appears below, it keeps that
 sense --- the mapping, one function of the model --- while the thing
 with a life is the connectome itself
-(Figure~\ref{fig:connectome}).
+(Figures~\ref{fig:connectome} and~\ref{fig:curves}).
 
 \emph{Tenders, named once.} Everything the model does, somebody does:
 the members that tend the substrate --- probing it, watching the
@@ -183,16 +184,35 @@ given --- the model's hands --- and claims nothing new about them.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.88\linewidth]{figures/connectome}
-\caption{The connectome. Left: the wiring one room measured, whole ---
-a directed graph, one arrow per measured coupling between nodes (a
-member's reading of itself appears as a panel only, not an arrow).
-Right: every edge's own response curve, one small panel each --- each
-dot one probe: the sender's dial set to that level, the receiver's
-answer read, the bar its honest uncertainty; red dashed where the
-stretch between probes was never measured, kept as priced ignorance
-rather than filled by a guess.}
+\includegraphics[width=\linewidth]{figures/connectome}
+\caption{The connectome: the whole measured map of one live system.
+All six members and all twelve measured couplings of one snapshot ---
+thick blue arrows walked in full, thin gray arrows whose walk had
+just begun; a member's reading of itself loops at its node. Every
+coupling's own curve follows on the next page.}
 \label{fig:connectome}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{figures/curves}
+\caption{Every edge's own curve --- one panel per coupling of the map
+in Figure~\ref{fig:connectome}, titled by its pair. Each dot is one
+probe's record: the receiver's median reading while the sender's dial
+was held at that level minus its median at the resting position
+(dial 50) --- the change from rest, with its honest uncertainty as the
+capped line (often smaller than the dot: the instrument is precise).
+The line joins consecutive records from low to high dial level. The
+dashed line is the scenario's true response for that edge, computed
+from its declared coupling structure with every other member at rest
+and likewise measured from the resting position. The self-reading's
+records lie on their truth line to the digit; the cross-edges'
+records do not follow their true responses --- an open instrument
+question for live rooms, where the receiving members' own dials may
+move during a probe. The late prober's node is not yet identified, so
+its panels carry no truth line. The count in each title is the number
+of records so far.}
+\label{fig:curves}
 \end{figure}
 
 \emph{What kind of object, that it can age.} The connectome is a
@@ -202,7 +222,7 @@ and error bars that are themselves claims about the world. A curve
 does not rot; a stored claim about a living substrate does --- and it
 is the state that decays. It is \emph{partial} by design: measured
 where knowing was worth the trials, deliberately holed where it was
-not; the holes are priced ignorance, never filled by guesswork. It is
+not; the holes are honest admissions of not knowing, never filled by guesswork. It is
 \emph{persisted}: the model outlives the walkers that built it, which
 is precisely why it can age. It is \emph{served}, not just held:
 consumed live through its doors by planning, by the watch, by the
@@ -216,7 +236,7 @@ this object.
 causal model on three constitutive ingredients. \emph{Variables}: the
 dials and the readings. \emph{Directed structure}: the curves are
 measured by asymmetric intervention --- one side moves, the other
-answers --- so a measured null is an absent arrow and a sign flip is
+answers --- so where the measurement finds nothing, the arrow is absent and a sign flip is
 tracked as the world's own change. \emph{Interventional semantics}:
 the model is built by doing, answers questions of doing, refuses when
 its bars say uncertain, and every arrow carries its uncertainty. What
@@ -232,12 +252,12 @@ state, so the rules that make those measurements countable are part
 of the instrument.
 
 \emph{The unit is the bar.} The model's honesty unit is the
-uncertainty bar on a curve. Every room of this campaign froze its bar
-at the same value ($0.02$) and cites the frozen value in every
+uncertainty bar on a curve. Every run of this campaign fixed its bar
+at the same value ($0.02$) and cites the fixed value in every
 receipt; knowledge, decay, healing, and price all read in this unit.
 No verdict is ever taken from a run's badge or summary.
 
-\emph{Everything is recorded.} Every room writes the same diary ---
+\emph{Everything is recorded.} Every run writes the same diary ---
 per tick and per event --- and the truth channel records what was
 actually planted throughout. Nothing planted is visible to the
 members; the truth exists only to score. All numbers in this paper
@@ -245,20 +265,20 @@ are recomputed from these recordings.
 
 \emph{Change is declared.} The bench carries an event grammar: each
 change is an event with a destination and a declared clock --- wall
-seconds or ticks, named per room --- and the drift schedule is part
+seconds or ticks, named per run --- and the drift schedule is part
 of the scenario, never a surprise to the record (it is always a
-surprise to the model, which never reads it). Where a warm room
+surprise to the model, which never reads it). Where a warm run
 compressed a tick-denominated event into the model's first minutes,
-the compression is printed with the room, not hidden.
+the compression is printed with the run, not hidden.
 
-\emph{No silent defaults.} Every number is computed from the room's
+\emph{No silent defaults.} Every number is computed from the run's
 own measurements or from a declared term; where a precise table is
 not yet computed (the per-trial economics, the random arm's exact
 constant), the debt is declared in the text, never papered over.
 
-\emph{Honest close.} A room that misbehaves is a receipt: the
-anomaly is recorded, the flaw fixed, and the cell re-flown. Three
-cells of this campaign exercised that rule; the re-flown numbers are
+\emph{Honest close.} A run that misbehaves is a receipt: the
+anomaly is recorded, the flaw fixed, and the experiment re-flown. Three
+experiments of this campaign exercised that rule; the re-flown numbers are
 the ones printed here.
 
 \section{Birth: what building costs}
@@ -267,10 +287,10 @@ the ones printed here.
 The model is born by walking. A dial is swept level by level across
 its range --- a full ladder --- and the receiver's answers, with their
 bars, become the curve; the edge is done when the bar is met. The
-birth receipt: a ladder of a hundred and one levels at the frozen bar
-amortizes to between one and one-and-a-half levels per minute of room
-time, with the probing lease rotating among the members so that no
-one walker monopolizes the substrate --- the same lease discipline
+birth receipt: a ladder of a hundred and one levels at the fixed bar
+amortizes to between one and one-and-a-half levels per minute of run
+time, with the measuring turn rotating among the members so that no
+one walker monopolizes the substrate --- the same turn-taking discipline
 that reappears under load (\S\ref{sec:endure}) and under regime
 change (\S\ref{sec:carry}).
 
@@ -278,7 +298,7 @@ Build spans and walking cadence were measured across the reference
 grid, per group size and coupling, in the campaign that also produced
 the load walls of \S\ref{sec:endure}; the curve-level economics
 themselves are the predecessor's published result~\cite{p2} and are
-cited, not re-run. What is new here is the \emph{amortized room
+cited, not re-run. What is new here is the \emph{amortized run
 price} of a whole relationship --- the number a keeper must budget
 before the first promise is ever declared: the model's birth is not
 free, and its cost is a receipt, not an estimate.
@@ -286,9 +306,9 @@ free, and its cost is a receipt, not an estimate.
 \section{Decay, and noticing}
 \label{sec:decay}
 
-The world changed in four named ways, one kind per room, each event
+The world changed in four named ways, one kind per run, each event
 exact in the truth record --- destination, clock, travel --- and each
-room asked the same question: what does this kind of change do to the
+run asked the same question: what does this kind of change do to the
 model's uncertainty structure? Table~\ref{tab:kinds} gathers the
 four answers.
 
@@ -298,7 +318,7 @@ four answers.
 \begin{tabular}{@{}p{0.22\linewidth}p{0.28\linewidth}p{0.40\linewidth}@{}}
 \toprule
 \textbf{Change kind} & \textbf{What changed in the world} &
-\textbf{The model's response (uncertainty bars; frozen bar 0.02)} \\
+\textbf{The model's response (uncertainty bars; fixed bar 0.02)} \\
 \midrule
 the sensor slides (readout drift) & every reading on one node slowly
 lies & promise breaks; detected; re-walked at a cost of $\sim$200
@@ -320,7 +340,7 @@ sisters calm; detected and re-measured \\
 Public words throughout: the world moved on purpose, the model's
 bars answer. Reading line: all four kinds announce themselves ---
 three with broad breaks of distinct magnitude, the shape-bend with a
-narrow spike exactly where the curve bent; in this room the bend's
+narrow spike exactly where the curve bent; in this run the bend's
 heal was starved and its flag stood to the close (the named
 follow-up, \S\ref{sec:boundaries}).}
 \label{tab:kinds}
@@ -350,12 +370,12 @@ event, the model still fenced it.
 saturating. The model's answer was the most precise of the four: at
 the knee --- the exact levels where the response bent --- two gap-bars
 jumped from build level past $0.54$, roughly twenty-seven times the
-frozen bar, and held there to the close of the room, while the rest
+fixed bar, and held there to the close of the run, while the rest
 of that curve and every sister curve stayed low, and two stretches
 even \emph{tightened} (to $0.038$ and $0.045$) as the model refined
 under the new shape. The alarm was two gaps wide and pointed at the
 bend. It also never came down: the member that would have re-walked
-that stretch was starved of trials in this room (the load split of
+that stretch was starved of trials in this run (the load split of
 \S\ref{sec:endure}), so the flag stood --- noticed, named, and
 unhealed. An earlier reading called this the quiet kind; it had
 summarized the curves by their bulk and missed the knee. The data
@@ -364,13 +384,13 @@ rules: the bend is the \emph{narrow} kind.
 \emph{The flip.} One influence reversed, $+0.7$ to $-0.7$. The
 loudest of the four: on the changed relationship the bars went from
 a $0.02$--$0.09$ baseline past $1.1$ at two regions of the ladder
---- fifty-six times the frozen bar --- while all five sister curves
+--- fifty-six times the fixed bar --- while all five sister curves
 held baseline. The model fenced the break to one relationship and
 absorbed it as uncertainty pending re-measurement; the probing
 rotation did \emph{not} widen (one sender throughout, turn-taking
 intact). One honesty note, printed because it is the campaign's own:
 an earlier flight's reading attributed the flip a widening of the
-rotation; it was contamination from an unpurged prior room, retired
+rotation; it was contamination from an unpurged prior run, retired
 on the clean re-fly. The clean number is the one above.
 
 \emph{The finding.} Every kind of change announced itself; what
@@ -378,7 +398,7 @@ differs is the signature --- breadth, magnitude, and birth timing.
 The slide announces itself in broken promises; the climb in bars born
 high on one relationship; the flip in an explosion at the epicenter;
 the bend in a narrow spike exactly at the knee. No monitor watched,
-no oracle was consulted at decision time --- in all four rooms the
+no oracle was consulted at decision time --- in all four runs the
 worst bar in the store was the alarm, and in the bend's case the
 alarm was aimed to within two gaps of where the world changed.
 Figure~\ref{fig:kinds} shows the three kinds whose captures this
@@ -389,8 +409,8 @@ cited rather than re-plotted~\cite{p4}.
 \centering
 \includegraphics[width=\linewidth]{figures/fourkinds}
 \caption{The three measured change kinds: each curve's worst bar
-through its room (log scale; dashed line: the frozen bar). Blue: the
-changed relationship. Red: the stirred neighbor, in the climb room.
+through its run (log scale; dashed line: the fixed bar). Blue: the
+changed relationship. Red: the stirred neighbor, in the climb run.
 Gray: every other curve. Reading line: the climb and the flip break
 one relationship broadly; the bend breaks it narrowly, at the exact
 knee, and the flag stands to the close.}
@@ -405,7 +425,7 @@ predecessor's published result, cited here in one sentence and never
 re-litigated~\cite{p4}. What this campaign adds is the \emph{price
 of repair, per kind of change, in the members' own trials}.
 
-The slide room's close carries the signature: the six workers
+The slide run's close carries the signature: the six workers
 finished their walks within a narrow band of trials ---
 $\sim$410--415 apiece --- while the drifted node's tender closed at
 $\sim$610: about two hundred extra trials, roughly half again the
@@ -414,14 +434,14 @@ walk, spent on the re-walk. One upstream neighbor closed at $\sim$700
 its curves: when a relationship changes, the change is paid for twice,
 once at the node and once in whoever maps through it.
 
-The climb room shows healing finishing inside the window: the
+The climb run shows healing finishing inside the window: the
 epicenter group carried the break as uncertainty through the story,
 then re-walked to retirement --- converged, done --- with the
-surviving curves at or below $0.089$ at the close. The flip room
+surviving curves at or below $0.089$ at the close. The flip run
 shows the holding state: bars past $1.1$ at the epicenter,
 \emph{pending} re-measurement --- the honest intermediate between
 detection and repair, where the model knows exactly which
-relationship it no longer trusts. And the bend room shows the honest
+relationship it no longer trusts. And the bend run shows the honest
 failure mode: its knee-flag stood to the close because its re-walker
 was starved --- repair noticed, aimed, and never funded; the load
 walls of \S\ref{sec:endure} are where that starvation lives.
@@ -445,7 +465,7 @@ watering~\cite{p4}. That envelope is cited, not re-flown.
 What this campaign adds is the behavior under \emph{load}, measured
 on the reference grid across group sizes --- and the load walls are
 named as walls, not apologized for. The \emph{turn wall}: the
-lease-rotated turn-taking that walks the substrate degrades with
+turn-taking that walks the substrate degrades with
 group size --- group trials per minute fell from $\sim$413 at the
 reference size to $\sim$47 at the largest flown, as shared airtime
 thins. The \emph{peer-motion wall}: at fixed size, when the peers are
@@ -458,11 +478,11 @@ direction the boundaries name.
 \section{Carry: one regime replaced by another}
 \label{sec:carry}
 
-The transfer cell is the lineage's first live crossing: a model
+The transfer experiment is the lineage's first live crossing: a model
 built under one regime, serving under another. The world changed
 wholesale --- all six nodes at once, weights $1.0 \to 1.5$ and
 response shapes linear $\to$ saturating, over a declared travel ---
-and the room served through it with the same protocol throughout.
+and the run served through it with the same protocol throughout.
 Whatever the crossing produced --- graceful service, honest
 degradation, or honest refusal --- was to be the receipt.
 Table~\ref{tab:transfer} is what it produced.
@@ -474,10 +494,10 @@ Table~\ref{tab:transfer} is what it produced.
 \toprule
 \textbf{World} & \textbf{The model's survey} \\
 \midrule
-quiet (regime A) & one prober, six curves --- the one sender's whole
+quiet (regime A) & one measuring member, six curves --- the one sender's whole
 influence map \\
-after the whole regime shifted (all six nodes) & two probers in the
-change minute, twelve curves; the long lease-holder ran
+after the whole regime shifted (all six nodes) & two measuring members in the
+change minute, twelve curves; the longest-turn member ran
 $\sim$3$\times$ its siblings' trials \\
 \bottomrule
 \end{tabular}
@@ -491,22 +511,23 @@ protocol throughout.}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.8\linewidth]{figures/transfer}
-\caption{Transfer, from the room's own captures: probers above, curves
+\caption{Transfer, from the run's own captures: measuring members above, curves
 held below; the shaded band is the declared travel of the regime
-change. Reading line: one prober while quiet; a second joins in the
+change. Reading line: one measuring member while quiet; a second joins in the
 change minute and the survey doubles --- the widening fits the blast
 radius.}
 \label{fig:transfer}
 \end{figure}
 
-The mechanism is the same sender-lease discipline the whole lineage
-runs on: one holder per group, heartbeats, fairness by starvation.
+The mechanism is the same turn-taking discipline the whole lineage
+runs on: one member measuring at a time per group, heartbeats,
+fairness to whoever waited longest.
 Under the flip of \S\ref{sec:decay} --- one member's promise broken
---- one reason meant one prober, and the rotation never widened.
+--- one reason meant one measuring member, and the rotation never widened.
 Under the regime change, every member's world broke at once: the
-lease rotated wider, a second sender joined in the change minute, and
-the long holder carried roughly three times its siblings' trial
-load. The widening is proportionate, not panicked: the model's
+turn-taking widened, a second sender joined in the change minute, and
+the member that held the measuring turn longest carried roughly
+three times the others' trial load. The widening is proportionate, not panicked: the model's
 survey answered the blast radius of the change, and at the close the
 registry purged clean. The model built under A carried into B ---
 gracefully, measurably, and without anyone rebuilding it.
@@ -514,7 +535,7 @@ gracefully, measurably, and without anyone rebuilding it.
 \section{The price: one busy evening}
 \label{sec:price}
 
-The price cell is one room, one evening, the world refusing to hold
+The price run is one evening, the world refusing to hold
 still: a readout slide from minute five, a weight morph at minute
 ten, a declared exogenous step, and --- unscheduled --- a push
 through the bench's exogenous door while the morph was still
@@ -535,8 +556,8 @@ slide active ($\sim$min 5--10) & 0.054 & 0.073 \\
 morph, push, and aftermath (to close) & 0.054 & 0.083 \\
 \bottomrule
 \end{tabular}
-\caption{The busy evening, regenerated from the room's own captures
-by the committed script (frozen bar 0.02). Reading line: through
+\caption{The busy evening, regenerated from the run's own captures
+by the committed script (fixed bar 0.02). Reading line: through
 three scheduled changes and one unscheduled push, the model's mean
 uncertainty never left fresh-build level, and the worst single
 relationship in each phase marks where each change landed and was
@@ -547,9 +568,9 @@ absorbed.}
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/evening}
-\caption{The busy evening, from the room's own captures. Dashed
+\caption{The busy evening, from the run's own captures. Dashed
 verticals: the sensor slides, the weight morphs, the unscheduled
-outside push; dashed horizontal: the frozen bar. Reading line: the
+outside push; dashed horizontal: the fixed bar. Reading line: the
 mean bar never leaves fresh-build level; the worst relationship marks
 where each change landed and was absorbed back toward the bar.}
 \label{fig:evening}
@@ -564,7 +585,7 @@ that re-measure than on the members that stand watch. The price of
 freshness is a \emph{per-member} price, not a group average --- a
 budget fact for any group that would keep one model together.
 
-\emph{The anchors.} A model frozen at build time --- the do-nothing
+\emph{The anchors.} A model left un-updated from build time --- the do-nothing
 arm --- carries its build-time bars, calm-looking, while the world
 moves under it: its error is invisible \emph{to itself}. The live
 model paid its trials to \emph{know}: each change of the evening
@@ -579,10 +600,10 @@ economics --- cost per unit of recovered knowledge --- need the
 per-trial ledgers and are declared owed at the evidence port,
 printed here as a debt, not skipped in silence.
 
-So the second half of the claim, in the room's own units: the
+So the second half of the claim, in the run's own units: the
 evening's knowledge was bought at a real and unevenly distributed
 price, was cheaper than calm ignorance \emph{where knowing mattered}
---- the frozen arm's calm is not knowledge --- and was honestly
+--- the never-updated arm's calm is not knowledge --- and was honestly
 measured short of hindsight, by exactly the distance the oracle
 names. Cheaper where it is cheaper; honestly not where it is not.
 
@@ -653,9 +674,9 @@ Printed as boundaries, not apologies:
 
 \begin{itemize}
 \item \emph{The starved heal.} The bend's knee-flag was noticed and
-aimed but never healed in its room: the re-walking member was starved
+aimed but never healed in its run: the re-walking member was starved
 of trials there. Whether a fed heal collapses the flag is the
-one-room follow-up; the starvation itself is load material, and the
+one-run follow-up; the starvation itself is load material, and the
 walls of \S\ref{sec:endure} are its measured edge.
 \item \emph{Scale.} The life stages are measured at the reference
 group size on a quiet bench; catastrophic-size outcomes are boundary
@@ -664,7 +685,7 @@ material. The turn wall and the peer-motion wall
 crossing them is the scaling direction.
 \item \emph{Composition.} Wherever composed prediction is used, it
 inherits the predecessor's measured boundary --- roughly two
-nonlinear hops at the frozen noise level~\cite{p3} --- stated, not
+nonlinear hops at the fixed noise level~\cite{p3} --- stated, not
 hidden.
 \item \emph{Causal scope.} The connectome is causal on the three
 constitutive ingredients of \S\ref{sec:orientation}: variables,
@@ -703,7 +724,7 @@ implicit promise closes here: the edges were found, the curves were
 priced, the composition was proved, the promises were kept --- and
 now the model that did all of it has had its own life measured, in
 its own units, stage by stage. What flew is the smallest set of
-rooms that exercises the whole life; scaling and the field crossing
+runs that exercises the whole life; scaling and the field crossing
 are the open directions, and both stand on these receipts.
 
 \section*{Reproducibility}
@@ -717,23 +738,23 @@ strengths --- carry one node's dial changes into another node's
 reading; and a closed-form truth channel records what was actually
 planted at every tick. Nothing planted is visible to the members:
 they learn the couplings by probing, exactly as in the prior papers;
-the truth channel exists only to score. Each room's record is
+the truth channel exists only to score. Each run's record is
 retained in the evidence bundles --- the per-tick truth and curve
 captures through each story, the close-out stamps, the meters ---
 and every figure and table of this paper regenerates from its bundle
 by committed scripts. One mechanical cut is part of the regen
 contract and declared: some bundles banked captures from more than
-one room's window (a capture script ran across boots); the scripts
+one run's window (a capture script ran across boots); the scripts
 align each capture's wall-clock stamp against its bench uptime ---
-constant within one room --- and keep only the room's own window,
-so no number in this paper reads another room's registry. Registry identities never print; they resolve at
+constant within one run --- and keep only the run's own window,
+so no number in this paper reads another run's registry. Registry identities never print; they resolve at
 the evidence port. Verdicts are recomputed from recordings, never
 read from run badges; the honest-close rule (an anomaly is a
 receipt, a fix, and a re-fly) was exercised three times in this
 campaign, and the re-flown numbers are the printed ones. Full
 independent reproduction requires this estate's stack; on a
-compatible bench, the scenario declarations --- per room: the
-change kind, its destination, its clock and travel, the frozen bar,
+compatible bench, the scenario declarations --- per run: the
+change kind, its destination, its clock and travel, the fixed bar,
 the group --- plus the bundles are everything a re-run needs.
 
 \begin{thebibliography}{99}
