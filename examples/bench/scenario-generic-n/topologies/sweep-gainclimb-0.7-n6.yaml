@@ -3,7 +3,12 @@
 # 6 nodes, 1 dial + 1 objective each, linear base, weights [1.0], edges
 # all-pairs i<j at strength 0.7 (15 edges), noise sigma 0.02. The event
 # block is the cell's whole subject; the story point (tick 360 / secs
-# cues) sits after the map builds. Terms: target_weights [[2.0]] from 1.0, at_tick 360, travel_ticks 120 — first flight, declared as terms
+# cues) sits after the map builds. Terms: node-6 weights 1.0 -> [[2.0]], wall clock, at_secs 420, travel_secs 60,
+# then HOLD — map built under A serves under the doubled gain. Amended 2026-11-27 (one commit, the diff is the
+# receipt): the morph was tick-cued (at_tick 360, travel_ticks 120). On the cured engine tick 360 arrives at uptime
+# 73-117 s (rooms 45851074156, 45874805293, 45887281699 of 2026-11-26; before the cure 222-262 s) — before the first
+# map exists. 420 s = the slowest first map seen (343 s) plus ~70 s against boot variance; 60 s = the declared
+# 120 ticks at the ~2 ticks/s the terms were declared against.
 nodes:
   - id: node-1
     params: 1
@@ -54,8 +59,9 @@ nodes:
     weights:
       - [1.0]
     morphs:
-      - at_tick: 360
-        travel_ticks: 120
+      - clock: wall
+        at_secs: 420.0
+        travel_secs: 60.0
         target_weights: [[2.0]]
 edges:
   - from: node-1

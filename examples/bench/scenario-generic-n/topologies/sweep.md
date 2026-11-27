@@ -22,16 +22,25 @@ cells is the event block — the controlled variable is the base.
 
 | file | cell / kind | the event (declared) | clock | first flight? |
 |---|---|---|---|---|
-| sweep-offsetslide-0.7-n6.yaml | 1 — offset-slide (integration sounding) | node-6 readout: rate 0.003/tick, cap 1.0, start_tick 360 — the battery's own terms (scenario-characterization-offsetstep) | tick | flown for years; first on 0.6.2 |
-| sweep-gainclimb-0.7-n6.yaml | 2 — gain-climb | node-6 weights 1.0→[[2.0]], at_tick 360, travel_ticks 120, then HOLD | tick | YES — terms declared, nothing to cite |
-| sweep-kneemorph-0.7-n6.yaml | 3 — knee-morph | node-6 base linear→saturation, at_tick 360, travel_ticks 120 | tick | YES — the bench's own blend test names this pair |
-| sweep-inversion-0.7-n6.yaml | 4 — inversion | edge node-1→node-6 strength +0.7→−0.7 (through zero, settles inverted), at_tick 360, travel_ticks 120 | tick | YES |
+| sweep-offsetslide-0.7-n6.yaml | 1 — offset-slide (integration sounding) | node-6 readout slides rate_per_second 0.006, cap 1.0, cued at uptime 420 s (the battery's 0.003/tick, scenario-characterization-offsetstep, at the ~2 ticks/s its terms were declared against — as cell 5 converts it); amended 2026-11-27 from the tick form (rate 0.003/tick, start_tick 360) | wall | flown for years; first on 0.6.2 |
+| sweep-gainclimb-0.7-n6.yaml | 2 — gain-climb | node-6 weights 1.0→[[2.0]], at_secs 420, travel_secs 60 (the declared 120 ticks at ~2 ticks/s), then HOLD; amended 2026-11-27 from at_tick 360 / travel_ticks 120 | wall | YES — terms declared, nothing to cite |
+| sweep-kneemorph-0.7-n6.yaml | 3 — knee-morph | node-6 base linear→saturation, at_secs 420, travel_secs 60 (240 s from 2026-11-20 to 2026-11-26) | wall | YES — the bench's own blend test names this pair |
+| sweep-inversion-0.7-n6.yaml | 4 — inversion | edge node-1→node-6 strength +0.7→−0.7 (through zero, settles inverted), at_secs 420, travel_secs 60 (240 s from 2026-11-20 to 2026-11-26) | wall | YES |
 | sweep-evening-0.7-n6.yaml | 5 — multi-event (PRICE, ruled in 2026-11-20) | slide rate_per_second 0.006 cap 1.0 cued at uptime 300s (= the battery's 0.003/tick at the grid's ~2 ticks/sec, declared) · wall weight morph 1.0→1.6 at_secs 600 travel_secs 120 · exogenous step amplitude 0.15 over 60 ticks · officer door-pushes at flight | wall (agent-independent) | YES |
-| sweep-transfer-0.7-n6.yaml | 6 — transfer | regime B on ALL nodes, wall clock at_secs 360 travel_secs 60 (amended 2026-11-24 from 240 s: on the bench clock the walkers come up ~101 s after the bench, first reading 108 s, first pass ends 289 s — one clean pass under A needs ~290 s, room 45403001197): weights →[[1.5]] + base →saturation; map built under A serves under B — whatever happens is the receipt | wall | YES |
+| sweep-transfer-0.7-n6.yaml | 6 — transfer | regime B on ALL nodes, wall clock at_secs 420 travel_secs 60 (amended 2026-11-27 from 360 s: on the cured engine the first map completes at uptime 210–343 s — margins 114 / 150 / 17 s over the 360 s change in the rooms of 2026-11-26 — so 420 = the slowest seen plus ~70 s against boot variance; amended 2026-11-24 from 240 s: on the bench clock the walkers come up ~101 s after the bench, first reading 108 s, first pass ends 289 s — one clean pass under A needs ~290 s, room 45403001197): weights →[[1.5]] + base →saturation; map built under A serves under B — whatever happens is the receipt | wall | YES |
 
-Story alignment: every tick-cued event sits at tick 360 — after the
-map builds. The tick↔wall relation is receipted at flight time from
-truth (`total_ticks` + `uptime_secs`; the README-generic clock rule).
+Story alignment (amended 2026-11-27): no cell counts ticks any more.
+Cells 1, 2, 3, 4 and 6 ride the wall clock with their change cued at
+420 s of bench uptime — after the map builds on the cured engine (the
+first map completed at uptime 210 / 246 / 343 s in the rooms of
+2026-11-26; 420 = the slowest seen plus ~70 s against boot variance).
+Cell 5 keeps its ruled terms (slide at 300 s, morph at 600 s). Before
+this amendment cells 1 and 2 were tick-cued at tick 360: on the cured
+engine tick 360 arrives at uptime 73–117 s, before any map exists
+(before the cure, 222–262 s) — the tick's length is estate load, the
+artifact class godon#423 named for drift speed. The tick↔wall relation
+is still receipted at flight time from truth (`total_ticks` +
+`uptime_secs`; the README-generic clock rule).
 
 ## Standing declarations (every room, no silent defaults)
 

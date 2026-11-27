@@ -3,7 +3,16 @@
 # 6 nodes, 1 dial + 1 objective each, linear base, weights [1.0], edges
 # all-pairs i<j at strength 0.7 (15 edges), noise sigma 0.02. The event
 # block is the cell's whole subject; the story point (tick 360 / secs
-# cues) sits after the map builds. Terms: rate 0.003/tick, cap 1.0, start_tick 360 — the characterization battery's own declared shape (scenario-characterization-offsetstep), tick clock = story-aligned
+# cues) sits after the map builds. Terms: node-6 readout slides at rate_per_second 0.006, cap 1.0, cued at uptime
+# 420 s — wall clock, the bench's drift block (the same readout term as the battery's offset drift; the two compose
+# additively, both are world). The rate is the characterization battery's 0.003/tick (scenario-characterization-
+# offsetstep) at the ~2 ticks/s its terms were declared against, as cell 5 converts it; the bench's own reason for a
+# wall-time slide is godon#423 (the same tick rate took ~6 min in one room and ~10 in the next). Amended 2026-11-27
+# (one commit, the diff is the receipt): the slide was the battery's tick form (0.003/tick from tick 360). On the
+# cured engine tick 360 arrives at uptime 73-117 s (rooms of 2026-11-26; before the cure 222-262 s) — before the
+# first map exists — and at the engine's 12-24 ticks/s the slide would reach its cap in 14-28 s, before the first
+# reading. 420 s = the slowest first map seen (343 s) plus ~70 s against boot variance; the slide reaches its cap
+# at ~587 s and the world settles.
 nodes:
   - id: node-1
     params: 1
@@ -53,9 +62,12 @@ nodes:
     param_upper: 100.0
     weights:
       - [1.0]
-    offset_drift_rate: 0.003
-    offset_drift_cap: 1.0
-    offset_drift_start_tick: 360
+    drifts:
+      - name: offset-slide
+        rate_per_second: 0.006
+        cap: 1.0
+        when:
+          seconds: 420
 edges:
   - from: node-1
     from_channel: 0
